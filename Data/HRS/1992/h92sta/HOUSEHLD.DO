@@ -1,5 +1,5 @@
 * Note: activate this do file from within STATA
-infile using c:\hrs1992\stata\HOUSEHLD.DCT 
+infile using /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92sta/HOUSEHLD.DCT 
  
 replace V3 =. if V3 ==00000
 replace V602 =. if V602 ==0
@@ -1176,4 +1176,4 @@ replace V6925 =. if V6925>=8
 replace V6926 =. if V6926 ==0
 replace V6926 =. if V6926>=9999
 
-save c:\hrs1992\stata\HOUSEHLD.DTA 
+save /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92sta/HOUSEHLD.DTA 

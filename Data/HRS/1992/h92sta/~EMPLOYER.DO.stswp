@@ -1,11 +1,5 @@
-* Note: activate this do file from within STATA
-infile using .\EMPLOYER.DCT 
-
-* Specify the location of the dictionary file
-local dctfile .\EMPLOYER.DCT
-
-* Note: activate this do file from within STATA
-infile using "`dctfile'"
+* Note: activate this do file from within STATA -- CHANGE PATH TO YOUR NEEDS
+infile using /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92sta/EMPLOYER.DCT
 
 replace V3 =. if V3 ==00000
 replace V2701 =. if V2701>=8
@@ -1927,4 +1921,4 @@ replace V5031 =. if V5031>=8
 replace V5032 =. if V5032 ==0
 replace V5032 =. if V5032>=8
 
-save c:\hrs1992\stata\EMPLOYER.DTA 
+save /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92sta/EMEMPLOYER.DTA 

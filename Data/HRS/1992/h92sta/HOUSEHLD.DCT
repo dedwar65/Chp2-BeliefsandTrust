@@ -1,4 +1,4 @@
-dictionary using c:\hrs1992\data\HOUSEHLD.DA{ 
+dictionary using /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92da/HOUSEHLD.DA{ 
   _column(1)     str6   HHID     %6s      "HOUSEHOLD IDENTIFIER"
   _column(7)     str1   ASUBHH   %1s      "1992 SUB-HOUSEHOLD IDENTIFIER"
   _column(8)     str3   APN_FAM  %3s      "1992 FAMILY RESP PERSON NUMBER"

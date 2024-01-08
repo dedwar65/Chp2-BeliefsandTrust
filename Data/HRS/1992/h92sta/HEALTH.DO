@@ -1,5 +1,5 @@
 * Note: activate this do file from within STATA
-infile using c:\hrs1992\stata\HEALTH.DCT 
+infile using /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92sta/HEALTH.DCT 
  
 replace V3 =. if V3 ==00000
 replace V21 =. if V21>=9999
@@ -592,4 +592,4 @@ replace V7142 =. if V7142>=9
 replace V7143 =. if V7143>=9
 replace V7144 =. if V7144>=9
 
-save c:\hrs1992\stata\HEALTH.DTA 
+save /Users/dc/Library/CloudStorage/OneDrive-JohnsHopkins/research/GitHub/dedwar65/Chp2-BeliefsandTrust/Data/HRS/1992/h92sta/HEALTH.DTA 
