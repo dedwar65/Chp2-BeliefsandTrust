@@ -1,3 +1,6 @@
+* Note: activate this do file from within STATA
+infile using .\EMPLOYER.DCT 
+
 * Specify the location of the dictionary file
 local dctfile .\EMPLOYER.DCT
 
