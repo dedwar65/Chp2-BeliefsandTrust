@@ -8,5 +8,10 @@ dependencies:
   - pandas
   - jupyter
   - matplotlib
+  - scipy
+  - numpy
+  - numba
   - seaborn
   - pip
+  - pip:
+      - git+https://github.com/econ-ark/HARK@master

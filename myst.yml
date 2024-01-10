@@ -10,9 +10,9 @@ site:
       url: https://mystmd.org/guide
   domains: []
 project:
-  title: Replication Notes for Guiso 2008
+  title: Replication Notes 
   # description:
-  short_title: RG2008
+  short_title: Notes
   keywords: []
   affiliations:
     - id: jhu
@@ -22,22 +22,27 @@ project:
     - id: econ-ark
       institution: Econ-ARK
       url: https://econ-ark.org
-authors: 
-    - name: Decory Edwards
-      corresponding: true
-      email: dedwar65@jhu.edu
-      affiliations: jhu
-      github: dedwar65
-open_access: true
-license:
-  content: CC-BY-4.0
-  code: MIT
-github: https://github.com/dedwar65/Chp2-BeliefsandTrust
-bibliography: Paper/references.bib
-settings:
-  output_matplotlib_strings: remove
-exports: 
-  - format: pdf
-    template: arxiv_nips
-    output: Notes/RepNotes_G2008.pdf
-    article: Notes/RepNotes_G2008.md
+  authors: 
+      - name: Decory Edwards
+        corresponding: true
+        email: dedwar65@jhu.edu
+        affiliations: jhu
+        github: dedwar65
+  open_access: true
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  github: https://github.com/dedwar65/Chp2-BeliefsandTrust
+  bibliography: Paper/references.bib
+  settings:
+    output_matplotlib_strings: remove
+  exports: 
+    - format: pdf
+      template: arxiv_nips
+      output: Notes/RepNotes_G2008.pdf
+      article: Notes/RepNotes_G2008.md
+    - format: pdf
+      template: arxiv_nips
+      output: Notes/RepNotes_B2016.pdf
+      article: Notes/RepNotes_B2016.md
+    
