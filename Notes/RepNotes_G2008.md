@@ -56,5 +56,14 @@ As it stands, the HRS does not have an analog for the risk aversion, ambiguity a
 
 Note: I can consider the relationship between trust and the number of stocks though. With this in mind, variable sections B, Q, and V will be used to replicate the results that can be replicated given the discrepancies between the two datasets.
 
+I use the RAND version of the HRS data as it accompishes the tedious task of converting household variables like asset holdings and income, to respondent level data. Below are the variables necessary to perform the exercise.
+
+* Education: RB014, RB015, RB016, RZ216
+* Age: RA019
+* Gender: RX060_R
+* Employment: RJ005M1, RJ005M2, RJ005M3, RJ005M4, RJ005M5, RJ020
+* Assets: 
+* Trust: 
+
 # Statistical model
 
