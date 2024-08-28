@@ -6,10 +6,10 @@ title: Replication Notes for "Returns Heterogeneity and Consumption Inequality o
 
 1. There is a regression of net returns to wealth with various controls including age, education, employment, year and state dummies, share of wealth allocated to different asset classes, leverage of mortgage and other debt, wealth percentiles using data from 1999-2019 waves of the PSID. I would like to replicate this regression (as closely as possible) with various measures of trust as the dependent variable for the two waves of the HRS (2020 and 2022) which have tracked this variable in the survey. I also want to allow for individual fixed effects in the regressions.
 
-# Variables needed from HRS waves (where trust is measured)
+# 1. Variables needed from HRS waves (where trust is measured)
 
 * Age: RA019
-* Education: RZ216
+* Education: RZ216 (different from PSID)
 * Employment: RJ005M1, RJ020
 * Year and state dummies: 0,1 for year if I want to consolidate waves and "the HRS uses a national area probability sample of US households, so not every state will have HRS respondents"
 * Share of wealth allocated to different asset classes: 
@@ -28,12 +28,14 @@ title: Replication Notes for "Returns Heterogeneity and Consumption Inequality o
 
 * Trust: RV557, RV558, RV559, RV560, RV561, RV562, RV563, RV564
 
-# Variables from the PSID 2019 wave (where returns can be calculated)
+Note: Able to reach a cleaned, final version of the dataset
+
+# 2. Variables from the PSID 2019 wave (where returns can be calculated)
 
 INCOME MODULE
 * Age: ER72017
-* Education: 
 * Employment: ER72164, ER72168
+
 * Share of wealth allocated to different asset classes: 
     * financial assets
         * safe assets
@@ -47,21 +49,19 @@ INCOME MODULE
     * real assets
         * housing and other real estate: ER72031
         * vehicles: omitted for now
-    * debt (not including mortgages): 
+    
     * flows (to compute returns)
         * interest income: ER73143 + ER73498 (SP)
         * dividends: ER73126 + ER73481 (SP) 
 
 
-WEALTH MODULE
-* Age: ER72017
-* Education: 
-* Employment: ER72164, ER72168
+WEALTH MODULE (use this one for now -- see note below)
+* Education: ER76908 (HS/GED), ER76919 (college), ER76922 (yrs of college)
 * Share of wealth allocated to different asset classes: 
     * financial assets
         * safe assets
             * cash: ER73848
-            * bonds: ER73853
+            * bonds: ER73854
         * risky assets
             * stocks: ER73821
             * pensions/IRA: ER73842 (IRA) + ER74036 (pension) + ER74243 (pension-SP)
@@ -70,6 +70,19 @@ WEALTH MODULE
         * housing and other real estate: ER73799, ER73803 (housing debt)
         * vehicles: omitted for now
     * debt (not including mortgages): ER73880 (credit) + ER73890 (student) + ER73895 (medical) + ER73900 (legal) + ER73905 (personal) + ER73911 (other)
+    
     * flows (to compute returns)
         * interest income: ER73860
         * dividends: ER73826
+
+Note: There are imputed versions of these variables starting on ER77448
+
+## 2.1 Issues with PSID:
+
+1. Household level only (versus respondent level)
+2. Not clear where the variables to compute "returns to net worth" are located
+    * capital gains/losses requires multiple waves, which I am trying to avoid since I only have a single wave of HRS data containing trust measures
+    * debt payments
+    * total household net worth at the beginning of previous period
+    * net investment flows into the risky assets
+3. Number of observation compared to HRS data
