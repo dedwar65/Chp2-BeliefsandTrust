@@ -8,7 +8,7 @@ I want to perform a two-sample IV procedure in the following way.
 
 1. Run a regression with trust as the dependent variable (LHS) and demographic variables as the independent variables (RHS)as an analogy to the regression used to produce table 1 in the paper “Returns Heterogeneity and Consumption Inequality over the Life Cycle”  by Daminato and Pistaferri (2014). 
 
-	The trust and demographic variables comes from the 2020 wave of the Household Retirement Survey (HRS). I made an effort to match the following variables described by the paper: age, education, employment, shares of wealth allocated to different asset classes, amounts of debt to compute total debt to wealth (if relevant for my uses), computed wealth percentiles after constructing a wealth variable. 
+	The trust and demographic variables come from the 2020 wave of the Household Retirement Survey (HRS). I made an effort to match the following variables described by the paper: age, education, employment, shares of wealth allocated to different asset classes, amounts of debt to compute total debt to wealth (if relevant for my uses), computed wealth percentiles after constructing a wealth variable. 
 
 2. Use the estimated relationship between trust and demographics to impute a measure of trust in the PSID data. I started with the 2019 wave and located the imputed version of each of the variables described above (since it was the initial reference point).
 
@@ -55,11 +55,11 @@ INCOME MODULE
             * bonds: 
         * risky assets
             * stocks: 
-            * pensions/IRA: ER73246 (non-va) + ER73262 (annuity) + ER73278 (other) + ER73294 (IRA)
+            * pensions/IRA: ER7320, ER73246 (non-va) + ER73262 (annuity) + ER73278 (other) + ER73294 (IRA)
                 * ER73600 (non-va-SP) + ER73616 (ann-SP) + ER73632 (other-SP) + ER73648 (IRA-SP)
             * private busines wealth: ER72995 (farm) + ER73010 (B1) + ER73024 (B2) + ER73038 (B3) + ER73052 (B4) + ER73066 (B5)
     * real assets
-        * housing and other real estate: ER72031
+        * main housing/real estate: ER72031, ER72051 (first mortgage), ER72053 (mt. payments),  ER72072 (second mortgage), ER72074 (mt. payments),  
         * vehicles: omitted for now
     
     * flows (to compute returns)
@@ -73,11 +73,11 @@ WEALTH MODULE (use this one for now -- see note below)
     * financial assets
         * safe assets
             * cash: ER73848
-            * bonds: ER73854
+            * bonds: ER73854, ER73875
         * risky assets
             * stocks: ER73821
             * pensions/IRA: ER73842 (IRA) + ER74036 (pension) + ER74243 (pension-SP)
-            * private busines wealth: ER73812 (farm) , ER73815 (farm-debt)
+            * private busines wealth: ER73812 (farm) , ER73816 (farm-debt)
     * real assets
         * housing and other real estate: ER73799, ER73803 (housing debt)
         * vehicles: omitted for now
@@ -86,6 +86,10 @@ WEALTH MODULE (use this one for now -- see note below)
     * flows (to compute returns)
         * interest income: ER73860
         * dividends: ER73826
+
+        * net investment flows
+            * pensions/IRA: ER73917, ER73922 (cash in)
+            * real estate: ER7392 (main), ER73933 (otr) 
 
 Note: There are imputed versions of these variables starting on ER77448
 
