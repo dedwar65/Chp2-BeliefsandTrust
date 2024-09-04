@@ -1,4 +1,4 @@
-In the paper, returns to net worth are constructed as \begin{equation} r_t = \frac{y_{t}^{c} + cg_t + y_{t}^{d}}{A_{t-1} + .5F_t}. \end{equation}
+In the paper, returns to net worth are constructed as \begin{aligned} r_t = \frac{y_{t}^{c} + cg_t + y_{t}^{d}}{A_{t-1} + .5F_t}. \end{aligned}
 
 What lines of the PSID codebook are the variables $y_{t}^{c}$ (payments on debt) and $F_t$ (net investment flows) referring to?
 
