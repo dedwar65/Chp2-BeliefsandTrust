@@ -18,12 +18,17 @@ I want to perform a two-sample IV procedure in the following way.
 
 A final, minor concern is that the years of the survey don’t exactly line up (although they are more conducted every two years). 
 
-# 1. Variables needed from HRS waves (where trust is measured)
+# 1 - Variables needed from HRS waves (where trust is measured)
+
+Note: Controls are a combination of DP2024 and G2008
 
 * Age: RA019
 * Education: RZ216 (different from PSID)
 * Employment: RJ005M1, RJ020
-* Year and state dummies: 0,1 for year if I want to consolidate waves and "the HRS uses a national area probability sample of US households, so not every state will have HRS respondents"
+* Gender: RX060_R
+* Marital status: RX065_R 
+* Immigration status: ommitted for now (from G2008)
+* Year and state dummies: 0,1 for year if I want to consolidate waves and "the HRS uses a national area probability sample of US households, so not every state will have HRS respondents" (from DP2024)
 * Share of wealth allocated to different asset classes: 
     * financial assets
         * safe assets
@@ -34,15 +39,33 @@ A final, minor concern is that the years of the survey don’t exactly line up (
             * pensions/IRA: RQ166_1 + RQ166_2 + RQ166_3 (IRA) + RQ227_1 + RQ227_2 (pensions)
             * private busines wealth: RQ148
     * real assets
-        * housing and other real estate: RQ134
+        * housing and other real estate: RQ134, RQ376
         * vehicles: omitted for now
     * debt (not including mortgages): RQ478
 
 * Trust: RV557, RV558, RV559, RV560, RV561, RV562, RV563, RV564
 
-Note: Able to reach a cleaned, final version of the dataset
 
-# 2. Variables from the PSID 2019 wave (where returns can be calculated)
+# 1.2 - Question: for now, no
+Is it possible to compute returns here as is done in PSID?
+
+So far, HRS 2020 has
+1. interest income and dividends
+    * real estate: RQ139 (how often), RQ141 (last period)
+    * private business or farm: RQ155, RQ156
+    * stock: RQ322, RQ324
+    * bonds: RQ336, RQ338 
+    * cash: RQ350, RQ352
+2. capital gains and losses (i.e. used reported values for the previous wave's asset classes and take the difference)
+3. payments on debt: ??
+4. total net wealth at beginning of previous period (i.e. same as 2)
+5. net investment flows
+    * real estate: RR007 (buy). RR013 (sell), RR024 (major improvements)
+    * private business: RR050 (private funds in), RR055 (sell) 
+
+    
+
+# 2 - Variables from the PSID 2019 wave (where returns can be calculated)
 
 INCOME MODULE
 * Age: ER72017
@@ -114,7 +137,7 @@ Note: There are imputed versions of these variables starting on ER77448
         * interest income: ER73860
         * dividends: ER73826
 
-## 2.1 Issues with PSID:
+## 2.1 - Issues with PSID:
 
 2. Not clear where the variables to compute "returns to net worth" are located
     * capital gains/losses requires multiple waves, which I am trying to avoid since I only have a single wave of HRS data containing trust measures
