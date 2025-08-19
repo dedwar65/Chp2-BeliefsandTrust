@@ -33,6 +33,12 @@ gen F_stk19    = ER73957  - ER73963    // stocks
 gen F_re19     = ER73933  - ER73938    // real estate (non-primary)
 gen F_pen19    = ER73917  - ER73922    // pensions/IRAs
 gen Ftot19     = F_bus19 + F_stk19 + F_re19 + F_pen19
+
+summarize F_bus19
+summarize F_stk19
+summarize F_re19
+summarize F_pen19
+
 label var Ftot19 "Net investment flows (F_2019)"
 
 summarize Ftot19
@@ -126,6 +132,8 @@ di as txt "Zero or negative denominators: " as res r(N)
 
 * List a few to inspect why
 list hid A17 Ftot19 denom19 in 1/20 if denom19 <= 0 | missing(denom19)
+
+summarize denom19
 
 * ----------------------------------------------------------------------------
 * 8) Compute the return for 2017→2019, only when denom19 > 0

@@ -27,7 +27,6 @@ foreach var in cg_bus cg_rents cg_home cg_stocks cg_pens {
 }
 
 foreach pair in business rents home stocks pens {
-    // Define 2019 and 2017 variables for each asset class
     if "`pair'" == "business" {
         local var19 ER77451
         local var17 ER67789
@@ -49,10 +48,13 @@ foreach pair in business rents home stocks pens {
         local var17 ER67819
     }
 
-    di "Checking `pair' asset values for suspicious -1e9 or less values"
-    count if `var19' <= -1e8 | `var17' <= -1e8
-    list hid `var19' `var17' if `var19' <= -1e8 | `var17' <= -1e8 in 1/20
+    di "Summarizing raw variables for `pair'"
+    summarize `var19' `var17', detail
+
+    di "Listing suspiciously low values for `pair'"
+    list hid `var19' `var17' if inrange(`var19', -1.01e9, -9.9e8) | inrange(`var17', -1.01e9, -9.9e8)
     di "--------------------------------------------"
 }
+
 
 
