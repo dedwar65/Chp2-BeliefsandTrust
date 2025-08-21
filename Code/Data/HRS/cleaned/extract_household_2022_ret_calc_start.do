@@ -17,7 +17,7 @@ local tempH "`path2022'/hrs_2022_H_selected.dta"
 
 * --- list variables to keep from each file (edit these lists as you like)
 local varsQ "HHID RSUBHH SQ139 SQ141 SQ153 SQ155 SQ190 SQ194 SQ322 SQ324 SQ336 SQ338 SQ350 SQ352 SQ362 SQ364 SQ171_1 SQ171_2 SQ171_3 SQ148 SQ134 SQ317 SQ166_1 SQ166_2 SQ166_3 SQ331"
-local varsR "HHID RSUBHH SR050 SR055 SR063 SR064 SR072 SR030 SR045 SR007 SR013 SR024"
+local varsR "HHID RSUBHH SR050 SR055 SR063 SR064 SR073 SR030 SR035 SR045 SR007 SR013 SR024"
 local varsH "HHID RSUBHH SH020 SH162 SH025 SH029 SH036 SH040 SH175 SH179"
 
 * --- Safety: check files exist
@@ -97,7 +97,7 @@ count if dupN > 1
 di as txt "R duplicate observations before deduplication = " r(N)
 
 if r(N) > 0 {
-    egen nm = rownonmiss(SR050 SR055 SR063 SR064 SR072 SR030 SR045 SR007 SR013 SR024), strok
+    egen nm = rownonmiss(SR050 SR055 SR063 SR064 SR073 SR030 SR045 SR007 SR013 SR024), strok
     bys HHID RSUBHH (nm): keep if _n==_N   // keep max nonmissing
     drop nm dupN
     sort HHID RSUBHH
@@ -158,7 +158,7 @@ drop _merge
 * ---------------------------------------------------------------------
 * Optional: convert common special codes to Stata missing (numeric variables)
 * ---------------------------------------------------------------------
-local misscodes 999999998 999999999 -8 -9
+local misscodes 99999999 99999998 999999998 999999999 9999999 9999998 9999999999 9999999998 -8 -9
 foreach v of varlist _all {
     capture confirm numeric variable `v'
     if !_rc {

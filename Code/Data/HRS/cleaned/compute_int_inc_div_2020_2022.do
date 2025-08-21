@@ -1,9 +1,7 @@
 *----------------------------------------------------------------------
 * compute_interest_dividends_2022.do
 * Compute interest income & dividends (y^c_t) by asset class for 2022 only
-* Assumes merged master exists:
-*   /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2020_2022_master.dta
-* (This is the 2022-only trimmed version of the previous script)
+* Loads and then saves back to the master so other scripts keep variables.
 *----------------------------------------------------------------------
 clear all
 capture log close
@@ -32,15 +30,7 @@ di as txt "Using master file: `master'"
 
 * ---------------------------
 * 2022: pairs (freq, amount)
-* - real estate (other than main home): SQ139 (freq), SQ141 (amt)
-* - private business: SQ153 (freq), SQ155 (amt)
-* - IRA: SQ194 (freq), SQ190 (amt)
-* - stocks: SQ322 (freq), SQ324 (amt)
-* - bonds: SQ336 (freq), SQ338 (amt)
-* - checking/savings: SQ350 (freq), SQ352 (amt)
-* - CDS/t-bills: SQ362 (freq), SQ364 (amt)
 * ---------------------------
-
 local f2022_re   SQ139
 local a2022_re   SQ141
 
@@ -64,8 +54,6 @@ local a2022_cds  SQ364
 
 * ---------------------------------------------------------------------
 * Recode frequency codes 7,8,9 -> missing ONLY for the frequency variables
-* This leaves the original variables present but removes codes 7/8/9
-* from being treated as valid multipliers later. Do not change other vars.
 * ---------------------------------------------------------------------
 local freqvars "`f2022_re' `f2022_bus' `f2022_ira' `f2022_stk' `f2022_bnd' `f2022_cash' `f2022_cds'"
 
@@ -92,40 +80,28 @@ foreach v of local freqvars {
 
 * ---------------------------------------------------------------------
 * map_freq_to_mult: maps numeric frequency codes -> annual multipliers
-* Survey mapping:
-*   1 WEEKLY    -> 52
-*   2 2x/month  -> 24
-*   3 MONTHLY   -> 12
-*   4 QUARTERLY -> 4
-*   5 EVERY 6 MONTHS -> 2
-*   6 YEARLY    -> 1
-* Codes 7/8/9 were recoded to . above and will produce missing *_mult.
 * ---------------------------------------------------------------------
+capture program drop map_freq_to_mult
 program define map_freq_to_mult, rclass
     syntax varname
     local fq = "`varlist'"
 
-    /* drop any previously created helpers to avoid collisions */
     capture drop `fq'_lbl
     capture drop `fq'_mult
 
-    /* create a decoded label string variable if a value label is attached */
     local labname : value label `fq'
     if "`labname'" != "" {
         decode `fq', gen(`fq'_lbl)
     }
 
-    /* create multiplier (double) and map by numeric code (survey coding) */
     gen double `fq'_mult = .
-    quietly replace `fq'_mult = 52 if `fq' == 1    // WEEKLY
-    quietly replace `fq'_mult = 24 if `fq' == 2    // 2 times per month
-    quietly replace `fq'_mult = 12 if `fq' == 3    // MONTHLY
-    quietly replace `fq'_mult = 4  if `fq' == 4    // QUARTERLY
-    quietly replace `fq'_mult = 2  if `fq' == 5    // EVERY 6 MONTHS
-    quietly replace `fq'_mult = 1  if `fq' == 6    // YEARLY
-    /* 7/8/9 were recoded to . above; any remaining 7/8/9 (unlikely) will leave *_mult missing */
+    quietly replace `fq'_mult = 52 if `fq' == 1
+    quietly replace `fq'_mult = 24 if `fq' == 2
+    quietly replace `fq'_mult = 12 if `fq' == 3
+    quietly replace `fq'_mult = 4  if `fq' == 4
+    quietly replace `fq'_mult = 2  if `fq' == 5
+    quietly replace `fq'_mult = 1  if `fq' == 6
 
-    /* diagnostics / reporting */
     di as txt "Mapping numeric codes to multipliers for `fq' completed."
     capture confirm variable `fq'_lbl
     if _rc == 0 {
@@ -143,7 +119,6 @@ end
 * ---------------------------
 * Apply mapping to all 2022 frequency variables
 * ---------------------------
-
 di as txt "=== Mapping 2022 frequency variables ==="
 map_freq_to_mult `f2022_re'
 map_freq_to_mult `f2022_bus'
@@ -155,9 +130,7 @@ map_freq_to_mult `f2022_cds'
 
 * ---------------------------------------------------------------------
 * Compute per-asset interest for 2022 when both amount & multiplier exist
-* After each computed variable we summarize it.
 * ---------------------------------------------------------------------
-
 cap drop int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2022 int_cds_2022
 
 di as txt "=== Computing 2022 interest/dividends per asset ==="
@@ -204,8 +177,6 @@ tabstat int_total_2022, stats(n mean sd p50 min max) format(%12.2f)
 
 * ---------------------------------------------------------------------
 * Diagnostics: find cases where amount exists but multiplier missing (2022)
-* These are rows where an amount is reported but the frequency multiplier is missing
-* (e.g., originally codes 7/8/9 or blank).
 * ---------------------------------------------------------------------
 di as txt "=== Diagnostics: amount present but freq multiplier missing (2022) ==="
 foreach pair in ///
@@ -223,18 +194,17 @@ foreach pair in ///
     quietly tab `fq', missing
     quietly count if !missing(`amt') & missing(`fq'_mult)
     di as txt "Records with amount but missing multiplier = " r(N)
-    /* optional: list a few cases for inspection */
     quietly list HHID RSUBHH `fq' `amt' in 1/10 if !missing(`amt') & missing(`fq'_mult)
 }
 
 * ---------------------------------------------------------------------
-* Save dataset with new computed variables (2022-only interest)
+* Save dataset with new computed variables BACK TO MASTER (overwrite)
 * ---------------------------------------------------------------------
-local out "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2022_with_interest.dta"
-save "`out'", replace
-di as txt "Saved 2022 interest/dividend vars to `out'"
+save "`master'", replace
+di as txt "Saved 2022 interest/dividend vars back to master: `master'"
 
 log close
 di as txt "Done. Inspect the log and tab/summarize outputs for any suspicious frequency codes or missing multipliers."
+
 
 
