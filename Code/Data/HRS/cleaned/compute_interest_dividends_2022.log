@@ -1,0 +1,641 @@
+-------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
+> /compute_interest_dividends_2022.log
+  log type:  text
+ opened on:  21 Aug 2025, 11:57:13
+
+. 
+. set more off
+
+. 
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/clea
+> ned/hrs_2020_2022_master.dta"
+
+. capture confirm file "`master'"
+
+. if _rc {
+.     di as error "ERROR: master file not found -> `master'"
+.     exit 198
+. }
+
+. 
+. use "`master'", clear
+
+. di as txt "Using master file: `master'"
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/c
+> leaned/hrs_2020_2022_master.dta
+
+. 
+. * ---------------------------------------------------------------------
+. * Helper note:
+. * We will create for each frequency variable a multiplier var named <fq>_mult
+. * and optionally a label var <fq>_lbl (if decode(value label) exists).
+. * We'll create per-asset interest vars named:
+. *   int_<asset>_2022
+. * and a total int_total_2022
+. * ---------------------------------------------------------------------
+. 
+. * ---------------------------
+. * 2022: pairs (freq, amount)
+. * - real estate (other than main home): SQ139 (freq), SQ141 (amt)
+. * - private business: SQ153 (freq), SQ155 (amt)
+. * - IRA: SQ194 (freq), SQ190 (amt)
+. * - stocks: SQ322 (freq), SQ324 (amt)
+. * - bonds: SQ336 (freq), SQ338 (amt)
+. * - checking/savings: SQ350 (freq), SQ352 (amt)
+. * - CDS/t-bills: SQ362 (freq), SQ364 (amt)
+. * ---------------------------
+. 
+. local f2022_re   SQ139
+
+. local a2022_re   SQ141
+
+. 
+. local f2022_bus  SQ153
+
+. local a2022_bus  SQ155
+
+. 
+. local f2022_ira  SQ194
+
+. local a2022_ira  SQ190
+
+. 
+. local f2022_stk  SQ322
+
+. local a2022_stk  SQ324
+
+. 
+. local f2022_bnd  SQ336
+
+. local a2022_bnd  SQ338
+
+. 
+. local f2022_cash SQ350
+
+. local a2022_cash SQ352
+
+. 
+. local f2022_cds  SQ362
+
+. local a2022_cds  SQ364
+
+. 
+. * ---------------------------------------------------------------------
+. * Recode frequency codes 7,8,9 -> missing ONLY for the frequency variables
+. * This leaves the original variables present but removes codes 7/8/9
+. * from being treated as valid multipliers later. Do not change other vars.
+. * ---------------------------------------------------------------------
+. local freqvars "`f2022_re' `f2022_bus' `f2022_ira' `f2022_stk' `f2022_bnd' `f2022_c
+> ash' `f2022_cds'"
+
+. 
+. di as txt "Recoding frequency codes 7/8/9 -> missing for 2022 frequency variables (
+> only)."
+Recoding frequency codes 7/8/9 -> missing for 2022 frequency variables (only).
+
+. foreach v of local freqvars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  Variable `v' not found in dataset -- skipping"
+  5.     }
+  6.     else {
+  7.         capture confirm numeric variable `v'
+  8.         if _rc {
+  9.             di as txt "  Variable `v' is not numeric -- skipping recode (check t
+> ype)."
+ 10.         }
+ 11.         else {
+ 12.             quietly count if inlist(`v',7,8,9)
+ 13.             di as txt "  `v' records with codes 7/8/9 before recode = " r(N)
+ 14.             quietly replace `v' = . if inlist(`v',7,8,9)
+ 15.             quietly count if inlist(`v',7,8,9)
+ 16.             di as txt "  `v' records with codes 7/8/9 after recode  = " r(N)
+ 17.         }
+ 18.     }
+ 19. }
+  SQ139 records with codes 7/8/9 before recode = 16
+  SQ139 records with codes 7/8/9 after recode  = 0
+  SQ153 records with codes 7/8/9 before recode = 89
+  SQ153 records with codes 7/8/9 after recode  = 0
+  SQ194 records with codes 7/8/9 before recode = 3
+  SQ194 records with codes 7/8/9 after recode  = 0
+  SQ322 records with codes 7/8/9 before recode = 222
+  SQ322 records with codes 7/8/9 after recode  = 0
+  SQ336 records with codes 7/8/9 before recode = 45
+  SQ336 records with codes 7/8/9 after recode  = 0
+  SQ350 records with codes 7/8/9 before recode = 326
+  SQ350 records with codes 7/8/9 after recode  = 0
+  SQ362 records with codes 7/8/9 before recode = 116
+  SQ362 records with codes 7/8/9 after recode  = 0
+
+. 
+. * ---------------------------------------------------------------------
+. * map_freq_to_mult: maps numeric frequency codes -> annual multipliers
+. * Survey mapping:
+. *   1 WEEKLY    -> 52
+. *   2 2x/month  -> 24
+. *   3 MONTHLY   -> 12
+. *   4 QUARTERLY -> 4
+. *   5 EVERY 6 MONTHS -> 2
+. *   6 YEARLY    -> 1
+. * Codes 7/8/9 were recoded to . above and will produce missing *_mult.
+. * ---------------------------------------------------------------------
+. program define map_freq_to_mult, rclass
+  1.     syntax varname
+  2.     local fq = "`varlist'"
+  3. 
+.     /* drop any previously created helpers to avoid collisions */
+.     capture drop `fq'_lbl
+  4.     capture drop `fq'_mult
+  5. 
+.     /* create a decoded label string variable if a value label is attached */
+.     local labname : value label `fq'
+  6.     if "`labname'" != "" {
+  7.         decode `fq', gen(`fq'_lbl)
+  8.     }
+  9. 
+.     /* create multiplier (double) and map by numeric code (survey coding) */
+.     gen double `fq'_mult = .
+ 10.     quietly replace `fq'_mult = 52 if `fq' == 1    // WEEKLY
+ 11.     quietly replace `fq'_mult = 24 if `fq' == 2    // 2 times per month
+ 12.     quietly replace `fq'_mult = 12 if `fq' == 3    // MONTHLY
+ 13.     quietly replace `fq'_mult = 4  if `fq' == 4    // QUARTERLY
+ 14.     quietly replace `fq'_mult = 2  if `fq' == 5    // EVERY 6 MONTHS
+ 15.     quietly replace `fq'_mult = 1  if `fq' == 6    // YEARLY
+ 16.     /* 7/8/9 were recoded to . above; any remaining 7/8/9 (unlikely) will leave 
+> *_mult missing */
+. 
+.     /* diagnostics / reporting */
+.     di as txt "Mapping numeric codes to multipliers for `fq' completed."
+ 17.     capture confirm variable `fq'_lbl
+ 18.     if _rc == 0 {
+ 19.         di as txt "Showing unique value-label text for `fq' (if present):"
+ 20.         tab `fq'_lbl, nolabel
+ 21.     }
+ 22.     else {
+ 23.         di as txt "No value label attached to `fq' (or decode missing). Showing 
+> raw numeric codes:"
+ 24.         tab `fq', missing
+ 25.     }
+ 26.     quietly count if !missing(`fq'_mult)
+ 27.     di as txt "`fq'_mult nonmissing observations = " r(N)
+ 28. end
+
+. 
+. * ---------------------------
+. * Apply mapping to all 2022 frequency variables
+. * ---------------------------
+. 
+. di as txt "=== Mapping 2022 frequency variables ==="
+=== Mapping 2022 frequency variables ===
+
+. map_freq_to_mult `f2022_re'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ139 completed.
+No value label attached to SQ139 (or decode missing). Showing raw numeric codes:
+
+     RENTAL |
+     INCOME |
+RECEIVE HOW |
+      OFTEN |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          5        0.04        0.04
+          3 |        519        3.64        3.67
+          4 |         10        0.07        3.74
+          5 |          6        0.04        3.78
+          6 |         36        0.25        4.03
+          . |     13,700       95.97      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ139_mult nonmissing observations = 576
+
+. map_freq_to_mult `f2022_bus'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ153 completed.
+No value label attached to SQ153 (or decode missing). Showing raw numeric codes:
+
+BUSINESS OR |
+   FARM INC |
+RECEIVE HOW |
+      OFTEN |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         43        0.30        0.30
+          2 |         19        0.13        0.43
+          3 |        131        0.92        1.35
+          4 |         22        0.15        1.51
+          5 |         32        0.22        1.73
+          6 |        126        0.88        2.61
+          . |     13,903       97.39      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ153_mult nonmissing observations = 373
+
+. map_freq_to_mult `f2022_ira'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ194 completed.
+No value label attached to SQ194 (or decode missing). Showing raw numeric codes:
+
+   INC FROM |
+  OTHER IRA |
+ AMOUNT PRE |
+  TAX - PER |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          3 |         10        0.07        0.07
+          6 |          5        0.04        0.11
+          . |     14,261       99.89      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ194_mult nonmissing observations = 15
+
+. map_freq_to_mult `f2022_stk'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ322 completed.
+No value label attached to SQ322 (or decode missing). Showing raw numeric codes:
+
+      STOCK |
+ INCOME HOW |
+      OFTEN |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        332        2.33        2.33
+          3 |        154        1.08        3.40
+          4 |        521        3.65        7.05
+          5 |         21        0.15        7.20
+          6 |        114        0.80        8.00
+          . |     13,134       92.00      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ322_mult nonmissing observations = 1142
+
+. map_freq_to_mult `f2022_bnd'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ336 completed.
+No value label attached to SQ336 (or decode missing). Showing raw numeric codes:
+
+BOND INCOME |
+  HOW OFTEN |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         61        0.43        0.43
+          3 |         45        0.32        0.74
+          4 |         35        0.25        0.99
+          5 |         21        0.15        1.13
+          6 |         32        0.22        1.36
+          . |     14,082       98.64      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ336_mult nonmissing observations = 194
+
+. map_freq_to_mult `f2022_cash'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ350 completed.
+No value label attached to SQ350 (or decode missing). Showing raw numeric codes:
+
+   CHECKING |
+ INCOME HOW |
+      OFTEN |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        264        1.85        1.85
+          3 |      1,991       13.95       15.80
+          4 |        630        4.41       20.21
+          5 |         36        0.25       20.46
+          6 |        349        2.44       22.91
+          . |     11,006       77.09      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ350_mult nonmissing observations = 3270
+
+. map_freq_to_mult `f2022_cds'
+(14,276 missing values generated)
+Mapping numeric codes to multipliers for SQ362 completed.
+No value label attached to SQ362 (or decode missing). Showing raw numeric codes:
+
+ CDS INCOME |
+  HOW OFTEN |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        121        0.85        0.85
+          3 |        128        0.90        1.74
+          4 |         96        0.67        2.42
+          5 |         33        0.23        2.65
+          6 |        135        0.95        3.59
+          . |     13,763       96.41      100.00
+------------+-----------------------------------
+      Total |     14,276      100.00
+SQ362_mult nonmissing observations = 513
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute per-asset interest for 2022 when both amount & multiplier exist
+. * After each computed variable we summarize it.
+. * ---------------------------------------------------------------------
+. 
+. cap drop int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2
+> 022 int_cds_2022
+
+. 
+. di as txt "=== Computing 2022 interest/dividends per asset ==="
+=== Computing 2022 interest/dividends per asset ===
+
+. 
+. gen double int_re_2022 = .
+(14,276 missing values generated)
+
+. replace int_re_2022 = `a2022_re' * `f2022_re'_mult if !missing(`a2022_re') & !missi
+> ng(`f2022_re'_mult)
+(492 real changes made)
+
+. di as txt "Real estate (2022) summary:"
+Real estate (2022) summary:
+
+. summarize int_re_2022, detail
+
+                         int_re_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         3600              0
+10%         6000              0       Obs                 492
+25%        10110              0       Sum of wgt.         492
+
+50%        18660                      Mean           40018.46
+                        Largest       Std. dev.      74396.15
+75%        36000         372000
+90%        84000         504000       Variance       5.53e+09
+95%       168000         600000       Skewness       6.316775
+99%       360000         960000       Kurtosis       61.16649
+
+. 
+. gen double int_bus_2022 = .
+(14,276 missing values generated)
+
+. replace int_bus_2022 = `a2022_bus' * `f2022_bus'_mult if !missing(`a2022_bus') & !m
+> issing(`f2022_bus'_mult)
+(211 real changes made)
+
+. di as txt "Private business (2022) summary:"
+Private business (2022) summary:
+
+. summarize int_bus_2022, detail
+
+                        int_bus_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%          300              0
+10%         2040              0       Obs                 211
+25%        15000              0       Sum of wgt.         211
+
+50%        36000                      Mean           81204.21
+                        Largest       Std. dev.      135068.6
+75%        78000         540000
+90%       192000         600000       Variance       1.82e+10
+95%       348000         936000       Skewness       3.737966
+99%       600000         960000       Kurtosis       20.19363
+
+. 
+. gen double int_ira_2022 = .
+(14,276 missing values generated)
+
+. replace int_ira_2022 = `a2022_ira' * `f2022_ira'_mult if !missing(`a2022_ira') & !m
+> issing(`f2022_ira'_mult)
+(15 real changes made)
+
+. di as txt "IRA (2022) summary:"
+IRA (2022) summary:
+
+. summarize int_ira_2022, detail
+
+                        int_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          840            840
+ 5%          840           2100
+10%         2100           5256       Obs                  15
+25%         6900           6900       Sum of wgt.          15
+
+50%         8400                      Mean            24362.8
+                        Largest       Std. dev.      47836.11
+75%        18000          18000
+90%        48500          26246       Variance       2.29e+09
+95%       192000          48500       Skewness       3.150377
+99%       192000         192000       Kurtosis       11.56414
+
+. 
+. gen double int_stk_2022 = .
+(14,276 missing values generated)
+
+. replace int_stk_2022 = `a2022_stk' * `f2022_stk'_mult if !missing(`a2022_stk') & !m
+> issing(`f2022_stk'_mult)
+(453 real changes made)
+
+. di as txt "Stocks (2022) summary:"
+Stocks (2022) summary:
+
+. summarize int_stk_2022, detail
+
+                        int_stk_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            4              0       Obs                 453
+25%          120              0       Sum of wgt.         453
+
+50%         1080                      Mean           15513.62
+                        Largest       Std. dev.      74403.68
+75%         8000         480000
+90%        24000         520000       Variance       5.54e+09
+95%        49800         596000       Skewness       11.38977
+99%       240000        1200000       Kurtosis       159.1124
+
+. 
+. gen double int_bnd_2022 = .
+(14,276 missing values generated)
+
+. replace int_bnd_2022 = `a2022_bnd' * `f2022_bnd'_mult if !missing(`a2022_bnd') & !m
+> issing(`f2022_bnd'_mult)
+(58 real changes made)
+
+. di as txt "Bonds (2022) summary:"
+Bonds (2022) summary:
+
+. summarize int_bnd_2022, detail
+
+                        int_bnd_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                  58
+25%          300              0       Sum of wgt.          58
+
+50%         3920                      Mean           24864.28
+                        Largest       Std. dev.      83534.46
+75%        12000          80000
+90%        40000         120000       Variance       6.98e+09
+95%       120000         204000       Skewness       5.968566
+99%       600000         600000       Kurtosis       40.52969
+
+. 
+. gen double int_cash_2022 = .
+(14,276 missing values generated)
+
+. replace int_cash_2022 = `a2022_cash' * `f2022_cash'_mult if !missing(`a2022_cash') 
+> & !missing(`f2022_cash'_mult)
+(1,832 real changes made)
+
+. di as txt "Checking/savings (2022) summary:"
+Checking/savings (2022) summary:
+
+. summarize int_cash_2022, detail
+
+                        int_cash_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               1,832
+25%           12              0       Sum of wgt.       1,832
+
+50%           40                      Mean            1757.16
+                        Largest       Std. dev.      23194.79
+75%          240         144000
+90%         1080         240000       Variance       5.38e+08
+95%         3200         600000       Skewness       26.37502
+99%        21600         720000       Kurtosis       751.2759
+
+. 
+. gen double int_cds_2022 = .
+(14,276 missing values generated)
+
+. replace int_cds_2022 = `a2022_cds' * `f2022_cds'_mult if !missing(`a2022_cds') & !m
+> issing(`f2022_cds'_mult)
+(153 real changes made)
+
+. di as txt "CDS/t-bills (2022) summary:"
+CDS/t-bills (2022) summary:
+
+. summarize int_cds_2022, detail
+
+                        int_cds_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 153
+25%           10              0       Sum of wgt.         153
+
+50%          240                      Mean           2402.784
+                        Largest       Std. dev.      7957.554
+75%         1200          32000
+90%         3600          36000       Variance       6.33e+07
+95%        12000          40000       Skewness       6.071186
+99%        40000          72000       Kurtosis       45.67572
+
+. 
+. egen double int_total_2022 = rowtotal(int_re_2022 int_bus_2022 int_ira_2022 int_stk
+> _2022 int_bnd_2022 int_cash_2022 int_cds_2022)
+
+. di as txt "TOTAL interest/dividends 2022 summary (sum across asset classes):"
+TOTAL interest/dividends 2022 summary (sum across asset classes):
+
+. summarize int_total_2022, detail
+
+                       int_total_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs              14,276
+25%            0              0       Sum of wgt.      14,276
+
+50%            0                      Mean           3449.507
+                        Largest       Std. dev.      33738.64
+75%            0         960000
+90%          120         960000       Variance       1.14e+09
+95%         7208        1026000       Skewness       24.74988
+99%        72120        1800012       Kurtosis       885.5141
+
+. tabstat int_total_2022, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+int_tot~2022 |     14276.00      3449.51     33738.64         0.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+int_tot~2022 |   1800012.00
+---------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Diagnostics: find cases where amount exists but multiplier missing (2022)
+. * These are rows where an amount is reported but the frequency multiplier is missin
+> g
+. * (e.g., originally codes 7/8/9 or blank).
+. * ---------------------------------------------------------------------
+. di as txt "=== Diagnostics: amount present but freq multiplier missing (2022) ==="
+=== Diagnostics: amount present but freq multiplier missing (2022) ===
+
+. foreach pair in ///
+>     "`f2022_re' `a2022_re' int_re_2022" ///
+>     "`f2022_bus' `a2022_bus' int_bus_2022" ///
+>     "`f2022_ira' `a2022_ira' int_ira_2022" ///
+>     "`f2022_stk' `a2022_stk' int_stk_2022" ///
+>     "`f2022_bnd' `a2022_bnd' int_bnd_2022" ///
+>     "`f2022_cash' `a2022_cash' int_cash_2022" ///
+>     "`f2022_cds' `a2022_cds' int_cds_2022" {
+  2.     local fq : word 1 of `pair'
+  3.     local amt : word 2 of `pair'
+  4.     local intv : word 3 of `pair'
+  5.     di as txt "---- `intv' (amount var `amt' ; freq var `fq')"
+  6.     quietly tab `fq', missing
+  7.     quietly count if !missing(`amt') & missing(`fq'_mult)
+  8.     di as txt "Records with amount but missing multiplier = " r(N)
+  9.     /* optional: list a few cases for inspection */
+.     quietly list HHID RSUBHH `fq' `amt' in 1/10 if !missing(`amt') & missing(`fq'_m
+> ult)
+ 10. }
+---- int_re_2022 (amount var SQ141 ; freq var SQ139)
+Records with amount but missing multiplier = 0
+---- int_bus_2022 (amount var SQ155 ; freq var SQ153)
+Records with amount but missing multiplier = 0
+---- int_ira_2022 (amount var SQ190 ; freq var SQ194)
+Records with amount but missing multiplier = 51
+---- int_stk_2022 (amount var SQ324 ; freq var SQ322)
+Records with amount but missing multiplier = 0
+---- int_bnd_2022 (amount var SQ338 ; freq var SQ336)
+Records with amount but missing multiplier = 0
+---- int_cash_2022 (amount var SQ352 ; freq var SQ350)
+Records with amount but missing multiplier = 0
+---- int_cds_2022 (amount var SQ364 ; freq var SQ362)
+Records with amount but missing multiplier = 0
+
+. 
+. * ---------------------------------------------------------------------
+. * Save dataset with new computed variables (2022-only interest)
+. * ---------------------------------------------------------------------
+. local out "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
+> /hrs_2022_with_interest.dta"
+
+. save "`out'", replace
+(file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2022_with_inter
+    > est.dta not found)
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2022_with_inter
+    > est.dta saved
+
+. di as txt "Saved 2022 interest/dividend vars to `out'"
+Saved 2022 interest/dividend vars to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTru
+> st/Code/Data/HRS/cleaned/hrs_2022_with_interest.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
+> /compute_interest_dividends_2022.log
+  log type:  text
+ closed on:  21 Aug 2025, 11:57:13
+-------------------------------------------------------------------------------------

@@ -1,0 +1,1432 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/2019_returns_comp.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}11 Aug 2025, 10:32:43
+
+{com}. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/PSID/merged/returns_2019.do"
+{txt}
+{com}. *******************************************************
+. * compute_returns.do
+. * Compute 2019 returns from merged 2017–2019 PSID data
+. *******************************************************
+. 
+. clear
+{txt}
+{com}. 
+. * 1) Load the merged file
+. use "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/PSID/merged/rep_DP2024_2017_2019.dta", clear
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 2) Interest income (y_c): reported interest + dividends
+. gen int_income  = ER73143   // interest income (2019)
+{txt}
+{com}. gen div_income  = ER73126   // dividend income (2019)
+{txt}
+{com}. gen yc19        = int_income + div_income
+{txt}
+{com}. label var yc19  "Interest + dividends (y_c_2019)"
+{txt}
+{com}. 
+. summarize yc19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 8}yc19 {c |}{res}      9,520    25158.09    190540.3          0    1999998
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 3) Net investment flows (F_t):
+. *    Sum across asset classes: (invest – divest) for business, stocks, RE, pensions
+. 
+. * Clean extreme values in net investment flow variables (2019)
+. local flow_vars ER73947 ER73952 ER73957 ER73963 ER73933 ER73938 ER73917 ER73922
+{txt}
+{com}. 
+. foreach var of local flow_vars {c -(}
+{txt}  2{com}.     replace `var' = . if inlist(`var', 999999997, 999999998, 999999999, -999999998, -999999999)
+{txt}  3{com}. {c )-}
+{txt}(8 real changes made, 8 to missing)
+(1 real change made, 1 to missing)
+(81 real changes made, 81 to missing)
+(74 real changes made, 74 to missing)
+(3 real changes made, 3 to missing)
+(6 real changes made, 6 to missing)
+(71 real changes made, 71 to missing)
+(19 real changes made, 19 to missing)
+
+{com}. 
+. gen F_bus19    = ER73947  - ER73952    // business
+{txt}(8 missing values generated)
+
+{com}. gen F_stk19    = ER73957  - ER73963    // stocks
+{txt}(104 missing values generated)
+
+{com}. gen F_re19     = ER73933  - ER73938    // real estate (non-primary)
+{txt}(9 missing values generated)
+
+{com}. gen F_pen19    = ER73917  - ER73922    // pensions/IRAs
+{txt}(86 missing values generated)
+
+{com}. gen Ftot19     = F_bus19 + F_stk19 + F_re19 + F_pen19
+{txt}(186 missing values generated)
+
+{com}. 
+. summarize F_bus19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}F_bus19 {c |}{res}      9,512   -5413.635    428991.3  -4.00e+07    1100000
+{txt}
+{com}. summarize F_stk19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}F_stk19 {c |}{res}      9,416    56.72292    19315.89    -953000     998000
+{txt}
+{com}. summarize F_re19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 6}F_re19 {c |}{res}      9,511    262.3827    32060.65    -850000    1200000
+{txt}
+{com}. summarize F_pen19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}F_pen19 {c |}{res}      9,434    555.6896    16668.32    -800000     500000
+{txt}
+{com}. 
+. label var Ftot19 "Net investment flows (F_2019)"
+{txt}
+{com}. 
+. summarize Ftot19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 6}Ftot19 {c |}{res}      9,334   -4526.913    433269.9  -3.99e+07    1250000
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 4) Capital gains by asset class per Daminato (2024):
+. *    cg_class = V2019 - V2017  (flows ignored)
+. * ----------------------------------------------------------------------------
+. 
+. foreach var in ER67789 ER67826 ER67798 ER67776 ER67784 ER67819 ER67847 ER71481 ER67793 ER67852 ER67862 ER67867 ER67872 ER67877 ER67883 {c -(}
+{txt}  2{com}.     replace `var' = . if inlist(`var', 999999998, 999999999, 1000000000)
+{txt}  3{com}. {c )-}
+{txt}(120 real changes made, 120 to missing)
+(694 real changes made, 694 to missing)
+(132 real changes made, 132 to missing)
+(63 real changes made, 63 to missing)
+(520 real changes made, 520 to missing)
+(200 real changes made, 200 to missing)
+(157 real changes made, 157 to missing)
+(0 real changes made)
+(33 real changes made, 33 to missing)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+{com}. 
+. 
+. * Business
+. gen cg_bus = ER77451 - ER67789
+{txt}(120 missing values generated)
+
+{com}. label var cg_bus "Capital gains: business (no flow adjustment)"
+{txt}
+{com}. summarize cg_bus
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 6}cg_bus {c |}{res}      9,400    10796.04    876952.9  -2.30e+07   4.00e+07
+{txt}
+{com}. gen neg_cg_bus = cg_bus < 0 if !missing(cg_bus)
+{txt}(120 missing values generated)
+
+{com}. count if neg_cg_bus
+  {res}565
+{txt}
+{com}. 
+. * Rents (other real estate)
+. gen cg_rents = ER77465 - ER67776
+{txt}(63 missing values generated)
+
+{com}. label var cg_rents "Capital gains: other RE (no flow adj.)"
+{txt}
+{com}. summarize cg_rents
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 4}cg_rents {c |}{res}      9,457   -1022.626      288520   -9750000    7000000
+{txt}
+{com}. gen neg_cg_rents = cg_rents < 0 if !missing(cg_rents)
+{txt}(63 missing values generated)
+
+{com}. count if neg_cg_rents
+  {res}870
+{txt}
+{com}. 
+. * Home equity
+. gen cg_home = ER77507 - ER71481
+{txt}
+{com}. label var cg_home "Capital gains: home equity"
+{txt}
+{com}. summarize cg_home
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}cg_home {c |}{res}      9,520    8977.974    269095.3   -7188500    8689997
+{txt}
+{com}. gen neg_cg_home = cg_home < 0 if !missing(cg_home)
+{txt}
+{com}. count if neg_cg_home
+  {res}3,415
+{txt}
+{com}. 
+. * Stocks
+. gen cg_stocks = ER77471 - ER67798
+{txt}(132 missing values generated)
+
+{com}. label var cg_stocks "Capital gains: stocks (no flow adj.)"
+{txt}
+{com}. summarize cg_stocks
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 3}cg_stocks {c |}{res}      9,388    13201.71     1233773  -4.00e+07   1.00e+08
+{txt}
+{com}. gen neg_cg_stocks = cg_stocks < 0 if !missing(cg_stocks)
+{txt}(132 missing values generated)
+
+{com}. count if neg_cg_stocks
+  {res}995
+{txt}
+{com}. 
+. * Pensions/IRAs
+. gen cg_pens = ER77481 - ER67819
+{txt}(200 missing values generated)
+
+{com}. label var cg_pens "Capital gains: pensions/IRAs (no flow adj.)"
+{txt}
+{com}. summarize cg_pens
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}cg_pens {c |}{res}      9,320    9962.632    285572.2   -6000000    4460000
+{txt}
+{com}. gen neg_cg_pens = cg_pens < 0 if !missing(cg_pens)
+{txt}(200 missing values generated)
+
+{com}. count if neg_cg_pens
+  {res}1,563
+{txt}
+{com}. 
+. * Total capital gains
+. gen cg19 = cg_bus + cg_rents + cg_home + cg_stocks + cg_pens
+{txt}(422 missing values generated)
+
+{com}. label var cg19 "Total capital gains (2017→2019, per paper)"
+{txt}
+{com}. summarize cg19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 8}cg19 {c |}{res}      9,098    49033.16     1790681  -4.52e+07   1.00e+08
+{txt}
+{com}. gen neg_cg19 = cg19 < 0 if !missing(cg19)
+{txt}(422 missing values generated)
+
+{com}. count if neg_cg19
+  {res}3,818
+{txt}
+{com}. 
+. 
+. * ----------------------------------------------------------------------------
+. * 5) Debt payments (y_d): annual mortgage P&I
+. *    Here we use reported monthly payments ER72064 & ER72118; if you compute via formula, replace
+. gen mort1_mo = ER72053  // first‐mortgage monthly P&I
+{txt}
+{com}. gen mort2_mo = ER72074  // second‐mortgage monthly P&I
+{txt}
+{com}. gen yd19     = 12*(mort1_mo + mort2_mo)
+{txt}
+{com}. label var yd19 "Annual mortgage payments (y_d_2019)"
+{txt}
+{com}. 
+. summarize yd19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 8}yd19 {c |}{res}      9,520    15103.96    109629.6          0    2399952
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 6) Beginning‐period net wealth (A_{c -(}t-1{c )-})
+. *    From 2017 imputed asset components minus debts:
+. gen A17 = (ER67789 + ER67826 + ER67798 + ER67776 + ER67784 + ER67819 + ER67847 + ER71481) - (ER67793 + ER67852 + ER67862 + ER67867 + ER67872 + ER67877 + ER67883)
+{txt}(1,430 missing values generated)
+
+{com}. label var A17 "Imputed net wealth excl. equity (2017)"
+{txt}
+{com}. 
+. summarize A17
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 9}A17 {c |}{res}      8,090     25246.4     3325022  -1.00e+08   4.57e+07
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 7) Prepare & inspect denominator for return
+. * ----------------------------------------------------------------------------
+. 
+. * 7a) Compute the denominator explicitly
+. gen denom19 = A17 + 0.5*Ftot19
+{txt}(1,585 missing values generated)
+
+{com}. label var denom19 "Denominator for ret19: A17 + .5*Ftot19"
+{txt}
+{com}. 
+. * How many denominators are missing?
+. count if missing(denom19)
+  {res}1,585
+{txt}
+{com}. di as txt "Missing denominators: " as res r(N)
+{res}{txt}Missing denominators: {res}1585
+{txt}
+{com}. 
+. * How many denominators are zero or negative?
+. count if denom19 <= 0
+  {res}2,047
+{txt}
+{com}. di as txt "Zero or negative denominators: " as res r(N)
+{res}{txt}Zero or negative denominators: {res}2047
+{txt}
+{com}. 
+. * List a few to inspect why
+. list hid A17 Ftot19 denom19 in 1/20 if denom19 <= 0 | missing(denom19)
+{txt}
+     {c TLC}{hline 5}{c -}{hline 11}{c -}{hline 8}{c -}{hline 11}{c TRC}
+     {c |} {res}hid         A17   Ftot19     denom19 {txt}{c |}
+     {c LT}{hline 5}{c -}{hline 11}{c -}{hline 8}{c -}{hline 11}{c RT}
+  2. {c |} {res}  2        -264        0        -264 {txt}{c |}
+  7. {c |} {res}  7           .        0           . {txt}{c |}
+  9. {c |} {res}  9           .        0           . {txt}{c |}
+ 10. {c |} {res} 10       64900        .           . {txt}{c |}
+ 11. {c |} {res} 11           0        0           0 {txt}{c |}
+     {c LT}{hline 5}{c -}{hline 11}{c -}{hline 8}{c -}{hline 11}{c RT}
+ 14. {c |} {res} 14           .        0           . {txt}{c |}
+ 15. {c |} {res} 15           0   -53000      -26500 {txt}{c |}
+ 16. {c |} {res} 16           0        0           0 {txt}{c |}
+ 18. {c |} {res} 18   -1.00e+08        0   -1.00e+08 {txt}{c |}
+     {c BLC}{hline 5}{c -}{hline 11}{c -}{hline 8}{c -}{hline 11}{c BRC}
+
+{com}. 
+. summarize denom19
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}denom19 {c |}{res}      7,935    27640.33     3350088  -1.00e+08   4.57e+07
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 8) Compute the return for 2017→2019, only when denom19 > 0
+. * ----------------------------------------------------------------------------
+. 
+. gen ret19 = .  
+{txt}(9,520 missing values generated)
+
+{com}. replace ret19 = (yc19 + cg19 - yd19) / denom19 ///
+>     if denom19 > 0 & denom19 < .
+{txt}(5,888 real changes made)
+
+{com}. 
+. label var ret19 "Return to net wealth 2017-19"
+{txt}
+{com}. 
+. * ----------------------------------------------------------------------------
+. * 9) Quick diagnostics on ret19
+. * ----------------------------------------------------------------------------
+. 
+. di _newline "=== Return summary ==="
+{res}
+=== Return summary ===
+{txt}
+{com}. summarize ret19, detail
+
+                {txt}Return to net wealth 2017-19
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}    -6.25       -5199.88
+{txt} 5%    {res}-1.131698      -2176.376
+{txt}10%    {res} -.975136       -881.001       {txt}Obs         {res}      5,888
+{txt}25%    {res} -.798198           -675       {txt}Sum of wgt. {res}      5,888
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 136.8835
+                        {txt}Largest       Std. dev.     {res} 3497.843
+{txt}75%    {res} 1.762353          64760
+{txt}90%    {res} 21.88837         102400       {txt}Variance      {res} 1.22e+07
+{txt}95%    {res} 79.30581       137024.5       {txt}Skewness      {res} 40.88743
+{txt}99%    {res}   762.78         184000       {txt}Kurtosis      {res} 1849.027
+{txt}
+{com}. 
+. di _newline "=== Missing count for ret19 ==="
+{res}
+=== Missing count for ret19 ===
+{txt}
+{com}. count if missing(ret19)
+  {res}3,632
+{txt}
+{com}. di as txt r(N) " observations missing ret19"
+{res}{txt}3632 observations missing ret19
+
+{com}. 
+. di _newline "=== Distribution of ret19 ==="
+{res}
+=== Distribution of ret19 ===
+{txt}
+{com}. histogram ret19, normal width(.05) ///
+>     title("Distribution of ret19") subtitle("2017→2019")
+{txt}(bin={res}3783998{txt}, start={res}-5199.8799{txt}, width={res}.05{txt})
+{res}{txt}
+{com}. 
+. * 10) Spot‐check some households
+. di _newline "=== Spot‐check first 10 obs ==="
+{res}
+=== Spot‐check first 10 obs ===
+{txt}
+{com}. list hid A17 Ftot19 yc19 cg19 yd19 denom19 ret19 in 1/10
+{txt}
+     {c TLC}{hline 5}{c -}{hline 9}{c -}{hline 8}{c -}{hline 9}{c -}{hline 10}{c -}{hline 7}{c -}{hline 9}{c -}{hline 11}{c TRC}
+     {c |} {res}hid       A17   Ftot19      yc19       cg19    yd19   denom19       ret19 {txt}{c |}
+     {c LT}{hline 5}{c -}{hline 9}{c -}{hline 8}{c -}{hline 9}{c -}{hline 10}{c -}{hline 7}{c -}{hline 9}{c -}{hline 11}{c RT}
+  1. {c |} {res}  1      1507        0         0          0       0      1507           0 {txt}{c |}
+  2. {c |} {res}  2      -264        0         0     140000   17400      -264           . {txt}{c |}
+  3. {c |} {res}  3     52000        0      7800     660000       0     52000    12.84231 {txt}{c |}
+  4. {c |} {res}  4     11600        0         0     403500       0     11600    34.78448 {txt}{c |}
+  5. {c |} {res}  5     12030        0         0      35000    4800     12030    2.510391 {txt}{c |}
+     {c LT}{hline 5}{c -}{hline 9}{c -}{hline 8}{c -}{hline 9}{c -}{hline 10}{c -}{hline 7}{c -}{hline 9}{c -}{hline 11}{c RT}
+  6. {c |} {res}  6   3545000        0         0   -3498000       0   3545000   -.9867419 {txt}{c |}
+  7. {c |} {res}  7         .        0         0          .       0         .           . {txt}{c |}
+  8. {c |} {res}  8    225000        0         2     250000   20328    225000    1.020773 {txt}{c |}
+  9. {c |} {res}  9         .        0         0    -150000       0         .           . {txt}{c |}
+ 10. {c |} {res} 10     64900        .   1000129    3935000       0         .           . {txt}{c |}
+     {c BLC}{hline 5}{c -}{hline 9}{c -}{hline 8}{c -}{hline 9}{c -}{hline 10}{c -}{hline 7}{c -}{hline 9}{c -}{hline 11}{c BRC}
+
+{com}. 
+. * 11) Save a working copy
+. save "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/PSID/merged/rep_DP2024_2017_2019_with_ret.dta", replace
+{txt}{p 0 4 2}
+file {bf}
+/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/PSID/merged/rep_DP2024_2017_2019_with_ret.dta{rm}
+saved
+{p_end}
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "/var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//SD11858.000000"
+{txt}
+{com}. *******************************************************
+. * compute_returns.do
+. * Inspect why 2019 returns seem so off, starting with capital gains
+. *******************************************************
+. 
+. // Flag extreme values for each capital gain component
+. gen extreme_cg_bus     = cg_bus < -1e7 | cg_bus > 1e7
+{txt}
+{com}. gen extreme_cg_rents   = cg_rents < -1e7 | cg_rents > 1e7
+{txt}
+{com}. gen extreme_cg_home    = cg_home < -1e7 | cg_home > 1e7
+{txt}
+{com}. gen extreme_cg_stocks  = cg_stocks < -1e7 | cg_stocks > 1e7
+{txt}
+{com}. gen extreme_cg_pens    = cg_pens < -1e7 | cg_pens > 1e7
+{txt}
+{com}. 
+. gen any_extreme_cg = extreme_cg_bus | extreme_cg_rents | extreme_cg_home | ///
+>                      extreme_cg_stocks | extreme_cg_pens
+{txt}
+{com}. 
+. // Optional: visually inspect rows with any extreme capital gains
+. browse hid cg_bus cg_rents cg_home cg_stocks cg_pens if any_extreme_cg
+{txt}
+{com}. 
+. // Print summaries and list extreme values for each capital gain component
+. foreach var in cg_bus cg_rents cg_home cg_stocks cg_pens {c -(}
+{txt}  2{com}.     di "Summary for `var'"
+{txt}  3{com}.     count if `var' < -1e7
+{txt}  4{com}.     count if `var' > 1e7
+{txt}  5{com}.     summarize `var' if `var' < -1e7 | `var' > 1e7, detail
+{txt}  6{com}.     list hid `var' if `var' < -1e7 | `var' > 1e7, sepby(`var')
+{txt}  7{com}.     di "---------------------------"
+{txt}  8{com}. {c )-}
+Summary for cg_bus
+  {res}4
+  124
+
+        {txt}Capital gains: business (no flow adjustment)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}-2.30e+07      -2.30e+07
+{txt} 5%    {res}-2.30e+07      -2.20e+07
+{txt}10%    {res}-2.30e+07      -1.44e+07       {txt}Obs         {res}          8
+{txt}25%    {res}-1.82e+07      -1.10e+07       {txt}Sum of wgt. {res}          8
+
+{txt}50%    {res}  3000000                      {txt}Mean          {res}  5825000
+                        {txt}Largest       Std. dev.     {res} 2.66e+07
+{txt}75%    {res} 3.00e+07       1.70e+07
+{txt}90%    {res} 4.00e+07       2.00e+07       {txt}Variance      {res} 7.08e+14
+{txt}95%    {res} 4.00e+07       4.00e+07       {txt}Skewness      {res} .2068872
+{txt}99%    {res} 4.00e+07       4.00e+07       {txt}Kurtosis      {res} 1.405839
+{txt}
+      {c TLC}{hline 6}{c -}{hline 11}{c TRC}
+      {c |} {res} hid      cg_bus {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+ 108. {c |} {res} 108           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+ 136. {c |} {res} 136   -1.44e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+ 312. {c |} {res} 312           . {txt}{c |}
+ 365. {c |} {res} 365           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+ 367. {c |} {res} 367   -1.10e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+ 419. {c |} {res} 419           . {txt}{c |}
+ 529. {c |} {res} 530           . {txt}{c |}
+ 550. {c |} {res} 551           . {txt}{c |}
+ 781. {c |} {res} 782           . {txt}{c |}
+ 795. {c |} {res} 796           . {txt}{c |}
+ 826. {c |} {res} 827           . {txt}{c |}
+ 840. {c |} {res} 841           . {txt}{c |}
+ 849. {c |} {res} 850           . {txt}{c |}
+ 998. {c |} {res} 999           . {txt}{c |}
+1237. {c |} {res}1241           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+1286. {c |} {res}1290    2.00e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+1375. {c |} {res}1379           . {txt}{c |}
+1466. {c |} {res}1470           . {txt}{c |}
+1504. {c |} {res}1508           . {txt}{c |}
+1551. {c |} {res}1556           . {txt}{c |}
+1856. {c |} {res}1862           . {txt}{c |}
+1858. {c |} {res}1864           . {txt}{c |}
+1959. {c |} {res}1969           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+2062. {c |} {res}2072   -2.20e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+2253. {c |} {res}2269           . {txt}{c |}
+2287. {c |} {res}2304           . {txt}{c |}
+2411. {c |} {res}2428           . {txt}{c |}
+2446. {c |} {res}2463           . {txt}{c |}
+2663. {c |} {res}2682           . {txt}{c |}
+2679. {c |} {res}2698           . {txt}{c |}
+2688. {c |} {res}2707           . {txt}{c |}
+2834. {c |} {res}2854           . {txt}{c |}
+2846. {c |} {res}2866           . {txt}{c |}
+2872. {c |} {res}2892           . {txt}{c |}
+2939. {c |} {res}2959           . {txt}{c |}
+2955. {c |} {res}2976           . {txt}{c |}
+2961. {c |} {res}2982           . {txt}{c |}
+3109. {c |} {res}3130           . {txt}{c |}
+3288. {c |} {res}3314           . {txt}{c |}
+3289. {c |} {res}3315           . {txt}{c |}
+3413. {c |} {res}3442           . {txt}{c |}
+3516. {c |} {res}3546           . {txt}{c |}
+3563. {c |} {res}3593           . {txt}{c |}
+3565. {c |} {res}3595           . {txt}{c |}
+3606. {c |} {res}3636           . {txt}{c |}
+3619. {c |} {res}3650           . {txt}{c |}
+3667. {c |} {res}3700           . {txt}{c |}
+3688. {c |} {res}3722           . {txt}{c |}
+3763. {c |} {res}3799           . {txt}{c |}
+3877. {c |} {res}3913           . {txt}{c |}
+3879. {c |} {res}3915           . {txt}{c |}
+3898. {c |} {res}3934           . {txt}{c |}
+4113. {c |} {res}4150           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+4316. {c |} {res}4356    1.70e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+4418. {c |} {res}4459           . {txt}{c |}
+4445. {c |} {res}4487           . {txt}{c |}
+4816. {c |} {res}4858           . {txt}{c |}
+4870. {c |} {res}4912           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+4963. {c |} {res}5005    4.00e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+4990. {c |} {res}5033           . {txt}{c |}
+4993. {c |} {res}5036           . {txt}{c |}
+5136. {c |} {res}5179           . {txt}{c |}
+5218. {c |} {res}5261           . {txt}{c |}
+5299. {c |} {res}5344           . {txt}{c |}
+5472. {c |} {res}5518           . {txt}{c |}
+5494. {c |} {res}5540           . {txt}{c |}
+5562. {c |} {res}5608           . {txt}{c |}
+5820. {c |} {res}5868           . {txt}{c |}
+5899. {c |} {res}5947           . {txt}{c |}
+6006. {c |} {res}6055           . {txt}{c |}
+6084. {c |} {res}6133           . {txt}{c |}
+6106. {c |} {res}6155           . {txt}{c |}
+6224. {c |} {res}6273           . {txt}{c |}
+6283. {c |} {res}6332           . {txt}{c |}
+6321. {c |} {res}6370           . {txt}{c |}
+6388. {c |} {res}6437           . {txt}{c |}
+6506. {c |} {res}6556           . {txt}{c |}
+6551. {c |} {res}6601           . {txt}{c |}
+6590. {c |} {res}6640           . {txt}{c |}
+6624. {c |} {res}6674           . {txt}{c |}
+6632. {c |} {res}6682           . {txt}{c |}
+6634. {c |} {res}6684           . {txt}{c |}
+6644. {c |} {res}6694           . {txt}{c |}
+6679. {c |} {res}6730           . {txt}{c |}
+6794. {c |} {res}6847           . {txt}{c |}
+6862. {c |} {res}6915           . {txt}{c |}
+6970. {c |} {res}7023           . {txt}{c |}
+6981. {c |} {res}7034           . {txt}{c |}
+6991. {c |} {res}7044           . {txt}{c |}
+7010. {c |} {res}7063           . {txt}{c |}
+7042. {c |} {res}7095           . {txt}{c |}
+7091. {c |} {res}7144           . {txt}{c |}
+7111. {c |} {res}7164           . {txt}{c |}
+7348. {c |} {res}7404           . {txt}{c |}
+7363. {c |} {res}7420           . {txt}{c |}
+7372. {c |} {res}7429           . {txt}{c |}
+7401. {c |} {res}7461           . {txt}{c |}
+7426. {c |} {res}7486           . {txt}{c |}
+7541. {c |} {res}7602           . {txt}{c |}
+7601. {c |} {res}7663           . {txt}{c |}
+7602. {c |} {res}7664           . {txt}{c |}
+7666. {c |} {res}7728           . {txt}{c |}
+7752. {c |} {res}7816           . {txt}{c |}
+7817. {c |} {res}7881           . {txt}{c |}
+7843. {c |} {res}7908           . {txt}{c |}
+8119. {c |} {res}8188           . {txt}{c |}
+8251. {c |} {res}8322           . {txt}{c |}
+8341. {c |} {res}8413           . {txt}{c |}
+8389. {c |} {res}8463           . {txt}{c |}
+8474. {c |} {res}8553           . {txt}{c |}
+8680. {c |} {res}8760           . {txt}{c |}
+8750. {c |} {res}8831           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+8791. {c |} {res}8873   -2.30e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+8806. {c |} {res}8888           . {txt}{c |}
+8874. {c |} {res}8958           . {txt}{c |}
+8899. {c |} {res}8983           . {txt}{c |}
+8913. {c |} {res}8997           . {txt}{c |}
+8949. {c |} {res}9034           . {txt}{c |}
+8964. {c |} {res}9049           . {txt}{c |}
+9040. {c |} {res}9126           . {txt}{c |}
+9147. {c |} {res}9235           . {txt}{c |}
+9183. {c |} {res}9271           . {txt}{c |}
+9278. {c |} {res}9368           . {txt}{c |}
+9281. {c |} {res}9371           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+9305. {c |} {res}9395    4.00e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+9340. {c |} {res}9430           . {txt}{c |}
+9386. {c |} {res}9476           . {txt}{c |}
+9388. {c |} {res}9478           . {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 11}{c BRC}
+---------------------------
+Summary for cg_rents
+  {res}0
+  63
+
+           {txt}Capital gains: other RE (no flow adj.)
+{hline 61}
+no observations
+
+      {c TLC}{hline 6}{c -}{hline 10}{c TRC}
+      {c |} {res} hid   cg_rents {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 10}{c RT}
+ 108. {c |} {res} 108          . {txt}{c |}
+ 110. {c |} {res} 110          . {txt}{c |}
+ 176. {c |} {res} 176          . {txt}{c |}
+ 202. {c |} {res} 202          . {txt}{c |}
+ 366. {c |} {res} 366          . {txt}{c |}
+ 464. {c |} {res} 464          . {txt}{c |}
+ 701. {c |} {res} 702          . {txt}{c |}
+ 770. {c |} {res} 771          . {txt}{c |}
+ 781. {c |} {res} 782          . {txt}{c |}
+ 835. {c |} {res} 836          . {txt}{c |}
+ 965. {c |} {res} 966          . {txt}{c |}
+1005. {c |} {res}1006          . {txt}{c |}
+1134. {c |} {res}1136          . {txt}{c |}
+1375. {c |} {res}1379          . {txt}{c |}
+1437. {c |} {res}1441          . {txt}{c |}
+1678. {c |} {res}1683          . {txt}{c |}
+1805. {c |} {res}1811          . {txt}{c |}
+1872. {c |} {res}1879          . {txt}{c |}
+1963. {c |} {res}1973          . {txt}{c |}
+2142. {c |} {res}2153          . {txt}{c |}
+2204. {c |} {res}2218          . {txt}{c |}
+2455. {c |} {res}2472          . {txt}{c |}
+2663. {c |} {res}2682          . {txt}{c |}
+2679. {c |} {res}2698          . {txt}{c |}
+2772. {c |} {res}2791          . {txt}{c |}
+3563. {c |} {res}3593          . {txt}{c |}
+3565. {c |} {res}3595          . {txt}{c |}
+3811. {c |} {res}3847          . {txt}{c |}
+3963. {c |} {res}3999          . {txt}{c |}
+3967. {c |} {res}4003          . {txt}{c |}
+3979. {c |} {res}4015          . {txt}{c |}
+4020. {c |} {res}4056          . {txt}{c |}
+4798. {c |} {res}4840          . {txt}{c |}
+4870. {c |} {res}4912          . {txt}{c |}
+4990. {c |} {res}5033          . {txt}{c |}
+5085. {c |} {res}5128          . {txt}{c |}
+5396. {c |} {res}5441          . {txt}{c |}
+5465. {c |} {res}5511          . {txt}{c |}
+5681. {c |} {res}5728          . {txt}{c |}
+5765. {c |} {res}5813          . {txt}{c |}
+5820. {c |} {res}5868          . {txt}{c |}
+5899. {c |} {res}5947          . {txt}{c |}
+6007. {c |} {res}6056          . {txt}{c |}
+6063. {c |} {res}6112          . {txt}{c |}
+6100. {c |} {res}6149          . {txt}{c |}
+6455. {c |} {res}6504          . {txt}{c |}
+6587. {c |} {res}6637          . {txt}{c |}
+6768. {c |} {res}6821          . {txt}{c |}
+6932. {c |} {res}6985          . {txt}{c |}
+7210. {c |} {res}7264          . {txt}{c |}
+7446. {c |} {res}7506          . {txt}{c |}
+7479. {c |} {res}7539          . {txt}{c |}
+7560. {c |} {res}7621          . {txt}{c |}
+7576. {c |} {res}7637          . {txt}{c |}
+7726. {c |} {res}7790          . {txt}{c |}
+8081. {c |} {res}8150          . {txt}{c |}
+8084. {c |} {res}8153          . {txt}{c |}
+8192. {c |} {res}8261          . {txt}{c |}
+8451. {c |} {res}8528          . {txt}{c |}
+8751. {c |} {res}8832          . {txt}{c |}
+9281. {c |} {res}9371          . {txt}{c |}
+9340. {c |} {res}9430          . {txt}{c |}
+9396. {c |} {res}9486          . {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 10}{c BRC}
+---------------------------
+Summary for cg_home
+  {res}0
+  0
+
+                 {txt}Capital gains: home equity
+{hline 61}
+no observations
+---------------------------
+Summary for cg_stocks
+  {res}1
+  134
+
+            {txt}Capital gains: stocks (no flow adj.)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}-4.00e+07      -4.00e+07
+{txt} 5%    {res}-4.00e+07       4.00e+07
+{txt}10%    {res}-4.00e+07       1.00e+08       {txt}Obs         {res}          3
+{txt}25%    {res}-4.00e+07              .       {txt}Sum of wgt. {res}          3
+
+{txt}50%    {res} 4.00e+07                      {txt}Mean          {res} 3.33e+07
+                        {txt}Largest       Std. dev.     {res} 7.02e+07
+{txt}75%    {res} 1.00e+08              .
+{txt}90%    {res} 1.00e+08      -4.00e+07       {txt}Variance      {res} 4.93e+15
+{txt}95%    {res} 1.00e+08       4.00e+07       {txt}Skewness      {res}-.1728005
+{txt}99%    {res} 1.00e+08       1.00e+08       {txt}Kurtosis      {res}      1.5
+{txt}
+      {c TLC}{hline 6}{c -}{hline 11}{c TRC}
+      {c |} {res} hid   cg_stocks {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+  82. {c |} {res}  82           . {txt}{c |}
+ 111. {c |} {res} 111           . {txt}{c |}
+ 152. {c |} {res} 152           . {txt}{c |}
+ 176. {c |} {res} 176           . {txt}{c |}
+ 193. {c |} {res} 193           . {txt}{c |}
+ 210. {c |} {res} 210           . {txt}{c |}
+ 267. {c |} {res} 267           . {txt}{c |}
+ 269. {c |} {res} 269           . {txt}{c |}
+ 284. {c |} {res} 284           . {txt}{c |}
+ 331. {c |} {res} 331           . {txt}{c |}
+ 442. {c |} {res} 442           . {txt}{c |}
+ 463. {c |} {res} 463           . {txt}{c |}
+ 464. {c |} {res} 464           . {txt}{c |}
+ 469. {c |} {res} 469           . {txt}{c |}
+ 473. {c |} {res} 473           . {txt}{c |}
+ 533. {c |} {res} 534           . {txt}{c |}
+ 536. {c |} {res} 537           . {txt}{c |}
+ 615. {c |} {res} 616           . {txt}{c |}
+ 820. {c |} {res} 821           . {txt}{c |}
+ 857. {c |} {res} 858           . {txt}{c |}
+ 883. {c |} {res} 884           . {txt}{c |}
+ 945. {c |} {res} 946           . {txt}{c |}
+ 998. {c |} {res} 999           . {txt}{c |}
+1020. {c |} {res}1022           . {txt}{c |}
+1041. {c |} {res}1043           . {txt}{c |}
+1063. {c |} {res}1065           . {txt}{c |}
+1134. {c |} {res}1136           . {txt}{c |}
+1198. {c |} {res}1201           . {txt}{c |}
+1221. {c |} {res}1225           . {txt}{c |}
+1234. {c |} {res}1238           . {txt}{c |}
+1273. {c |} {res}1277           . {txt}{c |}
+1276. {c |} {res}1280           . {txt}{c |}
+1409. {c |} {res}1413           . {txt}{c |}
+1563. {c |} {res}1568           . {txt}{c |}
+1734. {c |} {res}1740           . {txt}{c |}
+1834. {c |} {res}1840           . {txt}{c |}
+2036. {c |} {res}2046           . {txt}{c |}
+2084. {c |} {res}2094           . {txt}{c |}
+2135. {c |} {res}2146           . {txt}{c |}
+2316. {c |} {res}2333           . {txt}{c |}
+2458. {c |} {res}2475           . {txt}{c |}
+2544. {c |} {res}2563           . {txt}{c |}
+2679. {c |} {res}2698           . {txt}{c |}
+2707. {c |} {res}2726           . {txt}{c |}
+2732. {c |} {res}2751           . {txt}{c |}
+2741. {c |} {res}2760           . {txt}{c |}
+2880. {c |} {res}2900           . {txt}{c |}
+2900. {c |} {res}2920           . {txt}{c |}
+2926. {c |} {res}2946           . {txt}{c |}
+2947. {c |} {res}2968           . {txt}{c |}
+3046. {c |} {res}3067           . {txt}{c |}
+3049. {c |} {res}3070           . {txt}{c |}
+3057. {c |} {res}3078           . {txt}{c |}
+3513. {c |} {res}3543           . {txt}{c |}
+3533. {c |} {res}3563           . {txt}{c |}
+3563. {c |} {res}3593           . {txt}{c |}
+3674. {c |} {res}3707           . {txt}{c |}
+3753. {c |} {res}3789           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+3788. {c |} {res}3824   -4.00e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+3862. {c |} {res}3898           . {txt}{c |}
+3877. {c |} {res}3913           . {txt}{c |}
+4048. {c |} {res}4085           . {txt}{c |}
+4108. {c |} {res}4145           . {txt}{c |}
+4193. {c |} {res}4232           . {txt}{c |}
+4347. {c |} {res}4387           . {txt}{c |}
+4474. {c |} {res}4516           . {txt}{c |}
+4506. {c |} {res}4548           . {txt}{c |}
+4508. {c |} {res}4550           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+4531. {c |} {res}4573    4.00e+07 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+4553. {c |} {res}4595           . {txt}{c |}
+4563. {c |} {res}4605           . {txt}{c |}
+4576. {c |} {res}4618           . {txt}{c |}
+4683. {c |} {res}4725           . {txt}{c |}
+4735. {c |} {res}4777           . {txt}{c |}
+4741. {c |} {res}4783           . {txt}{c |}
+5006. {c |} {res}5049           . {txt}{c |}
+5070. {c |} {res}5113           . {txt}{c |}
+5093. {c |} {res}5136           . {txt}{c |}
+5221. {c |} {res}5264           . {txt}{c |}
+5303. {c |} {res}5348           . {txt}{c |}
+5425. {c |} {res}5471           . {txt}{c |}
+5482. {c |} {res}5528           . {txt}{c |}
+5512. {c |} {res}5558           . {txt}{c |}
+5541. {c |} {res}5587           . {txt}{c |}
+5609. {c |} {res}5656           . {txt}{c |}
+5749. {c |} {res}5797           . {txt}{c |}
+5753. {c |} {res}5801           . {txt}{c |}
+5795. {c |} {res}5843           . {txt}{c |}
+5820. {c |} {res}5868           . {txt}{c |}
+5858. {c |} {res}5906           . {txt}{c |}
+5954. {c |} {res}6002           . {txt}{c |}
+6034. {c |} {res}6083           . {txt}{c |}
+6063. {c |} {res}6112           . {txt}{c |}
+6100. {c |} {res}6149           . {txt}{c |}
+6106. {c |} {res}6155           . {txt}{c |}
+6129. {c |} {res}6178           . {txt}{c |}
+6140. {c |} {res}6189           . {txt}{c |}
+6173. {c |} {res}6222           . {txt}{c |}
+6186. {c |} {res}6235           . {txt}{c |}
+6214. {c |} {res}6263           . {txt}{c |}
+6246. {c |} {res}6295           . {txt}{c |}
+6369. {c |} {res}6418           . {txt}{c |}
+6424. {c |} {res}6473           . {txt}{c |}
+6537. {c |} {res}6587           . {txt}{c |}
+6551. {c |} {res}6601           . {txt}{c |}
+6606. {c |} {res}6656           . {txt}{c |}
+6632. {c |} {res}6682           . {txt}{c |}
+6679. {c |} {res}6730           . {txt}{c |}
+6708. {c |} {res}6759           . {txt}{c |}
+6740. {c |} {res}6792           . {txt}{c |}
+6768. {c |} {res}6821           . {txt}{c |}
+6882. {c |} {res}6935           . {txt}{c |}
+6982. {c |} {res}7035           . {txt}{c |}
+7032. {c |} {res}7085           . {txt}{c |}
+7054. {c |} {res}7107           . {txt}{c |}
+7184. {c |} {res}7238           . {txt}{c |}
+7409. {c |} {res}7469           . {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+7452. {c |} {res}7512    1.00e+08 {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 11}{c RT}
+7482. {c |} {res}7542           . {txt}{c |}
+7541. {c |} {res}7602           . {txt}{c |}
+7690. {c |} {res}7752           . {txt}{c |}
+7738. {c |} {res}7802           . {txt}{c |}
+7945. {c |} {res}8012           . {txt}{c |}
+7974. {c |} {res}8041           . {txt}{c |}
+8157. {c |} {res}8226           . {txt}{c |}
+8230. {c |} {res}8300           . {txt}{c |}
+8406. {c |} {res}8481           . {txt}{c |}
+8489. {c |} {res}8568           . {txt}{c |}
+8695. {c |} {res}8775           . {txt}{c |}
+8773. {c |} {res}8855           . {txt}{c |}
+8906. {c |} {res}8990           . {txt}{c |}
+8982. {c |} {res}9067           . {txt}{c |}
+9040. {c |} {res}9126           . {txt}{c |}
+9260. {c |} {res}9350           . {txt}{c |}
+9340. {c |} {res}9430           . {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 11}{c BRC}
+---------------------------
+Summary for cg_pens
+  {res}0
+  200
+
+         {txt}Capital gains: pensions/IRAs (no flow adj.)
+{hline 61}
+no observations
+
+      {c TLC}{hline 6}{c -}{hline 9}{c TRC}
+      {c |} {res} hid   cg_pens {txt}{c |}
+      {c LT}{hline 6}{c -}{hline 9}{c RT}
+   7. {c |} {res}   7         . {txt}{c |}
+  36. {c |} {res}  36         . {txt}{c |}
+ 111. {c |} {res} 111         . {txt}{c |}
+ 248. {c |} {res} 248         . {txt}{c |}
+ 284. {c |} {res} 284         . {txt}{c |}
+ 311. {c |} {res} 311         . {txt}{c |}
+ 330. {c |} {res} 330         . {txt}{c |}
+ 340. {c |} {res} 340         . {txt}{c |}
+ 399. {c |} {res} 399         . {txt}{c |}
+ 437. {c |} {res} 437         . {txt}{c |}
+ 442. {c |} {res} 442         . {txt}{c |}
+ 444. {c |} {res} 444         . {txt}{c |}
+ 463. {c |} {res} 463         . {txt}{c |}
+ 464. {c |} {res} 464         . {txt}{c |}
+ 469. {c |} {res} 469         . {txt}{c |}
+ 473. {c |} {res} 473         . {txt}{c |}
+ 474. {c |} {res} 474         . {txt}{c |}
+ 477. {c |} {res} 477         . {txt}{c |}
+ 503. {c |} {res} 503         . {txt}{c |}
+ 505. {c |} {res} 505         . {txt}{c |}
+ 533. {c |} {res} 534         . {txt}{c |}
+ 549. {c |} {res} 550         . {txt}{c |}
+ 551. {c |} {res} 552         . {txt}{c |}
+ 565. {c |} {res} 566         . {txt}{c |}
+ 637. {c |} {res} 638         . {txt}{c |}
+ 643. {c |} {res} 644         . {txt}{c |}
+ 666. {c |} {res} 667         . {txt}{c |}
+ 692. {c |} {res} 693         . {txt}{c |}
+ 752. {c |} {res} 753         . {txt}{c |}
+ 820. {c |} {res} 821         . {txt}{c |}
+ 861. {c |} {res} 862         . {txt}{c |}
+ 945. {c |} {res} 946         . {txt}{c |}
+ 971. {c |} {res} 972         . {txt}{c |}
+ 975. {c |} {res} 976         . {txt}{c |}
+ 998. {c |} {res} 999         . {txt}{c |}
+1011. {c |} {res}1013         . {txt}{c |}
+1020. {c |} {res}1022         . {txt}{c |}
+1041. {c |} {res}1043         . {txt}{c |}
+1097. {c |} {res}1099         . {txt}{c |}
+1150. {c |} {res}1152         . {txt}{c |}
+1177. {c |} {res}1180         . {txt}{c |}
+1185. {c |} {res}1188         . {txt}{c |}
+1186. {c |} {res}1189         . {txt}{c |}
+1202. {c |} {res}1206         . {txt}{c |}
+1209. {c |} {res}1213         . {txt}{c |}
+1273. {c |} {res}1277         . {txt}{c |}
+1290. {c |} {res}1294         . {txt}{c |}
+1313. {c |} {res}1317         . {txt}{c |}
+1337. {c |} {res}1341         . {txt}{c |}
+1377. {c |} {res}1381         . {txt}{c |}
+1398. {c |} {res}1402         . {txt}{c |}
+1400. {c |} {res}1404         . {txt}{c |}
+1409. {c |} {res}1413         . {txt}{c |}
+1507. {c |} {res}1511         . {txt}{c |}
+1551. {c |} {res}1556         . {txt}{c |}
+1562. {c |} {res}1567         . {txt}{c |}
+1691. {c |} {res}1696         . {txt}{c |}
+1715. {c |} {res}1720         . {txt}{c |}
+1732. {c |} {res}1738         . {txt}{c |}
+1741. {c |} {res}1747         . {txt}{c |}
+1750. {c |} {res}1756         . {txt}{c |}
+1782. {c |} {res}1788         . {txt}{c |}
+1794. {c |} {res}1800         . {txt}{c |}
+1814. {c |} {res}1820         . {txt}{c |}
+1867. {c |} {res}1874         . {txt}{c |}
+1879. {c |} {res}1887         . {txt}{c |}
+1909. {c |} {res}1917         . {txt}{c |}
+1915. {c |} {res}1923         . {txt}{c |}
+1959. {c |} {res}1969         . {txt}{c |}
+1981. {c |} {res}1991         . {txt}{c |}
+1986. {c |} {res}1996         . {txt}{c |}
+2019. {c |} {res}2029         . {txt}{c |}
+2031. {c |} {res}2041         . {txt}{c |}
+2122. {c |} {res}2133         . {txt}{c |}
+2135. {c |} {res}2146         . {txt}{c |}
+2316. {c |} {res}2333         . {txt}{c |}
+2320. {c |} {res}2337         . {txt}{c |}
+2535. {c |} {res}2554         . {txt}{c |}
+2541. {c |} {res}2560         . {txt}{c |}
+2543. {c |} {res}2562         . {txt}{c |}
+2584. {c |} {res}2603         . {txt}{c |}
+2605. {c |} {res}2624         . {txt}{c |}
+2639. {c |} {res}2658         . {txt}{c |}
+2651. {c |} {res}2670         . {txt}{c |}
+2679. {c |} {res}2698         . {txt}{c |}
+2707. {c |} {res}2726         . {txt}{c |}
+2728. {c |} {res}2747         . {txt}{c |}
+2732. {c |} {res}2751         . {txt}{c |}
+2735. {c |} {res}2754         . {txt}{c |}
+2741. {c |} {res}2760         . {txt}{c |}
+2806. {c |} {res}2826         . {txt}{c |}
+2819. {c |} {res}2839         . {txt}{c |}
+2881. {c |} {res}2901         . {txt}{c |}
+2890. {c |} {res}2910         . {txt}{c |}
+2926. {c |} {res}2946         . {txt}{c |}
+2930. {c |} {res}2950         . {txt}{c |}
+2961. {c |} {res}2982         . {txt}{c |}
+2962. {c |} {res}2983         . {txt}{c |}
+3014. {c |} {res}3035         . {txt}{c |}
+3045. {c |} {res}3066         . {txt}{c |}
+3057. {c |} {res}3078         . {txt}{c |}
+3080. {c |} {res}3101         . {txt}{c |}
+3128. {c |} {res}3151         . {txt}{c |}
+3257. {c |} {res}3283         . {txt}{c |}
+3413. {c |} {res}3442         . {txt}{c |}
+3443. {c |} {res}3472         . {txt}{c |}
+3513. {c |} {res}3543         . {txt}{c |}
+3533. {c |} {res}3563         . {txt}{c |}
+3560. {c |} {res}3590         . {txt}{c |}
+3563. {c |} {res}3593         . {txt}{c |}
+3620. {c |} {res}3651         . {txt}{c |}
+3994. {c |} {res}4030         . {txt}{c |}
+4295. {c |} {res}4335         . {txt}{c |}
+4347. {c |} {res}4387         . {txt}{c |}
+4376. {c |} {res}4417         . {txt}{c |}
+4394. {c |} {res}4435         . {txt}{c |}
+4541. {c |} {res}4583         . {txt}{c |}
+4553. {c |} {res}4595         . {txt}{c |}
+4563. {c |} {res}4605         . {txt}{c |}
+4608. {c |} {res}4650         . {txt}{c |}
+4683. {c |} {res}4725         . {txt}{c |}
+4741. {c |} {res}4783         . {txt}{c |}
+4757. {c |} {res}4799         . {txt}{c |}
+4772. {c |} {res}4814         . {txt}{c |}
+4859. {c |} {res}4901         . {txt}{c |}
+5033. {c |} {res}5076         . {txt}{c |}
+5052. {c |} {res}5095         . {txt}{c |}
+5070. {c |} {res}5113         . {txt}{c |}
+5102. {c |} {res}5145         . {txt}{c |}
+5142. {c |} {res}5185         . {txt}{c |}
+5143. {c |} {res}5186         . {txt}{c |}
+5206. {c |} {res}5249         . {txt}{c |}
+5295. {c |} {res}5340         . {txt}{c |}
+5303. {c |} {res}5348         . {txt}{c |}
+5482. {c |} {res}5528         . {txt}{c |}
+5496. {c |} {res}5542         . {txt}{c |}
+5501. {c |} {res}5547         . {txt}{c |}
+5512. {c |} {res}5558         . {txt}{c |}
+5529. {c |} {res}5575         . {txt}{c |}
+5566. {c |} {res}5612         . {txt}{c |}
+5581. {c |} {res}5627         . {txt}{c |}
+5609. {c |} {res}5656         . {txt}{c |}
+5749. {c |} {res}5797         . {txt}{c |}
+5765. {c |} {res}5813         . {txt}{c |}
+5820. {c |} {res}5868         . {txt}{c |}
+5880. {c |} {res}5928         . {txt}{c |}
+5905. {c |} {res}5953         . {txt}{c |}
+6034. {c |} {res}6083         . {txt}{c |}
+6063. {c |} {res}6112         . {txt}{c |}
+6100. {c |} {res}6149         . {txt}{c |}
+6111. {c |} {res}6160         . {txt}{c |}
+6173. {c |} {res}6222         . {txt}{c |}
+6214. {c |} {res}6263         . {txt}{c |}
+6246. {c |} {res}6295         . {txt}{c |}
+6276. {c |} {res}6325         . {txt}{c |}
+6315. {c |} {res}6364         . {txt}{c |}
+6412. {c |} {res}6461         . {txt}{c |}
+6424. {c |} {res}6473         . {txt}{c |}
+6537. {c |} {res}6587         . {txt}{c |}
+6593. {c |} {res}6643         . {txt}{c |}
+6632. {c |} {res}6682         . {txt}{c |}
+6679. {c |} {res}6730         . {txt}{c |}
+6740. {c |} {res}6792         . {txt}{c |}
+6768. {c |} {res}6821         . {txt}{c |}
+6882. {c |} {res}6935         . {txt}{c |}
+7039. {c |} {res}7092         . {txt}{c |}
+7233. {c |} {res}7287         . {txt}{c |}
+7270. {c |} {res}7325         . {txt}{c |}
+7387. {c |} {res}7446         . {txt}{c |}
+7432. {c |} {res}7492         . {txt}{c |}
+7513. {c |} {res}7574         . {txt}{c |}
+7529. {c |} {res}7590         . {txt}{c |}
+7541. {c |} {res}7602         . {txt}{c |}
+7555. {c |} {res}7616         . {txt}{c |}
+7579. {c |} {res}7640         . {txt}{c |}
+7582. {c |} {res}7644         . {txt}{c |}
+7690. {c |} {res}7752         . {txt}{c |}
+7692. {c |} {res}7754         . {txt}{c |}
+7765. {c |} {res}7829         . {txt}{c |}
+7802. {c |} {res}7866         . {txt}{c |}
+7825. {c |} {res}7889         . {txt}{c |}
+7867. {c |} {res}7932         . {txt}{c |}
+7868. {c |} {res}7933         . {txt}{c |}
+7878. {c |} {res}7943         . {txt}{c |}
+7939. {c |} {res}8006         . {txt}{c |}
+7977. {c |} {res}8044         . {txt}{c |}
+8146. {c |} {res}8215         . {txt}{c |}
+8157. {c |} {res}8226         . {txt}{c |}
+8281. {c |} {res}8352         . {txt}{c |}
+8406. {c |} {res}8481         . {txt}{c |}
+8416. {c |} {res}8492         . {txt}{c |}
+8529. {c |} {res}8609         . {txt}{c |}
+8626. {c |} {res}8706         . {txt}{c |}
+8806. {c |} {res}8888         . {txt}{c |}
+8906. {c |} {res}8990         . {txt}{c |}
+9207. {c |} {res}9296         . {txt}{c |}
+9248. {c |} {res}9338         . {txt}{c |}
+9314. {c |} {res}9404         . {txt}{c |}
+9350. {c |} {res}9440         . {txt}{c |}
+9461. {c |} {res}9554         . {txt}{c |}
+      {c BLC}{hline 6}{c -}{hline 9}{c BRC}
+---------------------------
+
+{com}. 
+. foreach pair in business rents home stocks pens {c -(}
+{txt}  2{com}.     if "`pair'" == "business" {c -(}
+{txt}  3{com}.         local var19 ER77451
+{txt}  4{com}.         local var17 ER67789
+{txt}  5{com}.     {c )-}
+{txt}  6{com}.     else if "`pair'" == "rents" {c -(}
+{txt}  7{com}.         local var19 ER77465
+{txt}  8{com}.         local var17 ER67776
+{txt}  9{com}.     {c )-}
+{txt} 10{com}.     else if "`pair'" == "home" {c -(}
+{txt} 11{com}.         local var19 ER77507
+{txt} 12{com}.         local var17 ER71481
+{txt} 13{com}.     {c )-}
+{txt} 14{com}.     else if "`pair'" == "stocks" {c -(}
+{txt} 15{com}.         local var19 ER77471
+{txt} 16{com}.         local var17 ER67798
+{txt} 17{com}.     {c )-}
+{txt} 18{com}.     else if "`pair'" == "pens" {c -(}
+{txt} 19{com}.         local var19 ER77481
+{txt} 20{com}.         local var17 ER67819
+{txt} 21{com}.     {c )-}
+{txt} 22{com}. 
+.     di "Summarizing raw variables for `pair'"
+{txt} 23{com}.     summarize `var19' `var17', detail
+{txt} 24{com}. 
+.     di "Listing suspiciously low values for `pair'"
+{txt} 25{com}.     list hid `var19' `var17' if inrange(`var19', -1.01e9, -9.9e8) | inrange(`var17', -1.01e9, -9.9e8)
+{txt} 26{com}.     di "--------------------------------------------"
+{txt} 27{com}. {c )-}
+Summarizing raw variables for business
+
+            {txt}IMP VALUE FARM/BUS ASSET (W11A) 2019
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0              0
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,520
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,520
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 45370.89
+                        {txt}Largest       Std. dev.     {res} 718922.7
+{txt}75%    {res}        0       1.70e+07
+{txt}90%    {res}        0       2.00e+07       {txt}Variance      {res} 5.17e+11
+{txt}95%    {res}    10000       4.00e+07       {txt}Skewness      {res} 41.33299
+{txt}99%    {res}   900000       4.00e+07       {txt}Kurtosis      {res} 2115.371
+
+               {txt}W11A WORTH OF FARM OR BUSINESS
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0              0
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,400
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,400
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 34641.07
+                        {txt}Largest       Std. dev.     {res}   498304
+{txt}75%    {res}        0       1.10e+07
+{txt}90%    {res}        0       1.50e+07       {txt}Variance      {res} 2.48e+11
+{txt}95%    {res}        0       2.20e+07       {txt}Skewness      {res} 29.33413
+{txt}99%    {res}   500000       2.30e+07       {txt}Kurtosis      {res} 1089.857
+Listing suspiciously low values for business
+--------------------------------------------
+Summarizing raw variables for rents
+
+          {txt}IMP VAL OTH REAL ESTATE ASSET (W2A) 2019
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0              0
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,520
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,520
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 27753.33
+                        {txt}Largest       Std. dev.     {res} 187355.9
+{txt}75%    {res}        0        4037000
+{txt}90%    {res}        0        6000000       {txt}Variance      {res} 3.51e+10
+{txt}95%    {res}   150000        6000000       {txt}Skewness      {res} 18.82171
+{txt}99%    {res}   620000        7000000       {txt}Kurtosis      {res}  518.421
+
+                {txt}W2A WORTH OF OTR REAL ESTATE
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0              0
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,457
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,457
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 28856.69
+                        {txt}Largest       Std. dev.     {res} 220032.6
+{txt}75%    {res}        0        5000000
+{txt}90%    {res}        0        6000000       {txt}Variance      {res} 4.84e+10
+{txt}95%    {res}   130000        8000000       {txt}Skewness      {res} 22.90942
+{txt}99%    {res}   650000       1.00e+07       {txt}Kurtosis      {res}  776.805
+Listing suspiciously low values for rents
+--------------------------------------------
+Summarizing raw variables for home
+
+                 {txt}IMP VALUE HOME EQUITY 2019
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0        -972999
+{txt} 5%    {res}        0        -879999
+{txt}10%    {res}        0        -350000       {txt}Obs         {res}      9,520
+{txt}25%    {res}        0        -260000       {txt}Sum of wgt. {res}      9,520
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 81517.17
+                        {txt}Largest       Std. dev.     {res} 203557.6
+{txt}75%    {res}   100000        3500000
+{txt}90%    {res}   230000        3660000       {txt}Variance      {res} 4.14e+10
+{txt}95%    {res}   356500        4765405       {txt}Skewness      {res} 13.68659
+{txt}99%    {res}   758000        8789997       {txt}Kurtosis      {res} 426.3877
+
+                 {txt}IMP VALUE HOME EQUITY 2017
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}    -4700        -360246
+{txt} 5%    {res}        0        -300000
+{txt}10%    {res}        0        -260000       {txt}Obs         {res}      9,520
+{txt}25%    {res}        0        -200000       {txt}Sum of wgt. {res}      9,520
+
+{txt}50%    {res}        0                      {txt}Mean          {res}  72539.2
+                        {txt}Largest       Std. dev.     {res}   180058
+{txt}75%    {res}    85000        2500000
+{txt}90%    {res}   200000        2800000       {txt}Variance      {res} 3.24e+10
+{txt}95%    {res}   319374        4500000       {txt}Skewness      {res} 11.94432
+{txt}99%    {res}   750000        7213500       {txt}Kurtosis      {res} 331.1956
+Listing suspiciously low values for home
+--------------------------------------------
+Summarizing raw variables for stocks
+
+                 {txt}IMP VALUE STOCKS (W16) 2019
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0           -500
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,520
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,520
+
+{txt}50%    {res}        0                      {txt}Mean          {res}    34469
+                        {txt}Largest       Std. dev.     {res} 477392.9
+{txt}75%    {res}        0        6000000
+{txt}90%    {res}      350        8000000       {txt}Variance      {res} 2.28e+11
+{txt}95%    {res}    50500       1.00e+07       {txt}Skewness      {res} 64.13613
+{txt}99%    {res}   900000       4.00e+07       {txt}Kurtosis      {res} 5196.435
+
+              {txt}W16 PROFIT IF SOLD NON-IRA STOCK
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0      -1.00e+08
+{txt} 5%    {res}        0           -400
+{txt}10%    {res}        0           -300       {txt}Obs         {res}      9,388
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,388
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 21443.09
+                        {txt}Largest       Std. dev.     {res}  1137013
+{txt}75%    {res}        0        5500000
+{txt}90%    {res}        0        5800000       {txt}Variance      {res} 1.29e+12
+{txt}95%    {res}    45000        9000000       {txt}Skewness      {res}-67.73085
+{txt}99%    {res}   700000       4.00e+07       {txt}Kurtosis      {res} 6543.789
+Listing suspiciously low values for stocks
+--------------------------------------------
+Summarizing raw variables for pens
+
+              {txt}IMP VALUE ANNUITY/IRA (W22) 2019
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0              0
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,520
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,520
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 46158.04
+                        {txt}Largest       Std. dev.     {res} 212941.4
+{txt}75%    {res}        0        4000000
+{txt}90%    {res}    80000        4000000       {txt}Variance      {res} 4.53e+10
+{txt}95%    {res}   250000        4000000       {txt}Skewness      {res} 9.218712
+{txt}99%    {res}  1000000        4500000       {txt}Kurtosis      {res} 118.8272
+
+                  {txt}W22 VALUE OF IRA/ANNUITY
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}        0              0
+{txt} 5%    {res}        0              0
+{txt}10%    {res}        0              0       {txt}Obs         {res}      9,320
+{txt}25%    {res}        0              0       {txt}Sum of wgt. {res}      9,320
+
+{txt}50%    {res}        0                      {txt}Mean          {res} 36108.35
+                        {txt}Largest       Std. dev.     {res} 194189.3
+{txt}75%    {res}        0        3500000
+{txt}90%    {res}    50000        4000000       {txt}Variance      {res} 3.77e+10
+{txt}95%    {res}   200000        5900000       {txt}Skewness      {res} 13.28128
+{txt}99%    {res}   759000        6000000       {txt}Kurtosis      {res} 275.4209
+Listing suspiciously low values for pens
+--------------------------------------------
+{txt}
+{com}. 
+. 
+. 
+{txt}end of do-file
+
+{com}. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/PSID/merged/inspect_returns_flows_2019.do"
+{txt}
+{com}. *******************************************************
+. * Inspect extreme values in 2019 net investment flows
+. *******************************************************
+. 
+. local flow_vars F_bus19 F_stk19 F_re19 F_pen19 Ftot19
+{txt}
+{com}. 
+. foreach var of local flow_vars {c -(}
+{txt}  2{com}.     di "Summary for `var'"
+{txt}  3{com}.     
+.     count if `var' < -1e7
+{txt}  4{com}.     di as txt "Observations with `var' < -1e7: " r(N)
+{txt}  5{com}.     
+.     count if `var' > 1e7
+{txt}  6{com}.     di as txt "Observations with `var' > 1e7: " r(N)
+{txt}  7{com}.     
+.     summarize `var' if `var' < -1e7 | `var' > 1e7, detail
+{txt}  8{com}.     
+.     di "Listing extreme values for `var'"
+{txt}  9{com}.     sort `var'
+{txt} 10{com}.     list hid `var' if `var' < -1e7 | `var' > 1e7 in 1/20
+{txt} 11{com}.     
+.     di "---------------------------"
+{txt} 12{com}. {c )-}
+Summary for F_bus19
+  {res}2
+{txt}Observations with F_bus19 < -1e7: 2
+  {res}8
+{txt}Observations with F_bus19 > 1e7: 8
+
+                           F_bus19
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}-4.00e+07      -4.00e+07
+{txt} 5%    {res}-4.00e+07      -1.20e+07
+{txt}10%    {res}-4.00e+07              .       {txt}Obs         {res}          2
+{txt}25%    {res}-4.00e+07              .       {txt}Sum of wgt. {res}          2
+
+{txt}50%    {res}-2.60e+07                      {txt}Mean          {res}-2.60e+07
+                        {txt}Largest       Std. dev.     {res} 1.98e+07
+{txt}75%    {res}-1.20e+07              .
+{txt}90%    {res}-1.20e+07              .       {txt}Variance      {res} 3.92e+14
+{txt}95%    {res}-1.20e+07      -4.00e+07       {txt}Skewness      {res}        0
+{txt}99%    {res}-1.20e+07      -1.20e+07       {txt}Kurtosis      {res}        1
+Listing extreme values for F_bus19
+{txt}
+     {c TLC}{hline 6}{c -}{hline 11}{c TRC}
+     {c |} {res} hid     F_bus19 {txt}{c |}
+     {c LT}{hline 6}{c -}{hline 11}{c RT}
+  1. {c |} {res}2222   -4.00e+07 {txt}{c |}
+  2. {c |} {res}7342   -1.20e+07 {txt}{c |}
+     {c BLC}{hline 6}{c -}{hline 11}{c BRC}
+---------------------------
+Summary for F_stk19
+  {res}0
+{txt}Observations with F_stk19 < -1e7: 0
+  {res}104
+{txt}Observations with F_stk19 > 1e7: 104
+
+                           F_stk19
+{hline 61}
+no observations
+Listing extreme values for F_stk19
+---------------------------
+Summary for F_re19
+  {res}0
+{txt}Observations with F_re19 < -1e7: 0
+  {res}9
+{txt}Observations with F_re19 > 1e7: 9
+
+                           F_re19
+{hline 61}
+no observations
+Listing extreme values for F_re19
+---------------------------
+Summary for F_pen19
+  {res}0
+{txt}Observations with F_pen19 < -1e7: 0
+  {res}86
+{txt}Observations with F_pen19 > 1e7: 86
+
+                           F_pen19
+{hline 61}
+no observations
+Listing extreme values for F_pen19
+---------------------------
+Summary for Ftot19
+  {res}2
+{txt}Observations with Ftot19 < -1e7: 2
+  {res}186
+{txt}Observations with Ftot19 > 1e7: 186
+
+                Net investment flows (F_2019)
+{hline 61}
+      Percentiles      Smallest
+ 1%    {res}-3.99e+07      -3.99e+07
+{txt} 5%    {res}-3.99e+07      -1.20e+07
+{txt}10%    {res}-3.99e+07              .       {txt}Obs         {res}          2
+{txt}25%    {res}-3.99e+07              .       {txt}Sum of wgt. {res}          2
+
+{txt}50%    {res}-2.59e+07                      {txt}Mean          {res}-2.59e+07
+                        {txt}Largest       Std. dev.     {res} 1.97e+07
+{txt}75%    {res}-1.20e+07              .
+{txt}90%    {res}-1.20e+07              .       {txt}Variance      {res} 3.90e+14
+{txt}95%    {res}-1.20e+07      -3.99e+07       {txt}Skewness      {res}        0
+{txt}99%    {res}-1.20e+07      -1.20e+07       {txt}Kurtosis      {res}        1
+Listing extreme values for Ftot19
+{txt}
+     {c TLC}{hline 6}{c -}{hline 11}{c TRC}
+     {c |} {res} hid      Ftot19 {txt}{c |}
+     {c LT}{hline 6}{c -}{hline 11}{c RT}
+  1. {c |} {res}2222   -3.99e+07 {txt}{c |}
+  2. {c |} {res}7342   -1.20e+07 {txt}{c |}
+     {c BLC}{hline 6}{c -}{hline 11}{c BRC}
+---------------------------
+
+{com}. 
+. 
+{txt}end of do-file
+
+{com}. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/2019_returns_comp.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}11 Aug 2025, 10:33:13
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}
