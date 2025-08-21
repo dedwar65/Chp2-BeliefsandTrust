@@ -63,7 +63,7 @@ count if dupN > 1
 di as txt "Q duplicate observations before deduplication = " r(N)
 
 if r(N) > 0 {
-    egen nm = rownonmiss(SQ171_1 SQ171_2 SQ171_3 SQ143 SQ157 SQ326 SQ340 SQ354 SQ366 SQ139 SQ141 SQ153 SQ155 SQ190 SQ194 SQ322 SQ324 SQ336 SQ338 SQ350 SQ352 SQ362 SQ364 SQ148 SQ134 SQ317 SQ166_1 SQ166_2 SQ166_3 SQ331), strok
+    egen nm = rownonmiss(SQ139 SQ141 SQ153 SQ155 SQ190 SQ194 SQ322 SQ324 SQ336 SQ338 SQ350 SQ352 SQ362 SQ364 SQ171_1 SQ171_2 SQ171_3 SQ148 SQ134 SQ317 SQ166_1 SQ166_2 SQ166_3 SQ331), strok
     bys HHID RSUBHH (nm): keep if _n==_N   // keep max nonmissing
     drop nm dupN
     sort HHID RSUBHH
