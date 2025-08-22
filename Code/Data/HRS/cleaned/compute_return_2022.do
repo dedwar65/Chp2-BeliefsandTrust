@@ -21,12 +21,11 @@ local base "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cle
 do "`base'/extract_household_2020_ret_calc_end"
 do "`base'/extract_household_2022_ret_calc_start"
 do "`base'/merge_2020_2022"
-
-do "`base'/compute_interest_dividends_2022"
-do "`base'/compute_net_flows_2022"
-do "`base'/compute_mortgage_payments_2022"
-do "`base'/compute_capital_gains_2022_simple_residences"
-do "`base'/compute_net_worth_A2020"
+do "`base'/compute_int_inc_div_2020_2022"
+do "`base'/compute_net_inv_flows_2020_2022"
+do "`base'/compute_debt_payments_2020_2022"
+do "`base'/compute_cap_gains_2020_2022"
+do "`base'/compute_beg_per_net_worth_2020_2022"
 
 * ---------------------------------------------------------------------
 * Gather components from master
