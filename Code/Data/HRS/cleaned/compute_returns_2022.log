@@ -1,0 +1,26 @@
+-------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
+> /compute_returns_2022.log
+  log type:  text
+ opened on:  22 Aug 2025, 15:05:26
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * Run all prerequisite scripts in sequence
+. * ---------------------------------------------------------------------
+. local base "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleane
+> d"
+
+. 
+. do "`base'/extract_household_2020_ret_calc_end"
+
+. *----------------------------------------------------------------------
+. * Create: select variables from H20Q_H.dta and H20R_H.dta and merge
+. * Usage: run in Stata: do "/Volumes/SSD PRO/Github-forks/.../extract_household_2020
+> .do"
+. *----------------------------------------------------------------------
+. capture log close

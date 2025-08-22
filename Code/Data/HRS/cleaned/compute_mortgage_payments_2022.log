@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
 > /compute_mortgage_payments_2022.log
   log type:  text
- opened on:  21 Aug 2025, 16:33:03
+ opened on:  22 Aug 2025, 15:05:26
 
 . 
 . set more off
@@ -99,15 +99,15 @@ Cleaning mortgage amount sentinel codes to missing for: SH025 SH036 SH175
       Percentiles      Smallest
  1%          200              0
  5%          400              0
-10%          500              0       Obs               2,698
-25%          750              0       Sum of wgt.       2,698
+10%          500              0       Obs               2,696
+25%          750              0       Sum of wgt.       2,696
 
-50%         1168                      Mean           1404.577
-                        Largest       Std. dev.      2468.746
+50%         1168                      Mean            1403.89
+                        Largest       Std. dev.      2469.218
 75%         1780           6100
-90%         2400           7000       Variance        6094708
-95%         3000          22000       Skewness       41.38658
-99%         4500         120000       Kurtosis       1977.251
+90%         2400           7000       Variance        6097036
+95%         3000          22000       Skewness       41.39403
+99%         4500         120000       Kurtosis       1977.253
   Summary for SH036 after recoding sentinels:
 
            AMOUNT OF PAYMENTS ON 2ND PROPERTY LOAN
@@ -131,15 +131,15 @@ Cleaning mortgage amount sentinel codes to missing for: SH025 SH036 SH175
       Percentiles      Smallest
  1%          115             50
  5%          230            115
-10%          340            135       Obs                 135
-25%          684            187       Sum of wgt.         135
+10%          340            135       Obs                 136
+25%          692            187       Sum of wgt.         136
 
-50%         1000                      Mean           1331.852
-                        Largest       Std. dev.       1283.92
+50%         1050                      Mean           1330.147
+                        Largest       Std. dev.       1279.31
 75%         1700           4000
-90%         2300           4500       Variance        1648450
-95%         3000           4951       Skewness       4.722586
-99%         4951          12000       Kurtosis       37.13334
+90%         2300           4500       Variance        1636634
+95%         3000           4951       Skewness       4.742296
+99%         4951          12000       Kurtosis       37.41571
 
 . 
 . * ---------------------------------------------------------------------
@@ -178,7 +178,7 @@ Mapping mortgage frequency variables to multipliers...
 
 . map_freq_to_mult SH029
 (14,276 missing values generated)
-  SH029_mult nonmissing observations = 2689
+  SH029_mult nonmissing observations = 2687
 
   AMOUNT OF |
  PAYMENT ON |
@@ -187,11 +187,11 @@ Mapping mortgage frequency variables to multipliers...
         PER |      Freq.     Percent        Cum.
 ------------+-----------------------------------
           2 |          9        0.06        0.06
-          3 |      2,672       18.72       18.78
-          4 |          2        0.01       18.79
-          5 |          2        0.01       18.81
-          6 |          4        0.03       18.84
-          . |     11,587       81.16      100.00
+          3 |      2,670       18.70       18.77
+          4 |          2        0.01       18.78
+          5 |          2        0.01       18.79
+          6 |          4        0.03       18.82
+          . |     11,589       81.18      100.00
 ------------+-----------------------------------
       Total |     14,276      100.00
 
@@ -211,7 +211,7 @@ PAYMENTS ON |
 
 . map_freq_to_mult SH179
 (14,276 missing values generated)
-  SH179_mult nonmissing observations = 134
+  SH179_mult nonmissing observations = 135
 
 PAYMENT ALL |
 MORTGAGES - |
@@ -219,8 +219,8 @@ MORTGAGES - |
         PER |      Freq.     Percent        Cum.
 ------------+-----------------------------------
           2 |          1        0.01        0.01
-          3 |        133        0.93        0.94
-          . |     14,142       99.06      100.00
+          3 |        134        0.94        0.95
+          . |     14,141       99.05      100.00
 ------------+-----------------------------------
       Total |     14,276      100.00
 
@@ -251,7 +251,7 @@ Computing annual mortgage payments (amount * multiplier)...
 (14,276 missing values generated)
 .         replace mort1_pay_annual = SH025 * SH029_mult if !missing(SH025) & !missing
 > (SH029_mult)
-(2,687 real changes made)
+(2,685 real changes made)
 .         di as txt "First mortgage annual payment summary (mort1_pay_annual):"
 First mortgage annual payment summary (mort1_pay_annual):
 .         summarize mort1_pay_annual, detail
@@ -261,15 +261,15 @@ First mortgage annual payment summary (mort1_pay_annual):
       Percentiles      Smallest
  1%         2640            135
  5%         4800            786
-10%         6000            792       Obs               2,687
-25%         9000            792       Sum of wgt.       2,687
+10%         6000            792       Obs               2,685
+25%         9000            792       Sum of wgt.       2,685
 
-50%        14136                      Mean           16905.19
-                        Largest       Std. dev.      29671.78
+50%        14136                      Mean           16896.94
+                        Largest       Std. dev.       29677.5
 75%        21420          73200
-90%        29088          84000       Variance       8.80e+08
-95%        36000         264000       Skewness       41.35478
-99%        51600        1440000       Kurtosis       1972.567
+90%        28800          84000       Variance       8.81e+08
+95%        36000         264000       Skewness       41.36213
+99%        51600        1440000       Kurtosis       1972.561
 .     }
 . }
 
@@ -335,7 +335,7 @@ Second mortgage annual payment summary (mort2_pay_annual):
 (14,276 missing values generated)
 .         replace secmort_pay_annual = SH175 * SH179_mult if !missing(SH175) & !missi
 > ng(SH179_mult)
-(134 real changes made)
+(135 real changes made)
 .         di as txt "Secondary mortgage annual payment summary (secmort_pay_annual):"
 Secondary mortgage annual payment summary (secmort_pay_annual):
 .         summarize secmort_pay_annual, detail
@@ -345,15 +345,15 @@ Secondary mortgage annual payment summary (secmort_pay_annual):
       Percentiles      Smallest
  1%         1380            600
  5%         2760           1380
-10%         4200           1620       Obs                 134
-25%         8208           2244       Sum of wgt.         134
+10%         4200           1620       Obs                 135
+25%         8208           2244       Sum of wgt.         135
 
-50%        12600                      Mean           16056.18
-                        Largest       Std. dev.      15436.38
+50%        13200                      Mean           16035.02
+                        Largest       Std. dev.      15380.64
 75%        20400          48000
-90%        27600          54000       Variance       2.38e+08
-95%        36000          59412       Skewness        4.71976
-99%        59412         144000       Kurtosis       37.03737
+90%        27600          54000       Variance       2.37e+08
+95%        36000          59412       Skewness       4.739617
+99%        59412         144000       Kurtosis       37.32088
 .     }
 . }
 
@@ -420,18 +420,18 @@ TOTAL mortgage payments (annual) summary:
 10%            0              0       Obs              14,276
 25%            0              0       Sum of wgt.      14,276
 
-50%            0                      Mean           3362.165
-                        Largest       Std. dev.      14744.57
+50%            0                      Mean           3359.171
+                        Largest       Std. dev.      14740.51
 75%            0         100800
-90%        13608         144000       Variance       2.17e+08
-95%        21276         264000       Skewness       65.82149
-99%        37200        1440000       Kurtosis        6323.29
+90%        13560         144000       Variance       2.17e+08
+95%        21276         264000       Skewness       65.87477
+99%        37200        1440000       Kurtosis       6330.303
 
 . tabstat mortgage_payments_total_2022, stats(n mean sd p50 min max) format(%12.2f)
 
     Variable |            N         Mean           SD          p50          Min
 -------------+-----------------------------------------------------------------
-mortgag~2022 |     14276.00      3362.17     14744.57         0.00         0.00
+mortgag~2022 |     14276.00      3359.17     14740.51         0.00         0.00
 -------------------------------------------------------------------------------
 
     Variable |          Max
@@ -458,5 +458,5 @@ Saved mortgage payment vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-B
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
 > /compute_mortgage_payments_2022.log
   log type:  text
- closed on:  21 Aug 2025, 16:33:03
+ closed on:  22 Aug 2025, 15:05:27
 -------------------------------------------------------------------------------------

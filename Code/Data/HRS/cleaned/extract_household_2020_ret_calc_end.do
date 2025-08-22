@@ -68,7 +68,7 @@ drop _merge
 
 * --- Optional: clean common special missing codes to Stata missing
 * Add or remove codes based on what HRS uses; many HRS items use 9999998/9999999 for DK/RF
-local misscodes 999998 999999 -8 -9
+local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 9999999999 9999999998 -8 -9
 foreach v of varlist _all {
     foreach mc of local misscodes {
         capture confirm numeric variable `v'

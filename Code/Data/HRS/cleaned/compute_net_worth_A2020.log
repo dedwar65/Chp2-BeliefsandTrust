@@ -1,0 +1,806 @@
+-------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
+> /compute_net_worth_A2020.log
+  log type:  text
+ opened on:  22 Aug 2025, 15:05:27
+
+. 
+. set more off
+
+. 
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/clea
+> ned/hrs_2020_2022_master.dta"
+
+. capture confirm file "`master'"
+
+. if _rc {
+.     di as error "ERROR: master file not found -> `master'"
+.     exit 198
+. }
+
+. 
+. use "`master'", clear
+
+. di as txt "Using master file: `master'"
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/c
+> leaned/hrs_2020_2022_master.dta
+
+. 
+. * ---------------------------
+. * Variables (2020) for net worth calculation:
+. * Assets:
+. *   primary residence: RH020
+. *   secondary residence: RH162
+. *   real estate (other than main home): RQ134
+. *   private business: RQ148
+. *   stocks: RQ317
+. *   IRA: RQ166_1 RQ166_2 RQ166_3
+. *   bonds: RQ331
+. *   checking/savings: RQ345
+. *   CDs: RQ357
+. *   vehicles: RQ371
+. *   other: RQ381
+. *
+. * Liabilities:
+. *   primary residence mortgage (outstand): RH032
+. *   secondary residence mortgage (outstand): RH171
+. *   other debts: RQ478
+. * ---------------------------
+. 
+. local assets_vars "RH020 RH162 RQ134 RQ148 RQ317 RQ166_1 RQ166_2 RQ166_3 RQ331 RQ34
+> 5 RQ357 RQ371 RQ381"
+
+. local liab_vars   "RH032 RH171 RQ478"
+
+. 
+. di as txt "Checking presence of required 2020 variables..."
+Checking presence of required 2020 variables...
+
+. foreach v of local assets_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc di as err "  MISSING asset var: `v'"
+  4.     else di as txt "  OK asset var: `v'"
+  5. }
+  OK asset var: RH020
+  OK asset var: RH162
+  OK asset var: RQ134
+  OK asset var: RQ148
+  OK asset var: RQ317
+  OK asset var: RQ166_1
+  OK asset var: RQ166_2
+  OK asset var: RQ166_3
+  OK asset var: RQ331
+  OK asset var: RQ345
+  OK asset var: RQ357
+  OK asset var: RQ371
+  OK asset var: RQ381
+
+. foreach v of local liab_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc di as err "  MISSING liability var: `v'"
+  4.     else di as txt "  OK liability var: `v'"
+  5. }
+  OK liability var: RH032
+  OK liability var: RH171
+  OK liability var: RQ478
+
+. 
+. * ---------------------------------------------------------------------
+. * Optional sentinel check (non-destructive): show counts of common sentinels for li
+> sted vars
+. * (this does NOT change values)
+. * ---------------------------------------------------------------------
+. di as txt "Quick sentinel-code checks (counts of common sentinels) for listed varia
+> bles..."
+Quick sentinel-code checks (counts of common sentinels) for listed variables...
+
+. local sentinels -8 -9 9999998 9999999 99999998 99999999 999999998 999999999
+
+. foreach v of local assets_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc continue
+  4.     quietly count if inlist(`v',`sentinels')
+  5.     di as txt "  `v' sentinel-count = " r(N)
+  6. }
+  RH020 sentinel-count = 0
+  RH162 sentinel-count = 0
+  RQ134 sentinel-count = 0
+  RQ148 sentinel-count = 0
+  RQ317 sentinel-count = 0
+  RQ166_1 sentinel-count = 0
+  RQ166_2 sentinel-count = 0
+  RQ166_3 sentinel-count = 0
+  RQ331 sentinel-count = 0
+  RQ345 sentinel-count = 0
+  RQ357 sentinel-count = 0
+  RQ371 sentinel-count = 0
+  RQ381 sentinel-count = 0
+
+. foreach v of local liab_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc continue
+  4.     quietly count if inlist(`v',`sentinels')
+  5.     di as txt "  `v' sentinel-count = " r(N)
+  6. }
+  RH032 sentinel-count = 0
+  RH171 sentinel-count = 0
+  RQ478 sentinel-count = 0
+
+. 
+. * ---------------------------------------------------------------------
+. * Summarize each input variable individually for quick inspection
+. * ---------------------------------------------------------------------
+. di as txt "Summarizing individual input variables (assets)..."
+Summarizing individual input variables (assets)...
+
+. foreach v of local assets_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  `v' not present -> skipped"
+  5.     }
+  6.     else {
+  7.         di as txt "  Summary for `v':"
+  8.         summarize `v', detail
+  9.     }
+ 10. }
+  Summary for RH020:
+
+                     HOME PRESENT VALUE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%        20000              0
+ 5%        50000              0
+10%        80000              0       Obs               6,015
+25%       140000              0       Sum of wgt.       6,015
+
+50%       239000                      Mean           987662.9
+                        Largest       Std. dev.      4.08e+07
+75%       400000        8500000
+90%       650000       1.00e+07       Variance       1.66e+15
+95%       850000       1.00e+09       Skewness       68.64432
+99%      1600000       3.00e+09       Kurtosis       4930.013
+  Summary for RH162:
+
+                 PURCHASE PRICE SECOND HOME
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         2000              0
+10%         6000              0       Obs                 977
+25%        13500              0       Sum of wgt.         977
+
+50%        50000                      Mean           120430.4
+                        Largest       Std. dev.      193620.9
+75%       150000        1600000
+90%       310000        1800000       Variance       3.75e+10
+95%       465000        1800000       Skewness       4.187411
+99%       975000        2000000       Kurtosis       29.70291
+  Summary for RQ134:
+
+                    REAL ESTATE ASSET AMT
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         6000              0
+10%        15000              0       Obs                 865
+25%        50000              0       Sum of wgt.         865
+
+50%       150000                      Mean           572288.3
+                        Largest       Std. dev.       5157707
+75%       350000        7000000
+90%       900000        8000000       Variance       2.66e+13
+95%      1500000       1.00e+07       Skewness       28.18453
+99%      5000000       1.50e+08       Kurtosis       816.3991
+  Summary for RQ148:
+
+               BUSINESS OR FARM EQUITY AMOUNT
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 572
+25%        15000              0       Sum of wgt.         572
+
+50%       127500                      Mean           500951.5
+                        Largest       Std. dev.       1277093
+75%       460000        7000000
+90%      1200000        8000000       Variance       1.63e+12
+95%      2000000       1.00e+07       Skewness       8.358759
+99%      5000000       2.00e+07       Kurtosis       106.7893
+  Summary for RQ317:
+
+                     STOCKS TOTAL VALUE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0         -20000
+ 5%         1200              0
+10%         3000              0       Obs               1,286
+25%        20000              0       Sum of wgt.       1,286
+
+50%       100000                      Mean           382130.5
+                        Largest       Std. dev.      904364.3
+75%       400000        6300000
+90%      1000000        7000000       Variance       8.18e+11
+95%      1600000       1.22e+07       Skewness       7.901657
+99%      4000000       1.60e+07       Kurtosis        102.758
+  Summary for RQ166_1:
+
+                  AMOUNT IN IRA ACCOUNT - 1
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1000              0
+ 5%         4000              0
+10%        10000              0       Obs               2,433
+25%        33000              0       Sum of wgt.       2,433
+
+50%       100000                      Mean           225127.9
+                        Largest       Std. dev.      394835.2
+75%       250000        4000000
+90%       600000        4200000       Variance       1.56e+11
+95%       850000        5500000       Skewness       6.042237
+99%      1932945        7000000       Kurtosis        67.6434
+  Summary for RQ166_2:
+
+                  AMOUNT IN IRA ACCOUNT - 2
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          100              0
+ 5%         3000              0
+10%         6000              0       Obs               1,264
+25%        20350              0       Sum of wgt.       1,264
+
+50%        60000                      Mean           119514.5
+                        Largest       Std. dev.      186303.8
+75%       145500        1400000
+90%       291000        1755000       Variance       3.47e+10
+95%       440000        2000000       Skewness       4.535554
+99%       900000        2200000       Kurtosis        34.7467
+  Summary for RQ166_3:
+
+                  AMOUNT IN IRA ACCOUNT - 3
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         1800              0
+10%         5000              0       Obs                 516
+25%        20000              0       Sum of wgt.         516
+
+50%        50000                      Mean           131487.9
+                        Largest       Std. dev.      213233.5
+75%       150000        1390000
+90%       365000        1406986       Variance       4.55e+10
+95%       550000        1500000       Skewness        3.77734
+99%      1000000        2000000       Kurtosis        23.4069
+  Summary for RQ331:
+
+                   BOND ASSETS TOTAL VALUE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         1000              0
+10%         4000              0       Obs                 208
+25%        22500              0       Sum of wgt.         208
+
+50%        76500                      Mean           203434.5
+                        Largest       Std. dev.      352682.7
+75%       210000        1300000
+90%       500000        1400000       Variance       1.24e+11
+95%       800000        2200000       Skewness       4.113335
+99%      1400000        3000000       Kurtosis       26.51187
+  Summary for RQ345:
+
+                    CHECKING TOTAL VALUE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%           50              0
+10%          250              0       Obs               6,270
+25%         2000              0       Sum of wgt.       6,270
+
+50%        10000                      Mean           40491.98
+                        Largest       Std. dev.      98955.82
+75%        40000        1500000
+90%       100000        1500000       Variance       9.79e+09
+95%       175000        1800000       Skewness       7.744264
+99%       500000        2400000       Kurtosis       107.8609
+  Summary for RQ357:
+
+             CDS GOVT SAVINGS TBILLS TOTAL VALUE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          100              0
+ 5%         1000             50
+10%         2000             50       Obs                 673
+25%         9000             50       Sum of wgt.         673
+
+50%        25000                      Mean           89050.84
+                        Largest       Std. dev.      215383.2
+75%        95000        1700000
+90%       200000        2000000       Variance       4.64e+10
+95%       350000        2000000       Skewness       7.483007
+99%      1000000        3000000       Kurtosis       77.98211
+  Summary for RQ371:
+
+                 TRANSPORTATION TOTAL VALUE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%          800              0
+10%         1800              0       Obs               6,787
+25%         5000              0       Sum of wgt.       6,787
+
+50%        12000                      Mean           19325.65
+                        Largest       Std. dev.      26265.64
+75%        25000         370000
+90%        45000         400000       Variance       6.90e+08
+95%        60000         500000       Skewness       7.281397
+99%       100000         750000       Kurtosis       130.8991
+  Summary for RQ381:
+
+                  OTHER ASSET INCOME AMOUNT
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                  76
+25%         1000              0       Sum of wgt.          76
+
+50%         7000                      Mean           20206.72
+                        Largest       Std. dev.      41691.07
+75%        16000          85000
+90%        60000         100000       Variance       1.74e+09
+95%        85000         125000       Skewness       4.519745
+99%       300000         300000       Kurtosis       28.43092
+
+. di as txt "Summarizing individual input variables (liabilities)..."
+Summarizing individual input variables (liabilities)...
+
+. foreach v of local liab_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  `v' not present -> skipped"
+  5.     }
+  6.     else {
+  7.         di as txt "  Summary for `v':"
+  8.         summarize `v', detail
+  9.     }
+ 10. }
+  Summary for RH032:
+
+             HOW MUCH IS STILL OWED ON MORTGAGE
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         5000              0
+ 5%        16000              0
+10%        28000              0       Obs               2,377
+25%        58935              0       Sum of wgt.       2,377
+
+50%       103233                      Mean           146732.9
+                        Largest       Std. dev.        142212
+75%       200000         900000
+90%       309000         950000       Variance       2.02e+10
+95%       400000        1200000       Skewness       4.843739
+99%       626000        2970000       Kurtosis        72.0736
+  Summary for RH171:
+
+            TOTAL OWE MORTGAGE/LOAN - SECOND HOME
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%         3000              0
+10%        15000              0       Obs                 155
+25%        35000              0       Sum of wgt.         155
+
+50%       106440                      Mean           141129.7
+                        Largest       Std. dev.      153363.9
+75%       183000         550000
+90%       300000         600000       Variance       2.35e+10
+95%       413000         788000       Skewness        2.96708
+99%       788000        1160000       Kurtosis       16.62069
+  Summary for RQ478:
+
+                    R OR SP DEBTS AMOUNT
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          127              0
+ 5%          400              0
+10%          700              6       Obs               3,160
+25%         2000             20       Sum of wgt.       3,160
+
+50%         6000                      Mean           15582.54
+                        Largest       Std. dev.      59363.01
+75%        15000         700000
+90%        30000        1000000       Variance       3.52e+09
+95%        50000        1000000       Skewness       27.43215
+99%       130000        2500000       Kurtosis       1030.128
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute row counts of non-missing components (so we can tell if a total
+. * is truly absent vs zero)
+. * ---------------------------------------------------------------------
+. capture drop n_assets_2020 n_liab_2020
+
+. egen n_assets_2020 = rownonmiss(`assets_vars')
+
+. egen n_liab_2020   = rownonmiss(`liab_vars')
+
+. 
+. di as txt "Non-missing component counts:"
+Non-missing component counts:
+
+. tabstat n_assets_2020 n_liab_2020, stats(n mean sd min max p50) format(%6.0f)
+
+   Stats |  n_a~2020  n_l~2020
+---------+--------------------
+       N |     14276     14276
+    Mean |         2         0
+      SD |         2         1
+     Min |         0         0
+     Max |        12         3
+     p50 |         1         0
+------------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute totals (row sums) using egen rowtotal.
+. * Then set totals to missing when **all** components in the group are missing.
+. * ---------------------------------------------------------------------
+. capture drop assets_total_2020 liab_total_2020
+
+. egen assets_total_2020 = rowtotal(`assets_vars')
+
+. recast double assets_total_2020
+
+. replace assets_total_2020 = . if n_assets_2020 == 0
+(5,067 real changes made, 5,067 to missing)
+
+. di as txt "Summary: assets_total_2020 (post-rowtotal / set to missing when no compo
+> nents):"
+Summary: assets_total_2020 (post-rowtotal / set to missing when no components):
+
+. summarize assets_total_2020, detail
+
+                      assets_total_2020
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%          600              0
+10%         2275              0       Obs               9,209
+25%        25000              0       Sum of wgt.       9,209
+
+50%       200000                      Mean           932449.3
+                        Largest       Std. dev.      3.44e+07
+75%       500600       2.09e+07
+90%      1120000       2.27e+07       Variance       1.19e+15
+95%      1885000       1.00e+09       Skewness       85.62512
+99%      4700000       3.15e+09       Kurtosis       7662.614
+
+. quietly count if !missing(assets_total_2020)
+
+. di as txt "Records with non-missing assets_total_2020 = " r(N)
+Records with non-missing assets_total_2020 = 9209
+
+. 
+. egen liab_total_2020 = rowtotal(`liab_vars')
+
+. recast double liab_total_2020
+
+. replace liab_total_2020 = . if n_liab_2020 == 0
+(9,685 real changes made, 9,685 to missing)
+
+. di as txt "Summary: liab_total_2020 (post-rowtotal / set to missing when no compone
+> nts):"
+Summary: liab_total_2020 (post-rowtotal / set to missing when no components):
+
+. summarize liab_total_2020, detail
+
+                       liab_total_2020
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          190              0
+ 5%          600              0
+10%         1500              0       Obs               4,591
+25%         5000              0       Sum of wgt.       4,591
+
+50%        35000                      Mean           91461.56
+                        Largest       Std. dev.      141965.4
+75%       124000        1250000
+90%       250000        1360000       Variance       2.02e+10
+95%       350000        2500000       Skewness       5.062946
+99%       600000        2970000       Kurtosis       65.79104
+
+. quietly count if !missing(liab_total_2020)
+
+. di as txt "Records with non-missing liab_total_2020 = " r(N)
+Records with non-missing liab_total_2020 = 4591
+
+. 
+. * Show a few top obs to inspect pairing of big assets vs liabilities
+. di as txt "Top 30 assets_total_2020 (inspect liabilities too):"
+Top 30 assets_total_2020 (inspect liabilities too):
+
+. gsort -assets_total_2020
+
+. list HHID RSUBHH assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 in 1/3
+> 0
+
+     +-------------------------------------------------------------+
+     |   HHID   RSUBHH   ass~2020   lia~2020   n_a~2020   n_l~2020 |
+     |-------------------------------------------------------------|
+  1. | 912430        0   3.15e+09     400000          3          1 |
+  2. | 909496        0   1.00e+09     180000          4          1 |
+  3. | 039257        0   2.27e+07        500          7          1 |
+  4. | 540746        0   2.09e+07          .          6          0 |
+  5. | 525030        0   1.85e+07          .         10          0 |
+     |-------------------------------------------------------------|
+  6. | 149257        0   1.42e+07          .          8          0 |
+  7. | 540637        0   1.41e+07          .          4          0 |
+  8. | 112575        0   1.33e+07     340000         10          1 |
+  9. | 500005        0   1.31e+07          .         10          0 |
+ 10. | 137440        0   1.27e+07          .          4          0 |
+     |-------------------------------------------------------------|
+ 11. | 500044        0   1.22e+07          .          6          0 |
+ 12. | 544811        0   1.13e+07          .          8          0 |
+ 13. | 543381        0   1.10e+07          .          3          0 |
+ 14. | 045931        0   1.09e+07          .          6          0 |
+ 15. | 534186        0   1.09e+07      32000          7          1 |
+     |-------------------------------------------------------------|
+ 16. | 541556        0   1.08e+07     650000          8          2 |
+ 17. | 501894        0   1.05e+07          .          8          0 |
+ 18. | 501770        1   1.01e+07          .          6          0 |
+ 19. | 500505        0   1.00e+07       1700          4          1 |
+ 20. | 131812        0    9366397          .          6          0 |
+     |-------------------------------------------------------------|
+ 21. | 523913        0    9275000       2000          8          1 |
+ 22. | 501053        0    9024382      85310          8          1 |
+ 23. | 071660        0    8910000          .          6          0 |
+ 24. | 082258        0    8879000     875000          7          2 |
+ 25. | 182312        0    8450000          .          6          0 |
+     |-------------------------------------------------------------|
+ 26. | 030423        0    8130000          .          6          0 |
+ 27. | 529943        0    8110000          .          6          0 |
+ 28. | 134132        0    8060000     197000         11          1 |
+ 29. | 052846        0    8050000          .          3          0 |
+ 30. | 141144        0    7750000          .          8          0 |
+     +-------------------------------------------------------------+
+
+. 
+. di as txt "Top 30 liabilities_total_2020 (inspect assets too):"
+Top 30 liabilities_total_2020 (inspect assets too):
+
+. gsort -liab_total_2020
+
+. list HHID RSUBHH assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 in 1/3
+> 0
+
+     +-------------------------------------------------------------+
+     |   HHID   RSUBHH   ass~2020   lia~2020   n_a~2020   n_l~2020 |
+     |-------------------------------------------------------------|
+  1. | 501738        2    2029000    2970000          5          1 |
+  2. | 540507        0      58000    2500000          2          1 |
+  3. | 502245        0    1901000    1360000          5          2 |
+  4. | 543745        0    3720000    1250000          7          2 |
+  5. | 523417        0    3476000    1160000          7          1 |
+     |-------------------------------------------------------------|
+  6. | 541727        0    1595000    1100000          6          2 |
+  7. | 546280        0    4918500    1080000          7          3 |
+  8. | 500613        0    2350200    1018000          5          2 |
+  9. | 532166        0        600    1000000          1          1 |
+ 10. | 527679        0    1925000     950000          6          1 |
+     |-------------------------------------------------------------|
+ 11. | 501351        0    2925000     935000          8          3 |
+ 12. | 542059        0    4490000     900000          7          1 |
+ 13. | 540261        1    5604000     900000          4          1 |
+ 14. | 903539        0    4330000     900000          6          2 |
+ 15. | 082258        0    8879000     875000          7          2 |
+     |-------------------------------------------------------------|
+ 16. | 546015        0    2230000     850000          5          2 |
+ 17. | 048091        0    7432000     850000          6          1 |
+ 18. | 501328        0    1173150     847500          8          3 |
+ 19. | 073155        0    2735000     825000          6          1 |
+ 20. | 032481        0    1244000     800000          3          1 |
+     |-------------------------------------------------------------|
+ 21. | 523871        0    2246000     799000          8          1 |
+ 22. | 522879        0     492000     793000          4          2 |
+ 23. | 522406        0    4430000     765000          3          1 |
+ 24. | 535945        0    5152000     750000          9          2 |
+ 25. | 013344        0    4972000     730000         12          1 |
+     |-------------------------------------------------------------|
+ 26. | 500473        0    1861000     727000          7          2 |
+ 27. | 541817        0    1999000     725000          6          2 |
+ 28. | 210281        0    2020000     700000          2          1 |
+ 29. | 016024        0    3283000     700000          9          1 |
+ 30. | 532539        0    1345000     695000          6          2 |
+     +-------------------------------------------------------------+
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute net worth at beginning of period A_{t-1} = networth_A2020
+. * - If both assets_total_2020 and liab_total_2020 are missing --> networth remains 
+> missing
+. * - Otherwise treat missing side as zero when the other side exists (so we can comp
+> ute)
+. * ---------------------------------------------------------------------
+. capture drop networth_A2020
+
+. gen double networth_A2020 = .
+(14,276 missing values generated)
+
+. replace networth_A2020 = (cond(missing(assets_total_2020),0,assets_total_2020) - //
+> /
+>                          cond(missing(liab_total_2020),0,liab_total_2020)) ///
+>     if n_assets_2020 > 0 | n_liab_2020 > 0
+(9,483 real changes made)
+
+. 
+. di as txt "Summary: networth_A2020 (assets_total_2020 - liab_total_2020):"
+Summary: networth_A2020 (assets_total_2020 - liab_total_2020):
+
+. summarize networth_A2020, detail
+
+                       networth_A2020
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%       -53100       -2442000
+ 5%        -6000        -999400
+10%            0        -941000       Obs               9,483
+25%        12000        -577000       Sum of wgt.       9,483
+
+50%       143700                      Mean             861228
+                        Largest       Std. dev.      3.39e+07
+75%       423000       2.09e+07
+90%      1030000       2.27e+07       Variance       1.15e+15
+95%      1704000       1.00e+09       Skewness       86.89327
+99%      4635000       3.15e+09       Kurtosis        7891.05
+
+. tabstat networth_A2020, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+networt~2020 |      9483.00    861228.03  33943583.50    143700.00  -2442000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+networt~2020 |     3.15e+09
+---------------------------
+
+. 
+. * Count how many networth values were computed
+. quietly count if !missing(networth_A2020)
+
+. di as txt "Records with networth_A2020 computed = " r(N) " out of " _N
+Records with networth_A2020 computed = 9483 out of 14276
+
+. 
+. * ---------------------------------------------------------------------
+. * Diagnostics: show extremes and cases where a side was missing but networth comput
+> ed
+. * ---------------------------------------------------------------------
+. di as txt "Extremes: top 20 highest networth_A2020:"
+Extremes: top 20 highest networth_A2020:
+
+. gsort -networth_A2020
+
+. list HHID RSUBHH networth_A2020 assets_total_2020 liab_total_2020 n_assets_2020 n_l
+> iab_2020 in 1/20
+
+     +-------------------------------------------------------------------------+
+     |   HHID   RSUBHH   netw~2020   ass~2020   lia~2020   n_a~2020   n_l~2020 |
+     |-------------------------------------------------------------------------|
+  1. | 912430        0   3.150e+09   3.15e+09     400000          3          1 |
+  2. | 909496        0   1.000e+09   1.00e+09     180000          4          1 |
+  3. | 039257        0    22671500   2.27e+07        500          7          1 |
+  4. | 540746        0    20900000   2.09e+07          .          6          0 |
+  5. | 525030        0    18465000   1.85e+07          .         10          0 |
+     |-------------------------------------------------------------------------|
+  6. | 149257        0    14205000   1.42e+07          .          8          0 |
+  7. | 540637        0    14140000   1.41e+07          .          4          0 |
+  8. | 500005        0    13100000   1.31e+07          .         10          0 |
+  9. | 112575        0    12939000   1.33e+07     340000         10          1 |
+ 10. | 137440        0    12676724   1.27e+07          .          4          0 |
+     |-------------------------------------------------------------------------|
+ 11. | 500044        0    12240000   1.22e+07          .          6          0 |
+ 12. | 544811        0    11305000   1.13e+07          .          8          0 |
+ 13. | 543381        0    11000000   1.10e+07          .          3          0 |
+ 14. | 045931        0    10940000   1.09e+07          .          6          0 |
+ 15. | 534186        0    10821000   1.09e+07      32000          7          1 |
+     |-------------------------------------------------------------------------|
+ 16. | 501894        0    10475000   1.05e+07          .          8          0 |
+ 17. | 541556        0    10158000   1.08e+07     650000          8          2 |
+ 18. | 501770        1    10100000   1.01e+07          .          6          0 |
+ 19. | 500505        0    10001300   1.00e+07       1700          4          1 |
+ 20. | 131812        0     9366397    9366397          .          6          0 |
+     +-------------------------------------------------------------------------+
+
+. 
+. di as txt "Extremes: top 20 lowest networth_A2020:"
+Extremes: top 20 lowest networth_A2020:
+
+. gsort networth_A2020
+
+. list HHID RSUBHH networth_A2020 assets_total_2020 liab_total_2020 n_assets_2020 n_l
+> iab_2020 in 1/20
+
+     +------------------------------------------------------------------------+
+     |   HHID   RSUBHH   net~2020   ass~2020   lia~2020   n_a~2020   n_l~2020 |
+     |------------------------------------------------------------------------|
+  1. | 540507        0   -2442000      58000    2500000          2          1 |
+  2. | 532166        0    -999400        600    1000000          1          1 |
+  3. | 501738        2    -941000    2029000    2970000          5          1 |
+  4. | 540582        0    -577000      23000     600000          2          2 |
+  5. | 534696        0    -482500      17500     500000          2          2 |
+     |------------------------------------------------------------------------|
+  6. | 541034        0    -433000      17000     450000          2          2 |
+  7. | 525319        0    -348000       2000     350000          2          2 |
+  8. | 540022        0    -336000      14000     350000          2          1 |
+  9. | 542385        1    -314500      65500     380000          3          2 |
+ 10. | 522879        0    -301000     492000     793000          4          2 |
+     |------------------------------------------------------------------------|
+ 11. | 544864        0    -299300        700     300000          2          1 |
+ 12. | 145670        0    -275000          .     275000          0          1 |
+ 13. | 545550        0    -270000      40000     310000          1          2 |
+ 14. | 544886        0    -250000          .     250000          0          1 |
+ 15. | 541531        0    -230000          .     230000          0          2 |
+     |------------------------------------------------------------------------|
+ 16. | 531922        0    -225000      30000     255000          3          2 |
+ 17. | 544518        0    -219000      61000     280000          5          2 |
+ 18. | 542074        0    -200000          0     200000          1          1 |
+ 19. | 535408        5    -188000      12000     200000          2          1 |
+ 20. | 540426        0    -171000      10000     181000          2          1 |
+     +------------------------------------------------------------------------+
+
+. 
+. di as txt "Cases where assets missing but liabilities present (networth computed tr
+> eating assets=0):"
+Cases where assets missing but liabilities present (networth computed treating assets
+> =0):
+
+. quietly count if n_assets_2020==0 & n_liab_2020>0
+
+. di as txt "  count = " r(N)
+  count = 274
+
+. quietly list HHID RSUBHH assets_total_2020 liab_total_2020 n_assets_2020 n_liab_202
+> 0 in 1/20 if n_assets_2020==0 & n_liab_2020>0
+
+. 
+. di as txt "Cases where liabilities missing but assets present (networth computed tr
+> eating liab=0):"
+Cases where liabilities missing but assets present (networth computed treating liab=0
+> ):
+
+. quietly count if n_liab_2020==0 & n_assets_2020>0
+
+. di as txt "  count = " r(N)
+  count = 4892
+
+. quietly list HHID RSUBHH assets_total_2020 liab_total_2020 n_assets_2020 n_liab_202
+> 0 in 1/20 if n_liab_2020==0 & n_assets_2020>0
+
+. 
+. * ---------------------------------------------------------------------
+. * Save totals back to master (so subsequent components/returns scripts can use them
+> )
+. * ---------------------------------------------------------------------
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2020_2022_maste
+    > r.dta saved
+
+. di as txt "Saved assets_total_2020, liab_total_2020, networth_A2020 (and helpers) b
+> ack to master: `master'"
+Saved assets_total_2020, liab_total_2020, networth_A2020 (and helpers) back to master
+> : /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2020
+> _2022_master.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
+> /compute_net_worth_A2020.log
+  log type:  text
+ closed on:  22 Aug 2025, 15:05:27
+-------------------------------------------------------------------------------------
