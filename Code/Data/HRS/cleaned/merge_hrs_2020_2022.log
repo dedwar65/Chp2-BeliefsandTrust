@@ -1,23 +1,23 @@
--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
-> /merge_hrs_2020_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/
+> merge_hrs_2020_2022.log
   log type:  text
- opened on:  22 Aug 2025, 15:05:26
+ opened on:  22 Sep 2025, 12:03:07
 
 . 
 . set more off
 
 . 
 . * --- file paths
-. local cleaned "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cle
-> aned"
+. local cleaned "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/clea
+> ned"
 
-. local file2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/_r
-> aw/2020/h20sta/hrs_2020_selected.dta"
+. local file2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/_ra
+> w/2020/h20sta/hrs_2020_selected.dta"
 
-. local file2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/_r
-> aw/2022/h22sta/hrs_2022_selected.dta"
+. local file2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/_ra
+> w/2022/h22sta/hrs_2022_selected.dta"
 
 . local out "`cleaned'/hrs_2020_2022_master.dta"
 
@@ -83,18 +83,18 @@ Merge 2020 + 2022 results:
 . * ---------------------------------------------------------------------
 . save "`out'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2020_2022_maste
-    > r.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/hrs_2020_2022_master
+    > .dta saved
 
 . di as txt "Saved merged 2020+2022 HRS data to `out'"
-Saved merged 2020+2022 HRS data to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
-> /Code/Data/HRS/cleaned/hrs_2020_2022_master.dta
+Saved merged 2020+2022 HRS data to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/
+> Code/Data/HRS/cleaned/hrs_2020_2022_master.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned
-> /merge_hrs_2020_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/
+> merge_hrs_2020_2022.log
   log type:  text
- closed on:  22 Aug 2025, 15:05:26
--------------------------------------------------------------------------------------
+ closed on:  22 Sep 2025, 12:03:07
+--------------------------------------------------------------------------------------

@@ -1,0 +1,461 @@
+--------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/compute_mortgage_payments_2022.log
+  log type:  text
+ opened on:  22 Sep 2025, 12:15:51
+
+. 
+. set more off
+
+. 
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/
+> cleaned/hrs_rand_2020_2022_master.dta"
+
+. capture confirm file "`master'"
+
+. if _rc {
+.     di as error "ERROR: master file not found -> `master'"
+.     exit 198
+. }
+
+. 
+. use "`master'", clear
+
+. di as txt "Using master file: `master'"
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
+> ND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. * ---------------------------------------------------------------------
+. * Variable list for mortgages in RAND (lowercase analogs)
+. * sh025 - first mortgage payment amount
+. * sh029 - first mortgage payment frequency
+. * sh036 - second mortgage payment amount
+. * sh040 - second mortgage payment frequency
+. * sh175 - secondary residence first mortgage payment amount
+. * sh179 - secondary residence first mortgage payment frequency
+. * ---------------------------------------------------------------------
+. 
+. local amtvars "sh025 sh036 sh175"
+
+. local freqvars "sh029 sh040 sh179"
+
+. 
+. * ---------------------------------------------------------------------
+. * 1) Recode frequency codes 7/8/9 -> missing (BEFORE computations)
+. * ---------------------------------------------------------------------
+. di as txt "Recoding frequency codes 7,8,9 -> missing for mortgage frequency vars..."
+Recoding frequency codes 7,8,9 -> missing for mortgage frequency vars...
+
+. foreach v of local freqvars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  Variable `v' not present -> skipping recode"
+  5.     }
+  6.     else {
+  7.         quietly count if inlist(`v',7,8,9)
+  8.         di as txt "  `v' records with codes 7/8/9 before recode = " r(N)
+  9.         quietly replace `v' = . if inlist(`v',7,8,9)
+ 10.         quietly count if inlist(`v',7,8,9)
+ 11.         di as txt "  `v' records with codes 7/8/9 after recode  = " r(N)
+ 12.         quietly tab `v', missing
+ 13.     }
+ 14. }
+  sh029 records with codes 7/8/9 before recode = 2
+  sh029 records with codes 7/8/9 after recode  = 0
+  sh040 records with codes 7/8/9 before recode = 0
+  sh040 records with codes 7/8/9 after recode  = 0
+  sh179 records with codes 7/8/9 before recode = 0
+  sh179 records with codes 7/8/9 after recode  = 0
+
+. 
+. * ---------------------------------------------------------------------
+. * 2) Clean amount variables: set common sentinel codes -> missing
+. * ---------------------------------------------------------------------
+. local amt_misscodes 9999998 9999999 -8 -9
+
+. di as txt "Cleaning mortgage amount sentinel codes to missing for: `amtvars'"
+Cleaning mortgage amount sentinel codes to missing for: sh025 sh036 sh175
+
+. foreach v of local amtvars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  Amount variable `v' not found -> skipping"
+  5.     }
+  6.     else {
+  7.         foreach mc of local amt_misscodes {
+  8.             quietly replace `v' = . if `v' == `mc'
+  9.         }
+ 10.         di as txt "  Summary for `v' after recoding sentinels:"
+ 11.         summarize `v', detail
+ 12.     }
+ 13. }
+  Summary for sh025 after recoding sentinels:
+
+             amount of payment on first mortgage
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          200              0
+ 5%          400              0
+10%          500              0       Obs               2,705
+25%          750              0       Sum of wgt.       2,705
+
+50%         1166                      Mean           1404.066
+                        Largest       Std. dev.      2465.846
+75%         1780           6100
+90%         2400           7000       Variance        6080397
+95%         3000          22000       Skewness       41.42586
+99%         4300         120000       Kurtosis       1981.459
+  Summary for sh036 after recoding sentinels:
+
+           amount of payments on 2nd property loan
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%          100              0       Obs                  61
+25%          285              0       Sum of wgt.          61
+
+50%          440                      Mean           577.1967
+                        Largest       Std. dev.      487.5541
+75%          800           1400
+90%         1300           1400       Variance         237709
+95%         1400           1800       Skewness       1.495348
+99%         2500           2500       Kurtosis       5.736588
+  Summary for sh175 after recoding sentinels:
+
+            amount paid all mortgages - 2nd home
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          115             50
+ 5%          230            115
+10%          340            135       Obs                 138
+25%          700            187       Sum of wgt.         138
+
+50%         1050                      Mean           1334.058
+                        Largest       Std. dev.      1274.022
+75%         1700           4000
+90%         2300           4500       Variance        1623132
+95%         3000           4951       Skewness       4.725808
+99%         4951          12000       Kurtosis       37.42698
+
+. 
+. * ---------------------------------------------------------------------
+. * 3) Define program to map freq -> annual multiplier (with counts)
+. * ---------------------------------------------------------------------
+. capture program drop map_freq_to_mult
+
+. program define map_freq_to_mult, rclass
+  1.     syntax varname
+  2.     local fq = "`varlist'"
+  3.     capture confirm variable `fq'
+  4.     if _rc {
+  5.         di as txt "  map_freq_to_mult: variable `fq' not found -> exiting program
+> "
+  6.         exit 0
+  7.     }
+  8.     capture drop `fq'_mult
+  9.     gen double `fq'_mult = .
+ 10.     quietly replace `fq'_mult = 52 if `fq' == 1
+ 11.     quietly replace `fq'_mult = 24 if `fq' == 2
+ 12.     quietly replace `fq'_mult = 12 if `fq' == 3
+ 13.     quietly replace `fq'_mult = 4  if `fq' == 4
+ 14.     quietly replace `fq'_mult = 2  if `fq' == 5
+ 15.     quietly replace `fq'_mult = 1  if `fq' == 6
+ 16.     quietly count if !missing(`fq'_mult)
+ 17.     di as txt "  `fq'_mult nonmissing observations = " r(N)
+ 18.     tab `fq', missing
+ 19. end
+
+. 
+. * ---------------------------------------------------------------------
+. * 4) Apply mapping to each mortgage frequency var
+. * ---------------------------------------------------------------------
+. di as txt "Mapping mortgage frequency variables to multipliers..."
+Mapping mortgage frequency variables to multipliers...
+
+. map_freq_to_mult sh029
+(14,442 missing values generated)
+  sh029_mult nonmissing observations = 2696
+
+  amount of |
+ payment on |
+      first |
+  mortgage- |
+        per |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          2 |          9        0.06        0.06
+          3 |      2,679       18.55       18.61
+          4 |          2        0.01       18.63
+          5 |          2        0.01       18.64
+          6 |          4        0.03       18.67
+          . |     11,746       81.33      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. map_freq_to_mult sh040
+(14,442 missing values generated)
+  sh040_mult nonmissing observations = 58
+
+     amt of |
+payments on |
+   2nd prop |
+  loan- per |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          3 |         58        0.40        0.40
+          . |     14,384       99.60      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. map_freq_to_mult sh179
+(14,442 missing values generated)
+  sh179_mult nonmissing observations = 137
+
+payment all |
+mortgages - |
+ 2nd home - |
+        per |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          2 |          1        0.01        0.01
+          3 |        136        0.94        0.95
+          . |     14,305       99.05      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. 
+. * ---------------------------------------------------------------------
+. * 5) Compute annual payments: amount * multiplier
+. * ---------------------------------------------------------------------
+. di as txt "Computing annual mortgage payments (amount * multiplier)..."
+Computing annual mortgage payments (amount * multiplier)...
+
+. 
+. capture confirm variable sh025
+
+. if _rc {
+.     di as txt "sh025 not found -> mort1_pay_annual set to missing"
+.     gen double mort1_pay_annual = .
+. }
+
+. else {
+.     capture confirm variable sh029_mult
+.     if _rc {
+.         di as txt "sh029_mult not found -> cannot annualize sh025 -> mort1_pay_annua
+> l missing"
+.         gen double mort1_pay_annual = .
+.     }
+.     else {
+.         gen double mort1_pay_annual = .
+(14,442 missing values generated)
+.         replace mort1_pay_annual = sh025 * sh029_mult if !missing(sh025) & !missing(
+> sh029_mult)
+(2,694 real changes made)
+.         di as txt "First mortgage annual payment summary (mort1_pay_annual):"
+First mortgage annual payment summary (mort1_pay_annual):
+.         summarize mort1_pay_annual, detail
+
+                      mort1_pay_annual
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         2640            135
+ 5%         4800            786
+10%         6000            792       Obs               2,694
+25%         9000            792       Sum of wgt.       2,694
+
+50%        14052                      Mean            16898.9
+                        Largest       Std. dev.      29636.78
+75%        21420          73200
+90%        29088          84000       Variance       8.78e+08
+95%        36000         264000       Skewness       41.39421
+99%        51600        1440000       Kurtosis       1976.783
+.     }
+. }
+
+. 
+. capture confirm variable sh036
+
+. if _rc {
+.     di as txt "sh036 not found -> mort2_pay_annual set to missing"
+.     gen double mort2_pay_annual = .
+. }
+
+. else {
+.     capture confirm variable sh040_mult
+.     if _rc {
+.         di as txt "sh040_mult not found -> cannot annualize sh036 -> mort2_pay_annua
+> l missing"
+.         gen double mort2_pay_annual = .
+.     }
+.     else {
+.         gen double mort2_pay_annual = .
+(14,442 missing values generated)
+.         replace mort2_pay_annual = sh036 * sh040_mult if !missing(sh036) & !missing(
+> sh040_mult)
+(57 real changes made)
+.         di as txt "Second mortgage annual payment summary (mort2_pay_annual):"
+Second mortgage annual payment summary (mort2_pay_annual):
+.         summarize mort2_pay_annual, detail
+
+                      mort2_pay_annual
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          480            480
+ 5%         1200            960
+10%         1800           1200       Obs                  57
+25%         3600           1380       Sum of wgt.          57
+
+50%         5400                      Mean           7412.421
+                        Largest       Std. dev.      5745.248
+75%         9960          16800
+90%        15768          16800       Variance       3.30e+07
+95%        16800          21600       Skewness       1.562541
+99%        30000          30000       Kurtosis       5.886858
+.     }
+. }
+
+. 
+. capture confirm variable sh175
+
+. if _rc {
+.     di as txt "sh175 not found -> secmort_pay_annual set to missing"
+.     gen double secmort_pay_annual = .
+. }
+
+. else {
+.     capture confirm variable sh179_mult
+.     if _rc {
+.         di as txt "sh179_mult not found -> cannot annualize sh175 -> secmort_pay_ann
+> ual missing"
+.         gen double secmort_pay_annual = .
+.     }
+.     else {
+.         gen double secmort_pay_annual = .
+(14,442 missing values generated)
+.         replace secmort_pay_annual = sh175 * sh179_mult if !missing(sh175) & !missin
+> g(sh179_mult)
+(137 real changes made)
+.         di as txt "Secondary mortgage annual payment summary (secmort_pay_annual):"
+Secondary mortgage annual payment summary (secmort_pay_annual):
+.         summarize secmort_pay_annual, detail
+
+                     secmort_pay_annual
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1380            600
+ 5%         2760           1380
+10%         4200           1620       Obs                 137
+25%         8400           2244       Sum of wgt.         137
+
+50%        13200                      Mean           16081.23
+                        Largest       Std. dev.      15316.19
+75%        20400          48000
+90%        27600          54000       Variance       2.35e+08
+95%        36000          59412       Skewness       4.723502
+99%        59412         144000       Kurtosis       37.33738
+.     }
+. }
+
+. 
+. * ---------------------------------------------------------------------
+. * 6) Diagnostics: amount present but multiplier missing
+. * ---------------------------------------------------------------------
+. di as txt "Diagnostics: amount present but multiplier missing (first mortgage)"
+Diagnostics: amount present but multiplier missing (first mortgage)
+
+. quietly count if !missing(sh025) & missing(sh029_mult)
+
+. di as txt "Records with sh025 present & sh029_mult missing = " r(N)
+Records with sh025 present & sh029_mult missing = 11
+
+. quietly list hhid rsubhh sh025 sh029 sh029_mult mort1_pay_annual in 1/20 if !missing
+> (sh025) & missing(sh029_mult)
+
+. 
+. di as txt "Diagnostics: amount present but multiplier missing (second mortgage)"
+Diagnostics: amount present but multiplier missing (second mortgage)
+
+. quietly count if !missing(sh036) & missing(sh040_mult)
+
+. di as txt "Records with sh036 present & sh040_mult missing = " r(N)
+Records with sh036 present & sh040_mult missing = 4
+
+. quietly list hhid rsubhh sh036 sh040 sh040_mult mort2_pay_annual in 1/20 if !missing
+> (sh036) & missing(sh040_mult)
+
+. 
+. di as txt "Diagnostics: amount present but multiplier missing (secondary residence m
+> ortgage)"
+Diagnostics: amount present but multiplier missing (secondary residence mortgage)
+
+. quietly count if !missing(sh175) & missing(sh179_mult)
+
+. di as txt "Records with sh175 present & sh179_mult missing = " r(N)
+Records with sh175 present & sh179_mult missing = 1
+
+. quietly list hhid rsubhh sh175 sh179 sh179_mult secmort_pay_annual in 1/20 if !missi
+> ng(sh175) & missing(sh179_mult)
+
+. 
+. * ---------------------------------------------------------------------
+. * 7) Sum annual payments across mortgage types
+. * ---------------------------------------------------------------------
+. capture drop mortgage_payments_total_2022
+
+. egen double mortgage_payments_total_2022 = rowtotal(mort1_pay_annual mort2_pay_annua
+> l secmort_pay_annual)
+
+. 
+. di as txt "TOTAL mortgage payments (annual) summary:"
+TOTAL mortgage payments (annual) summary:
+
+. summarize mortgage_payments_total_2022, detail
+
+                mortgage_payments_total_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs              14,442
+25%            0              0       Sum of wgt.      14,442
+
+50%            0                      Mean           3334.114
+                        Largest       Std. dev.      14668.87
+75%            0         100800
+90%        13320         144000       Variance       2.15e+08
+95%        21024         264000       Skewness        66.0841
+99%        37200        1440000       Kurtosis       6381.141
+
+. tabstat mortgage_payments_total_2022, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+mortgag~2022 |     14442.00      3334.11     14668.87         0.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+mortgag~2022 |   1440000.00
+---------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * 8) Save dataset with new mortgage payment variables BACK TO MASTER
+. * ---------------------------------------------------------------------
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
+    > 022_master.dta saved
+
+. di as txt "Saved mortgage payment vars back to master: `master'"
+Saved mortgage payment vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beliefs
+> andTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/compute_mortgage_payments_2022.log
+  log type:  text
+ closed on:  22 Sep 2025, 12:15:51
+--------------------------------------------------------------------------------------

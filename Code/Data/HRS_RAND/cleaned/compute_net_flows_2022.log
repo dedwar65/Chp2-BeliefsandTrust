@@ -1,0 +1,482 @@
+--------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/compute_net_flows_2022.log
+  log type:  text
+ opened on:  22 Sep 2025, 12:15:48
+
+. 
+. set more off
+
+. 
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/
+> cleaned/hrs_rand_2020_2022_master.dta"
+
+. capture confirm file "`master'"
+
+. if _rc {
+.     di as error "ERROR: master file not found -> `master'"
+.     exit 198
+. }
+
+. 
+. use "`master'", clear
+
+. 
+. di as txt "Using master file: `master'"
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
+> ND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. * ---------------------------------------------------------------------
+. * Optional: convert common special codes to Stata missing (numeric variables)
+. * ---------------------------------------------------------------------
+. local misscodes 999999998 999999999 -8 -9
+
+. foreach v of varlist _all {
+  2.     capture confirm numeric variable `v'
+  3.     if !_rc {
+  4.         foreach mc of local misscodes {
+  5.             quietly replace `v' = . if `v' == `mc'
+  6.         }
+  7.     }
+  8. }
+
+. 
+. * ---------------------------------------------------------------------
+. * Variables (2022)
+. * - private business: SR050 (invest), SR055 (sell)
+. * - stocks (private): SR063 (direction), SR064 (magnitude)
+. *   - public stocks (sold only): SR073 (sold)
+. * - real estate: SR030 (buy), SR035 (sold), SR045 (improvement costs)
+. * - IRA: SQ171_1, SQ171_2, SQ171_3
+. * - primary/secondary residence(s): SR007 (buy), SR013 (sell), SR024 (improvement co
+> sts)
+. * ---------------------------------------------------------------------
+. 
+. local vars_to_check "sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sq171_1 sq171_2
+>  sq171_3 sr007 sr013 sr024"
+
+. di as txt "Checking existence of required 2022 variables..."
+Checking existence of required 2022 variables...
+
+. foreach v of local vars_to_check {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as err "  WARNING: variable `v' not found in master dataset"
+  5.     }
+  6.     else {
+  7.         di as txt "  OK: `v' present"
+  8.     }
+  9. }
+  OK: sr050 present
+  OK: sr055 present
+  OK: sr063 present
+  OK: sr064 present
+  OK: sr073 present
+  OK: sr030 present
+  OK: sr035 present
+  OK: sr045 present
+  OK: sq171_1 present
+  OK: sq171_2 present
+  OK: sq171_3 present
+  OK: sr007 present
+  OK: sr013 present
+  OK: sr024 present
+
+. 
+. * Clean sr063
+. capture confirm variable sr063
+
+. if _rc {
+.     di as txt "sr063 not found; skipping sr063 cleaning/mapping."
+. }
+
+. else {
+.     di as txt "Cleaning sr063 (private stock net buyer/seller)..."
+Cleaning sr063 (private stock net buyer/seller)...
+.     quietly replace sr063 = . if inlist(sr063,8,9)
+.     quietly replace sr063 = 0 if sr063 == 3
+.     capture drop sr063_dir
+.     gen byte sr063_dir = . 
+(14,442 missing values generated)
+.     replace sr063_dir = -1 if sr063 == 1
+(79 real changes made)
+.     replace sr063_dir =  1 if sr063 == 2
+(69 real changes made)
+.     replace sr063_dir =  0 if sr063 == 3
+(0 real changes made)
+.     di as txt "sr063 mapping summary (post-clean):"
+sr063 mapping summary (post-clean):
+.     tab sr063, missing
+
+  r put new |
+  amt in or |
+   take out |
+     stocks |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        107        0.74        0.74
+          1 |         79        0.55        1.29
+          2 |         69        0.48        1.77
+          . |     14,187       98.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+.     di as txt "sr063_dir summary:"
+sr063_dir summary:
+.     tab sr063_dir, missing
+
+  sr063_dir |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         -1 |         79        0.55        0.55
+          1 |         69        0.48        1.02
+          . |     14,294       98.98      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+. }
+
+. 
+. * Flows
+. * --- Private business: sr055 (sell/inflow) minus sr050 (invest/outflow)
+. capture confirm variable sr055
+
+. if _rc {
+.     di as txt "sr055 missing -> setting flow_bus_2022 to missing"
+.     gen double flow_bus_2022 = .
+. }
+
+. else {
+.     capture confirm variable sr050
+.     if _rc {
+.         di as txt "sr050 missing; using sr055 only for flow_bus_2022"
+.         gen double flow_bus_2022 = sr055
+.     }
+.     else {
+.         capture drop flow_bus_2022
+.         gen double flow_bus_2022 = . 
+(14,442 missing values generated)
+.         replace flow_bus_2022 = sr055 - sr050 if !missing(sr055) | !missing(sr050)
+(3 real changes made)
+.     }
+.     di as txt "Private business flow summary:"
+Private business flow summary:
+.     summarize flow_bus_2022, detail
+
+                        flow_bus_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%       -55000         -55000
+ 5%       -55000              0
+10%       -55000        2750000       Obs                   3
+25%       -55000              .       Sum of wgt.           3
+
+50%            0                      Mean           898333.3
+                        Largest       Std. dev.       1603826
+75%      2750000              .
+90%      2750000         -55000       Variance       2.57e+12
+95%      2750000              0       Skewness       .7061714
+99%      2750000        2750000       Kurtosis            1.5
+. }
+
+. 
+. * --- Private stocks: sr063_dir * sr064
+. capture confirm variable sr064
+
+. if _rc {
+.     di as txt "sr064 (stock magnitude) missing -> setting flow_stk_private_2022 to m
+> issing"
+.     gen double flow_stk_private_2022 = .
+. }
+
+. else {
+.     capture drop flow_stk_private_2022
+.     gen double flow_stk_private_2022 = .
+(14,442 missing values generated)
+.     replace flow_stk_private_2022 = sr063_dir * sr064 if !missing(sr063_dir) & !miss
+> ing(sr064)
+(116 real changes made)
+.     di as txt "Private stock flow summary (sr063_dir * sr064):"
+Private stock flow summary (sr063_dir * sr064):
+.     summarize flow_stk_private_2022, detail
+
+                    flow_stk_private_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -300000       -2000000
+ 5%      -200000        -300000
+10%      -100000        -300000       Obs                 116
+25%       -20000        -250000       Sum of wgt.         116
+
+50%          -50                      Mean           10070.69
+                        Largest       Std. dev.      266721.3
+75%        40400         300000
+90%       100000         500000       Variance       7.11e+10
+95%       250000         600000       Skewness      -1.752954
+99%       600000        1600000       Kurtosis       39.77505
+. }
+
+. 
+. * --- Public stocks: sr073 is reported as sold amount (inflow). Keep positive.
+. capture confirm variable sr073
+
+. if _rc {
+.     di as txt "sr073 not found -> flow_stk_public_2022 missing"
+.     gen double flow_stk_public_2022 = .
+. }
+
+. else {
+.     capture drop flow_stk_public_2022
+.     gen double flow_stk_public_2022 = sr073
+(14,280 missing values generated)
+.     di as txt "Public stock (sold) flow summary (sr073):"
+Public stock (sold) flow summary (sr073):
+.     summarize flow_stk_public_2022, detail
+
+                    flow_stk_public_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%          500              0
+10%         2000              0       Obs                 162
+25%         8000              0       Sum of wgt.         162
+
+50%        24000                      Mean           69615.31
+                        Largest       Std. dev.      131052.2
+75%        75000         600000
+90%       200000         600000       Variance       1.72e+10
+95%       300000         730000       Skewness       4.125808
+99%       730000        1000000       Kurtosis        23.8836
+. }
+
+. 
+. * Combine private + public stocks into total stocks flow
+. capture drop flow_stk_2022
+
+. egen double flow_stk_2022 = rowtotal(flow_stk_private_2022 flow_stk_public_2022)
+
+. di as txt "TOTAL stocks flow (2022) summary:"
+TOTAL stocks flow (2022) summary:
+
+. summarize flow_stk_2022, detail
+
+                        flow_stk_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0       -2000000
+ 5%            0        -300000
+10%            0        -300000       Obs              14,442
+25%            0        -250000       Sum of wgt.      14,442
+
+50%            0                      Mean           861.7838
+                        Largest       Std. dev.      28503.26
+75%            0         600000
+90%            0         730000       Variance       8.12e+08
+95%            0        1000000       Skewness      -4.392966
+99%        12000        1600000       Kurtosis       2563.473
+
+. 
+. * --- Real estate: sr035 (sold, inflow) - sr030 (buy, outflow) - sr045 (improvement 
+> costs, outflow)
+. capture drop flow_re_2022
+
+. gen double flow_re_2022 = .
+(14,442 missing values generated)
+
+. replace flow_re_2022 = cond(missing(sr035),0,sr035) - ( cond(missing(sr030),0,sr030)
+>  + cond(missing(sr045),0,sr045) ) if !missing(sr035) | !missing(sr030) | !missing(sr
+> 045)
+(269 real changes made)
+
+. di as txt "Real estate flow summary:"
+Real estate flow summary:
+
+. summarize flow_re_2022, detail
+
+                        flow_re_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     -1200000       -6400000
+ 5%      -515000       -1500000
+10%      -290000       -1200000       Obs                 269
+25%       -65000       -1040000       Sum of wgt.         269
+
+50%       -10000                      Mean           3765.331
+                        Largest       Std. dev.      573666.2
+75%        85000        1700000
+90%       240000        1750000       Variance       3.29e+11
+95%       550000        2170000       Skewness      -3.974137
+99%      1750000        3500000       Kurtosis       65.44258
+
+. 
+. * --- IRA: sum sq171_1 sq171_2 sq171_3 (kept as reported)
+. capture drop flow_ira_2022
+
+. egen double flow_ira_2022 = rowtotal(sq171_1 sq171_2 sq171_3)
+
+. di as txt "IRA flow summary (row-sum of sq171_1/2/3):"
+IRA flow summary (row-sum of sq171_1/2/3):
+
+. summarize flow_ira_2022, detail
+
+                        flow_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs              14,442
+25%            0              0       Sum of wgt.      14,442
+
+50%            0                      Mean           3020.453
+                        Largest       Std. dev.      22134.57
+75%            0         500000
+90%            0         700000       Variance       4.90e+08
+95%        10000         895000       Skewness        20.9984
+99%        76200        1060000       Kurtosis       709.3016
+
+. tabstat flow_ira_2022, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+flow_ir~2022 |     14442.00      3020.45     22134.57         0.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+flow_ir~2022 |   1060000.00
+---------------------------
+
+. 
+. * --- Primary/secondary residence(s): sr013 (sell, inflow) - sr007 (buy, outflow) - 
+> sr024 (improvements, outflow)
+. capture drop flow_residences_2022
+
+. gen double flow_residences_2022 = .
+(14,442 missing values generated)
+
+. replace flow_residences_2022 = cond(missing(sr013),0,sr013) - ( cond(missing(sr007),
+> 0,sr007) + cond(missing(sr024),0,sr024) ) if !missing(sr013) | !missing(sr007) | !mi
+> ssing(sr024)
+(1,684 real changes made)
+
+. di as txt "Primary/secondary residences flow summary:"
+Primary/secondary residences flow summary:
+
+. summarize flow_residences_2022, detail
+
+                    flow_residences_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -600000       -2660000
+ 5%      -250000       -2050000
+10%      -130000       -1600000       Obs               1,684
+25%       -40000       -1003000       Sum of wgt.       1,684
+
+50%       -15000                      Mean          -5964.808
+                        Largest       Std. dev.      223486.3
+75%        -3000        1100000
+90%       150000        1225000       Variance       4.99e+10
+95%       312000        2000000       Skewness       1.574816
+99%       735000        3500000       Kurtosis         62.882
+
+. capture drop flow_ira_2022_neg
+
+. gen double flow_ira_2022_neg = -flow_ira_2022
+
+. 
+. capture drop flow_total_2022
+
+. egen double flow_total_2022 = rowtotal(flow_bus_2022 flow_stk_2022 flow_re_2022 flow
+> _ira_2022_neg flow_residences_2022)
+
+. di as txt "TOTAL net investment flows 2022 summary (sum across asset classes; IRA ne
+> gated):"
+TOTAL net investment flows 2022 summary (sum across asset classes; IRA negated):
+
+. summarize flow_total_2022, detail
+
+                       flow_total_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -225000       -6400000
+ 5%       -40000       -2660000
+10%       -12000       -2250000       Obs              14,442
+25%            0       -2050000       Sum of wgt.      14,442
+
+50%            0                      Mean          -2597.449
+                        Largest       Std. dev.      114032.6
+75%            0        2550000
+90%            0        2837500       Variance       1.30e+10
+95%            0        3406000       Skewness      -7.482348
+99%       244000        3500000       Kurtosis        914.561
+
+. tabstat flow_total_2022, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+flow_to~2022 |     14442.00     -2597.45    114032.65         0.00  -6400000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+flow_to~2022 |   3500000.00
+---------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Diagnostics...
+. * ---------------------------------------------------------------------
+. di as txt "=== Diagnostics: sr063 direction missing but sr064 magnitude present ==="
+=== Diagnostics: sr063 direction missing but sr064 magnitude present ===
+
+. capture confirm variable sr064
+
+. if _rc == 0 {
+.     quietly count if missing(sr063_dir) & !missing(sr064)
+.     di as txt "Records with sr064 present but sr063_dir missing = " r(N)
+Records with sr064 present but sr063_dir missing = 0
+.     quietly list hhid rsubhh sr063 sr063_dir sr064 flow_stk_private_2022 in 1/20 if 
+> missing(sr063_dir) & !missing(sr064)
+. }
+
+. 
+. di as txt "=== Diagnostics: magnitude present for sells/buys but computed flow missi
+> ng ==="
+=== Diagnostics: magnitude present for sells/buys but computed flow missing ===
+
+. foreach pair in "sr055 sr050 flow_bus_2022" "sr035 sr030 flow_re_2022" "sr013 sr007 
+> flow_residences_2022" "sr073 sr073 flow_stk_public_2022" {
+  2.     local sell : word 1 of `pair'
+  3.     local buy  : word 2 of `pair'
+  4.     local outv : word 3 of `pair'
+  5.     di as txt "---- Checking `outv' (sell `sell' ; buy `buy')"
+  6.     quietly count if ( (!missing(`sell') | !missing(`buy')) & missing(`outv') )
+  7.     di as txt "Records with sell/buy present but `outv' missing = " r(N)
+  8.     quietly list hhid rsubhh `sell' `buy' `outv' in 1/20 if ( (!missing(`sell') |
+>  !missing(`buy')) & missing(`outv') )
+  9. }
+---- Checking flow_bus_2022 (sell sr055 ; buy sr050)
+Records with sell/buy present but flow_bus_2022 missing = 97
+---- Checking flow_re_2022 (sell sr035 ; buy sr030)
+Records with sell/buy present but flow_re_2022 missing = 0
+---- Checking flow_residences_2022 (sell sr013 ; buy sr007)
+Records with sell/buy present but flow_residences_2022 missing = 0
+---- Checking flow_stk_public_2022 (sell sr073 ; buy sr073)
+Records with sell/buy present but flow_stk_public_2022 missing = 0
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
+    > 022_master.dta saved
+
+. di as txt "Saved 2022 net-flow vars back to master: `master'"
+Saved 2022 net-flow vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beliefsand
+> Trust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/compute_net_flows_2022.log
+  log type:  text
+ closed on:  22 Sep 2025, 12:15:49
+--------------------------------------------------------------------------------------

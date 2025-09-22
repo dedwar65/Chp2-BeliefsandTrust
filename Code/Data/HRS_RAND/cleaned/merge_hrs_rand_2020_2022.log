@@ -1,0 +1,145 @@
+--------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/merge_hrs_rand_2020_2022.log
+  log type:  text
+ opened on:  22 Sep 2025, 12:15:43
+
+. 
+. set more off
+
+. 
+. * --- file paths
+. local cleaned "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND
+> /cleaned"
+
+. local file2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
+> D/_raw/2020/h20f1a_STATA/hrs_2020_selected.dta"
+
+. local file2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
+> D/_raw/2022/h22e3a_STATA/hrs_2022_selected.dta"
+
+. local alt2020  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
+> D/cleaned/hrs_2020_selected.dta"
+
+. local alt2022  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
+> D/cleaned/hrs_2022_selected.dta"
+
+. local out "`cleaned'/hrs_rand_2020_2022_master.dta"
+
+. 
+. * --- check files exist
+. capture confirm file "`file2020'"
+
+. if _rc {
+.     capture confirm file "`alt2020'"
+.     if !_rc {
+.         local file2020 "`alt2020'"
+.     }
+. }
+
+. capture confirm file "`file2022'"
+
+. if _rc {
+.     capture confirm file "`alt2022'"
+.     if !_rc {
+.         local file2022 "`alt2022'"
+.     }
+. }
+
+. capture confirm file "`file2020'"
+
+. if _rc {
+.     di as error "ERROR: 2020 file not found -> `file2020'"
+.     exit 198
+. }
+
+. capture confirm file "`file2022'"
+
+. if _rc {
+.     di as error "ERROR: 2022 file not found -> `file2022'"
+.     exit 198
+. }
+
+. 
+. * --- prepare 2022 file: align key name (ssubhh -> rsubhh)
+. tempfile using2022
+
+. use "`file2022'", clear
+
+. capture confirm variable ssubhh
+
+. if _rc {
+.     di as error "ERROR: key ssubhh not found in 2022 file."
+.     describe
+.     exit 198
+. }
+
+. rename ssubhh rsubhh
+
+. save "`using2022'", replace
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_25304.000002 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_25304.000002 saved as .dta
+    format
+
+. 
+. * ---------------------------------------------------------------------
+. * Load 2020 data (master) and merge 2022 data
+. * ---------------------------------------------------------------------
+. use "`file2020'", clear
+
+. merge 1:1 hhid rsubhh using "`using2022'"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         5,470
+        from master                     2,518  (_merge==1)
+        from using                      2,952  (_merge==2)
+
+    Matched                             8,972  (_merge==3)
+    -----------------------------------------
+
+. 
+. * --- inspect merge results
+. di as txt "Merge 2020 + 2022 RAND results:"
+Merge 2020 + 2022 RAND results:
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |      2,518       17.44       17.44
+         Using only (2) |      2,952       20.44       37.88
+            Matched (3) |      8,972       62.12      100.00
+------------------------+-----------------------------------
+                  Total |     14,442      100.00
+
+. 
+. * --- optionally keep only matched households
+. * keep if _merge==3
+. 
+. * --- drop _merge after inspection
+. drop _merge
+
+. 
+. * ---------------------------------------------------------------------
+. * Save final master dataset
+. * ---------------------------------------------------------------------
+. save "`out'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
+    > 022_master.dta saved
+
+. di as txt "Saved merged 2020+2022 HRS RAND data to `out'"
+Saved merged 2020+2022 HRS RAND data to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandT
+> rust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/merge_hrs_rand_2020_2022.log
+  log type:  text
+ closed on:  22 Sep 2025, 12:15:43
+--------------------------------------------------------------------------------------
