@@ -124,6 +124,7 @@ else {
         replace mort1_pay_annual = SH025 * SH029_mult if !missing(SH025) & !missing(SH029_mult)
         di as txt "First mortgage annual payment summary (mort1_pay_annual):"
         summarize mort1_pay_annual, detail
+        
     }
 }
 
@@ -143,6 +144,7 @@ else {
         replace mort2_pay_annual = SH036 * SH040_mult if !missing(SH036) & !missing(SH040_mult)
         di as txt "Second mortgage annual payment summary (mort2_pay_annual):"
         summarize mort2_pay_annual, detail
+        
     }
 }
 
@@ -162,39 +164,18 @@ else {
         replace secmort_pay_annual = SH175 * SH179_mult if !missing(SH175) & !missing(SH179_mult)
         di as txt "Secondary mortgage annual payment summary (secmort_pay_annual):"
         summarize secmort_pay_annual, detail
+        
     }
 }
 
 * ---------------------------------------------------------------------
 * 6) Diagnostics: cases where amount exists but multiplier missing
 * ---------------------------------------------------------------------
-di as txt "Diagnostics: amount present but multiplier missing (first mortgage)"
-quietly count if !missing(SH025) & missing(SH029_mult)
-di as txt "Records with SH025 present & SH029_mult missing = " r(N)
-quietly list HHID RSUBHH SH025 SH029 SH029_mult mort1_pay_annual in 1/20 if !missing(SH025) & missing(SH029_mult)
-
-di as txt "Diagnostics: amount present but multiplier missing (second mortgage)"
-quietly count if !missing(SH036) & missing(SH040_mult)
-di as txt "Records with SH036 present & SH040_mult missing = " r(N)
-quietly list HHID RSUBHH SH036 SH040 SH040_mult mort2_pay_annual in 1/20 if !missing(SH036) & missing(SH040_mult)
-
-di as txt "Diagnostics: amount present but multiplier missing (secondary residence mortgage)"
-quietly count if !missing(SH175) & missing(SH179_mult)
-di as txt "Records with SH175 present & SH179_mult missing = " r(N)
-quietly list HHID RSUBHH SH175 SH179 SH179_mult secmort_pay_annual in 1/20 if !missing(SH175) & missing(SH179_mult)
+ 
 
 * ---------------------------------------------------------------------
-* 7) Sum annual payments across mortgage types
-* ---------------------------------------------------------------------
-capture drop mortgage_payments_total_2022
-egen double mortgage_payments_total_2022 = rowtotal(mort1_pay_annual mort2_pay_annual secmort_pay_annual)
-
-di as txt "TOTAL mortgage payments (annual) summary:"
-summarize mortgage_payments_total_2022, detail
-tabstat mortgage_payments_total_2022, stats(n mean sd p50 min max) format(%12.2f)
-
-* ---------------------------------------------------------------------
-* 8) Save dataset with new mortgage payment variables BACK TO MASTER
+* (Total across mortgage types will be computed in compute_returns)
+* Save dataset with new mortgage payment variables BACK TO MASTER
 * ---------------------------------------------------------------------
 save "`master'", replace
 di as txt "Saved mortgage payment vars back to master: `master'"

@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_net_flows_2022.log
   log type:  text
- opened on:  22 Sep 2025, 12:15:48
+ opened on:  23 Sep 2025, 16:58:57
 
 . 
 . set more off
@@ -137,45 +137,42 @@ sr063_dir summary:
 . 
 . * Flows
 . * --- Private business: sr055 (sell/inflow) minus sr050 (invest/outflow)
-. capture confirm variable sr055
+. capture drop flow_bus_2022
 
-. if _rc {
-.     di as txt "sr055 missing -> setting flow_bus_2022 to missing"
-.     gen double flow_bus_2022 = .
-. }
-
-. else {
-.     capture confirm variable sr050
-.     if _rc {
-.         di as txt "sr050 missing; using sr055 only for flow_bus_2022"
-.         gen double flow_bus_2022 = sr055
-.     }
-.     else {
-.         capture drop flow_bus_2022
-.         gen double flow_bus_2022 = . 
+. gen double flow_bus_2022 = .
 (14,442 missing values generated)
-.         replace flow_bus_2022 = sr055 - sr050 if !missing(sr055) | !missing(sr050)
+
+. * both present -> net
+. replace flow_bus_2022 = sr055 - sr050 if !missing(sr055) & !missing(sr050)
 (3 real changes made)
-.     }
-.     di as txt "Private business flow summary:"
+
+. * sell only -> positive inflow
+. replace flow_bus_2022 = sr055 if  missing(sr050) & !missing(sr055)
+(17 real changes made)
+
+. * buy only -> negative outflow
+. replace flow_bus_2022 = -sr050 if !missing(sr050) &  missing(sr055)
+(80 real changes made)
+
+. di as txt "Private business flow summary:"
 Private business flow summary:
-.     summarize flow_bus_2022, detail
+
+. summarize flow_bus_2022, detail
 
                         flow_bus_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%       -55000         -55000
- 5%       -55000              0
-10%       -55000        2750000       Obs                   3
-25%       -55000              .       Sum of wgt.           3
+ 1%     -1000000       -1000000
+ 5%      -195000       -1000000
+10%      -100000        -300000       Obs                 100
+25%       -25000        -200000       Sum of wgt.         100
 
-50%            0                      Mean           898333.3
-                        Largest       Std. dev.       1603826
-75%      2750000              .
-90%      2750000         -55000       Variance       2.57e+12
-95%      2750000              0       Skewness       .7061714
-99%      2750000        2750000       Kurtosis            1.5
-. }
+50%        -5000                      Mean            51412.5
+                        Largest       Std. dev.      499773.3
+75%         -650         685670
+90%       112500        1450000       Variance       2.50e+11
+95%       248000        2750000       Skewness       4.977627
+99%      3125000        3500000       Kurtosis       32.86307
 
 . 
 . * --- Private stocks: sr063_dir * sr064
@@ -251,27 +248,49 @@ Public stock (sold) flow summary (sr073):
 . * Combine private + public stocks into total stocks flow
 . capture drop flow_stk_2022
 
-. egen double flow_stk_2022 = rowtotal(flow_stk_private_2022 flow_stk_public_2022)
+. gen double flow_stk_2022 = cond(!missing(flow_stk_private_2022), flow_stk_private_20
+> 22, 0) + ///
+>                             cond(!missing(flow_stk_public_2022),  flow_stk_public_20
+> 22,  0)
 
-. di as txt "TOTAL stocks flow (2022) summary:"
-TOTAL stocks flow (2022) summary:
+. replace flow_stk_2022 = . if missing(flow_stk_private_2022) & missing(flow_stk_publi
+> c_2022)
+(14,164 real changes made, 14,164 to missing)
+
+. di as txt "TOTAL stocks flow (2022) summary (missing when both components missing):"
+TOTAL stocks flow (2022) summary (missing when both components missing):
 
 . summarize flow_stk_2022, detail
 
                         flow_stk_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0       -2000000
- 5%            0        -300000
-10%            0        -300000       Obs              14,442
-25%            0        -250000       Sum of wgt.      14,442
+ 1%      -300000       -2000000
+ 5%       -80000        -300000
+10%       -20000        -300000       Obs                 278
+25%          600        -250000       Sum of wgt.         278
 
-50%            0                      Mean           861.7838
-                        Largest       Std. dev.      28503.26
-75%            0         600000
-90%            0         730000       Variance       8.12e+08
-95%            0        1000000       Skewness      -4.392966
-99%        12000        1600000       Kurtosis       2563.473
+50%        15000                      Mean           44769.36
+                        Largest       Std. dev.      200953.7
+75%        54000         600000
+90%       180000         730000       Variance       4.04e+10
+95%       300000        1000000       Skewness      -1.321848
+99%       730000        1600000       Kurtosis       55.15205
+
+. 
+. * Quick check: households with BOTH public (sr073) and private magnitude (sr064) pre
+> sent
+. di as txt "Checking overlap: sr073 (public sells) AND sr064 (private magnitude) both
+>  non-missing"
+Checking overlap: sr073 (public sells) AND sr064 (private magnitude) both non-missing
+
+. quietly count if !missing(sr073) & !missing(sr064)
+
+. di as txt "Count with sr073 & sr064 both present = " r(N)
+Count with sr073 & sr064 both present = 0
+
+. quietly list hhid rsubhh sr073 sr064 flow_stk_public_2022 flow_stk_private_2022 in 1
+> /10 if !missing(sr073) & !missing(sr064)
 
 . 
 . * --- Real estate: sr035 (sold, inflow) - sr030 (buy, outflow) - sr045 (improvement 
@@ -307,13 +326,54 @@ Real estate flow summary:
 99%      1750000        3500000       Kurtosis       65.44258
 
 . 
+. * Overlap diagnostics for real estate raw components (buy/sell/improvements)
+. gen byte ok_buy  = !missing(sr030)
+
+. gen byte ok_sell = !missing(sr035)
+
+. gen byte ok_impr = !missing(sr045)
+
+. gen byte re_pattern = ok_sell*4 + ok_buy*2 + ok_impr
+
+. label define rePat 0 "none" 1 "impr only" 2 "buy only" 3 "buy+impr" 4 "sell only" 5 
+> "sell+impr" 6 "sell+buy" 7 "sell+buy+impr"
+
+. label values re_pattern rePat
+
+. di as txt "Counts of buy/sell/improvements presence patterns (real estate):"
+Counts of buy/sell/improvements presence patterns (real estate):
+
+. tab re_pattern, missing
+
+   re_pattern |      Freq.     Percent        Cum.
+--------------+-----------------------------------
+         none |     14,173       98.14       98.14
+    impr only |         75        0.52       98.66
+     buy only |         63        0.44       99.09
+     buy+impr |         16        0.11       99.20
+    sell only |        100        0.69       99.90
+    sell+impr |         15        0.10      100.00
+--------------+-----------------------------------
+        Total |     14,442      100.00
+
+. quietly count if ok_sell & ok_buy & ok_impr
+
+. di as txt "Households with ALL THREE present = " r(N)
+Households with ALL THREE present = 0
+
+. 
 . * --- IRA: sum sq171_1 sq171_2 sq171_3 (kept as reported)
 . capture drop flow_ira_2022
 
 . egen double flow_ira_2022 = rowtotal(sq171_1 sq171_2 sq171_3)
 
-. di as txt "IRA flow summary (row-sum of sq171_1/2/3):"
-IRA flow summary (row-sum of sq171_1/2/3):
+. * Set to missing if ALL three components are missing
+. replace flow_ira_2022 = . if missing(sq171_1) & missing(sq171_2) & missing(sq171_3)
+(13,154 real changes made, 13,154 to missing)
+
+. di as txt "IRA flow summary (row-sum of sq171_1/2/3; missing when all three missing)
+> :"
+IRA flow summary (row-sum of sq171_1/2/3; missing when all three missing):
 
 . summarize flow_ira_2022, detail
 
@@ -321,28 +381,61 @@ IRA flow summary (row-sum of sq171_1/2/3):
 -------------------------------------------------------------
       Percentiles      Smallest
  1%            0              0
- 5%            0              0
-10%            0              0       Obs              14,442
-25%            0              0       Sum of wgt.      14,442
+ 5%          600              0
+10%         1200              0       Obs               1,288
+25%         4000              0       Sum of wgt.       1,288
 
-50%            0                      Mean           3020.453
-                        Largest       Std. dev.      22134.57
-75%            0         500000
-90%            0         700000       Variance       4.90e+08
-95%        10000         895000       Skewness        20.9984
-99%        76200        1060000       Kurtosis       709.3016
+50%        14000                      Mean           33867.53
+                        Largest       Std. dev.      66722.69
+75%        37218         500000
+90%        82000         700000       Variance       4.45e+09
+95%       120000         895000       Skewness       7.119528
+99%       300000        1060000       Kurtosis       81.95964
 
 . tabstat flow_ira_2022, stats(n mean sd p50 min max) format(%12.2f)
 
     Variable |            N         Mean           SD          p50          Min
 -------------+-----------------------------------------------------------------
-flow_ir~2022 |     14442.00      3020.45     22134.57         0.00         0.00
+flow_ir~2022 |      1288.00     33867.53     66722.69     14000.00         0.00
 -------------------------------------------------------------------------------
 
     Variable |          Max
 -------------+-------------
 flow_ir~2022 |   1060000.00
 ---------------------------
+
+. 
+. * Overlap diagnostics for IRA components
+. gen byte ok_ira1 = !missing(sq171_1)
+
+. gen byte ok_ira2 = !missing(sq171_2)
+
+. gen byte ok_ira3 = !missing(sq171_3)
+
+. gen byte ira_pattern = ok_ira1*4 + ok_ira2*2 + ok_ira3
+
+. label define iraPat 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+2
+> " 7 "1+2+3"
+
+. label values ira_pattern iraPat
+
+. di as txt "Counts of presence patterns for IRA components (sq171_1/2/3):"
+Counts of presence patterns for IRA components (sq171_1/2/3):
+
+. tab ira_pattern, missing
+
+ira_pattern |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       none |     13,154       91.08       91.08
+     3 only |         30        0.21       91.29
+     2 only |        105        0.73       92.02
+        2+3 |         17        0.12       92.13
+     1 only |        827        5.73       97.86
+        1+3 |         33        0.23       98.09
+        1+2 |        206        1.43       99.52
+      1+2+3 |         70        0.48      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
 
 . 
 . * --- Primary/secondary residence(s): sr013 (sell, inflow) - sr007 (buy, outflow) - 
@@ -377,91 +470,107 @@ Primary/secondary residences flow summary:
 95%       312000        2000000       Skewness       1.574816
 99%       735000        3500000       Kurtosis         62.882
 
-. capture drop flow_ira_2022_neg
-
-. gen double flow_ira_2022_neg = -flow_ira_2022
+. 
+. * Ensure missing only when all three residence components are missing
+. replace flow_residences_2022 = . if missing(sr013) & missing(sr007) & missing(sr024)
+(0 real changes made)
 
 . 
+. * Overlap diagnostics for residence components (buy/sell/improvements)
+. gen byte ok_res_buy  = !missing(sr007)
+
+. gen byte ok_res_sell = !missing(sr013)
+
+. gen byte ok_res_impr = !missing(sr024)
+
+. gen byte res_pattern = ok_res_sell*4 + ok_res_buy*2 + ok_res_impr
+
+. label define resPat 0 "none" 1 "impr only" 2 "buy only" 3 "buy+impr" 4 "sell only" 5
+>  "sell+impr" 6 "sell+buy" 7 "sell+buy+impr", replace
+
+. label values res_pattern resPat
+
+. di as txt "Counts of presence patterns for residence components (sr007/sr013/sr024):
+> "
+Counts of presence patterns for residence components (sr007/sr013/sr024):
+
+. tab res_pattern, missing
+
+  res_pattern |      Freq.     Percent        Cum.
+--------------+-----------------------------------
+         none |     12,758       88.34       88.34
+    impr only |      1,142        7.91       96.25
+     buy only |         87        0.60       96.85
+     buy+impr |         38        0.26       97.11
+    sell only |        162        1.12       98.23
+    sell+impr |         53        0.37       98.60
+     sell+buy |        114        0.79       99.39
+sell+buy+impr |         88        0.61      100.00
+--------------+-----------------------------------
+        Total |     14,442      100.00
+
+. quietly count if ok_res_sell & ok_res_buy & ok_res_impr
+
+. di as txt "Households with ALL THREE residence components present = " r(N)
+Households with ALL THREE residence components present = 88
+
+. * ---------------------------------------------------------------------
+. * Total net investment flows for 2022
+. * Missing only if ALL asset class flows are missing
+. * Otherwise, sum non-missing flows (treat missing as zero)
+. * ---------------------------------------------------------------------
 . capture drop flow_total_2022
 
-. egen double flow_total_2022 = rowtotal(flow_bus_2022 flow_stk_2022 flow_re_2022 flow
-> _ira_2022_neg flow_residences_2022)
+. gen double flow_total_2022 = .
+(14,442 missing values generated)
 
-. di as txt "TOTAL net investment flows 2022 summary (sum across asset classes; IRA ne
-> gated):"
-TOTAL net investment flows 2022 summary (sum across asset classes; IRA negated):
+. * Check if at least one asset class has non-missing flow
+. egen byte any_flow_present = rownonmiss(flow_bus_2022 flow_re_2022 flow_stk_2022 flo
+> w_ira_2022 flow_residences_2022)
+
+. * Compute total only if at least one flow is present
+. replace flow_total_2022 = cond(missing(flow_bus_2022),0,flow_bus_2022) + ///
+>                          cond(missing(flow_re_2022),0,flow_re_2022) + ///
+>                          cond(missing(flow_stk_2022),0,flow_stk_2022) + ///
+>                          cond(missing(flow_ira_2022),0,flow_ira_2022) + ///
+>                          cond(missing(flow_residences_2022),0,flow_residences_2022) 
+> ///
+>                          if any_flow_present > 0
+(2,901 real changes made)
+
+. drop any_flow_present
+
+. 
+. di as txt "Total net investment flows (flow_total_2022) summary:"
+Total net investment flows (flow_total_2022) summary:
 
 . summarize flow_total_2022, detail
 
                        flow_total_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%      -225000       -6400000
- 5%       -40000       -2660000
-10%       -12000       -2250000       Obs              14,442
-25%            0       -2050000       Sum of wgt.      14,442
+ 1%      -598400       -6400000
+ 5%      -190000       -2660000
+10%       -75000       -2050000       Obs               2,901
+25%       -19500       -1840000       Sum of wgt.       2,901
 
-50%            0                      Mean          -2597.449
-                        Largest       Std. dev.      114032.6
-75%            0        2550000
-90%            0        2837500       Variance       1.30e+10
-95%            0        3406000       Skewness      -7.482348
-99%       244000        3500000       Kurtosis        914.561
+50%          750                      Mean           17985.74
+                        Largest       Std. dev.      269453.3
+75%        27000        2862500
+90%       142230        3450000       Variance       7.26e+10
+95%       296000        3474000       Skewness      -1.940754
+99%       800000        3500000       Kurtosis       157.8651
 
-. tabstat flow_total_2022, stats(n mean sd p50 min max) format(%12.2f)
+. quietly count if !missing(flow_total_2022)
 
-    Variable |            N         Mean           SD          p50          Min
--------------+-----------------------------------------------------------------
-flow_to~2022 |     14442.00     -2597.45    114032.65         0.00  -6400000.00
--------------------------------------------------------------------------------
-
-    Variable |          Max
--------------+-------------
-flow_to~2022 |   3500000.00
----------------------------
+. di as txt "Records with flow_total_2022 computed = " r(N)
+Records with flow_total_2022 computed = 2901
 
 . 
 . * ---------------------------------------------------------------------
 . * Diagnostics...
 . * ---------------------------------------------------------------------
-. di as txt "=== Diagnostics: sr063 direction missing but sr064 magnitude present ==="
-=== Diagnostics: sr063 direction missing but sr064 magnitude present ===
-
-. capture confirm variable sr064
-
-. if _rc == 0 {
-.     quietly count if missing(sr063_dir) & !missing(sr064)
-.     di as txt "Records with sr064 present but sr063_dir missing = " r(N)
-Records with sr064 present but sr063_dir missing = 0
-.     quietly list hhid rsubhh sr063 sr063_dir sr064 flow_stk_private_2022 in 1/20 if 
-> missing(sr063_dir) & !missing(sr064)
-. }
-
-. 
-. di as txt "=== Diagnostics: magnitude present for sells/buys but computed flow missi
-> ng ==="
-=== Diagnostics: magnitude present for sells/buys but computed flow missing ===
-
-. foreach pair in "sr055 sr050 flow_bus_2022" "sr035 sr030 flow_re_2022" "sr013 sr007 
-> flow_residences_2022" "sr073 sr073 flow_stk_public_2022" {
-  2.     local sell : word 1 of `pair'
-  3.     local buy  : word 2 of `pair'
-  4.     local outv : word 3 of `pair'
-  5.     di as txt "---- Checking `outv' (sell `sell' ; buy `buy')"
-  6.     quietly count if ( (!missing(`sell') | !missing(`buy')) & missing(`outv') )
-  7.     di as txt "Records with sell/buy present but `outv' missing = " r(N)
-  8.     quietly list hhid rsubhh `sell' `buy' `outv' in 1/20 if ( (!missing(`sell') |
->  !missing(`buy')) & missing(`outv') )
-  9. }
----- Checking flow_bus_2022 (sell sr055 ; buy sr050)
-Records with sell/buy present but flow_bus_2022 missing = 97
----- Checking flow_re_2022 (sell sr035 ; buy sr030)
-Records with sell/buy present but flow_re_2022 missing = 0
----- Checking flow_residences_2022 (sell sr013 ; buy sr007)
-Records with sell/buy present but flow_residences_2022 missing = 0
----- Checking flow_stk_public_2022 (sell sr073 ; buy sr073)
-Records with sell/buy present but flow_stk_public_2022 missing = 0
-
+. * (Generic diagnostics removed)
 . 
 . save "`master'", replace
 file /Volumes/SSD
@@ -478,5 +587,5 @@ Saved 2022 net-flow vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beli
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_net_flows_2022.log
   log type:  text
- closed on:  22 Sep 2025, 12:15:49
+ closed on:  23 Sep 2025, 16:58:57
 --------------------------------------------------------------------------------------

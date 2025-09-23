@@ -79,54 +79,82 @@ foreach v of local freqvars {
 }
 
 * ---------------------------------------------------------------------
-* map_freq_to_mult: maps numeric frequency codes -> annual multipliers
+* Asset-specific frequency -> annual multiplier mappings (wave-accurate)
+* Mirrors the corrected RAND mappings, adapted to HRS variable names
 * ---------------------------------------------------------------------
-capture program drop map_freq_to_mult
-program define map_freq_to_mult, rclass
-    syntax varname
-    local fq = "`varlist'"
 
-    capture drop `fq'_lbl
-    capture drop `fq'_mult
+di as txt "=== Mapping 2022 frequency variables (asset-specific rules) ==="
 
-    local labname : value label `fq'
-    if "`labname'" != "" {
-        decode `fq', gen(`fq'_lbl)
-    }
+* --- Rental income (SQ139): 1=weekly, 2=2x/month, 3=monthly, 4=quarterly, 5=6mo, 6=yearly
+capture drop `f2022_re'_mult
+gen double `f2022_re'_mult = .
+quietly replace `f2022_re'_mult = 52 if `f2022_re' == 1
+quietly replace `f2022_re'_mult = 24 if `f2022_re' == 2
+quietly replace `f2022_re'_mult = 12 if `f2022_re' == 3
+quietly replace `f2022_re'_mult = 4  if `f2022_re' == 4
+quietly replace `f2022_re'_mult = 2  if `f2022_re' == 5
+quietly replace `f2022_re'_mult = 1  if `f2022_re' == 6
+di as txt "`f2022_re'_mult nonmissing observations = " _N - sum(missing(`f2022_re'_mult))
 
-    gen double `fq'_mult = .
-    quietly replace `fq'_mult = 52 if `fq' == 1
-    quietly replace `fq'_mult = 24 if `fq' == 2
-    quietly replace `fq'_mult = 12 if `fq' == 3
-    quietly replace `fq'_mult = 4  if `fq' == 4
-    quietly replace `fq'_mult = 2  if `fq' == 5
-    quietly replace `fq'_mult = 1  if `fq' == 6
+* --- Business income (SQ153): same mapping as rental
+capture drop `f2022_bus'_mult
+gen double `f2022_bus'_mult = .
+quietly replace `f2022_bus'_mult = 52 if `f2022_bus' == 1
+quietly replace `f2022_bus'_mult = 24 if `f2022_bus' == 2
+quietly replace `f2022_bus'_mult = 12 if `f2022_bus' == 3
+quietly replace `f2022_bus'_mult = 4  if `f2022_bus' == 4
+quietly replace `f2022_bus'_mult = 2  if `f2022_bus' == 5
+quietly replace `f2022_bus'_mult = 1  if `f2022_bus' == 6
+di as txt "`f2022_bus'_mult nonmissing observations = " _N - sum(missing(`f2022_bus'_mult))
 
-    di as txt "Mapping numeric codes to multipliers for `fq' completed."
-    capture confirm variable `fq'_lbl
-    if _rc == 0 {
-        di as txt "Showing unique value-label text for `fq' (if present):"
-        tab `fq'_lbl, nolabel
-    }
-    else {
-        di as txt "No value label attached to `fq' (or decode missing). Showing raw numeric codes:"
-        tab `fq', missing
-    }
-    quietly count if !missing(`fq'_mult)
-    di as txt "`fq'_mult nonmissing observations = " r(N)
-end
+* --- IRA annuity frequency (SQ194): 3=monthly, 4=quarterly, 5=6mo, 6=yearly
+capture drop `f2022_ira'_mult
+gen double `f2022_ira'_mult = .
+quietly replace `f2022_ira'_mult = 12 if `f2022_ira' == 3
+quietly replace `f2022_ira'_mult = 4  if `f2022_ira' == 4
+quietly replace `f2022_ira'_mult = 2  if `f2022_ira' == 5
+quietly replace `f2022_ira'_mult = 1  if `f2022_ira' == 6
+di as txt "`f2022_ira'_mult nonmissing observations = " _N - sum(missing(`f2022_ira'_mult))
 
-* ---------------------------
-* Apply mapping to all 2022 frequency variables
-* ---------------------------
-di as txt "=== Mapping 2022 frequency variables ==="
-map_freq_to_mult `f2022_re'
-map_freq_to_mult `f2022_bus'
-map_freq_to_mult `f2022_ira'
-map_freq_to_mult `f2022_stk'
-map_freq_to_mult `f2022_bnd'
-map_freq_to_mult `f2022_cash'
-map_freq_to_mult `f2022_cds'
+* --- Stock dividends (SQ322): 1=accumulates (map to 0), 3=monthly, 4=quarterly, 5=6mo, 6=yearly
+capture drop `f2022_stk'_mult
+gen double `f2022_stk'_mult = .
+quietly replace `f2022_stk'_mult = 0  if `f2022_stk' == 1
+quietly replace `f2022_stk'_mult = 12 if `f2022_stk' == 3
+quietly replace `f2022_stk'_mult = 4  if `f2022_stk' == 4
+quietly replace `f2022_stk'_mult = 2  if `f2022_stk' == 5
+quietly replace `f2022_stk'_mult = 1  if `f2022_stk' == 6
+di as txt "`f2022_stk'_mult nonmissing observations = " _N - sum(missing(`f2022_stk'_mult))
+
+* --- Bond interest (SQ336): same as stocks (1 accumulates -> 0)
+capture drop `f2022_bnd'_mult
+gen double `f2022_bnd'_mult = .
+quietly replace `f2022_bnd'_mult = 0  if `f2022_bnd' == 1
+quietly replace `f2022_bnd'_mult = 12 if `f2022_bnd' == 3
+quietly replace `f2022_bnd'_mult = 4  if `f2022_bnd' == 4
+quietly replace `f2022_bnd'_mult = 2  if `f2022_bnd' == 5
+quietly replace `f2022_bnd'_mult = 1  if `f2022_bnd' == 6
+di as txt "`f2022_bnd'_mult nonmissing observations = " _N - sum(missing(`f2022_bnd'_mult))
+
+* --- Checking/savings interest (SQ350): same as stocks (1 accumulates -> 0)
+capture drop `f2022_cash'_mult
+gen double `f2022_cash'_mult = .
+quietly replace `f2022_cash'_mult = 0  if `f2022_cash' == 1
+quietly replace `f2022_cash'_mult = 12 if `f2022_cash' == 3
+quietly replace `f2022_cash'_mult = 4  if `f2022_cash' == 4
+quietly replace `f2022_cash'_mult = 2  if `f2022_cash' == 5
+quietly replace `f2022_cash'_mult = 1  if `f2022_cash' == 6
+di as txt "`f2022_cash'_mult nonmissing observations = " _N - sum(missing(`f2022_cash'_mult))
+
+* --- CDs/T-bills/gov bonds (SQ362): same as stocks (1 accumulates -> 0)
+capture drop `f2022_cds'_mult
+gen double `f2022_cds'_mult = .
+quietly replace `f2022_cds'_mult = 0  if `f2022_cds' == 1
+quietly replace `f2022_cds'_mult = 12 if `f2022_cds' == 3
+quietly replace `f2022_cds'_mult = 4  if `f2022_cds' == 4
+quietly replace `f2022_cds'_mult = 2  if `f2022_cds' == 5
+quietly replace `f2022_cds'_mult = 1  if `f2022_cds' == 6
+di as txt "`f2022_cds'_mult nonmissing observations = " _N - sum(missing(`f2022_cds'_mult))
 
 * ---------------------------------------------------------------------
 * Compute per-asset interest for 2022 when both amount & multiplier exist
@@ -170,10 +198,7 @@ replace int_cds_2022 = `a2022_cds' * `f2022_cds'_mult if !missing(`a2022_cds') &
 di as txt "CDS/t-bills (2022) summary:"
 summarize int_cds_2022, detail
 
-egen double int_total_2022 = rowtotal(int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2022 int_cds_2022)
-di as txt "TOTAL interest/dividends 2022 summary (sum across asset classes):"
-summarize int_total_2022, detail
-tabstat int_total_2022, stats(n mean sd p50 min max) format(%12.2f)
+/* removed total computations; totals will be computed in compute_returns */
 
 * ---------------------------------------------------------------------
 * Diagnostics: find cases where amount exists but multiplier missing (2022)

@@ -55,7 +55,7 @@ di as txt "Records with non-missing liab_total_2020 = " r(N)
 
 capture drop networth_A2020
 gen double networth_A2020 = .
-replace networth_A2020 = (cond(missing(assets_total_2020),0,assets_total_2020) - cond(missing(liab_total_2020),0,liab_total_2020)) if n_assets_2020 > 0 | n_liab_2020 > 0
+replace networth_A2020 = (cond(missing(assets_total_2020),0,assets_total_2020) - cond(missing(liab_total_2020),0,liab_total_2020)) if n_assets_2020 > 0
 
 di as txt "Summary: networth_A2020 (assets_total_2020 - liab_total_2020):"
 summarize networth_A2020, detail

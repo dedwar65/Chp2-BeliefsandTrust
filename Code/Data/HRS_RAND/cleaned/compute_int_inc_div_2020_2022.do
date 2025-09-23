@@ -1,6 +1,6 @@
 *----------------------------------------------------------------------
-* RAND: compute_interest_dividends_2022.do
-* Mirror HRS version structure, diagnostics, and summaries (lowercase RAND vars)
+* compute_int_inc_div_2020_2022_modified.do
+* Asset-specific, wave-accurate frequency -> annual multiplier mappings
 *----------------------------------------------------------------------
 clear all
 capture log close
@@ -16,175 +16,214 @@ if _rc {
 }
 
 use "`master'", clear
+
 di as txt "Using master file: `master'"
 
 * ---------------------------------------------------------------------
-* 2022 (RAND lowercase) freq/amount pairs
+* Local mappings of RAND variable names (wave-specific locals)
+* NOTE: update these locals to match your RAND/Core variable names if needed
 * ---------------------------------------------------------------------
-local f2022_re   sq139
-local a2022_re   sq141
-local f2022_bus  sq153
+local f2022_re   sq139    // rental income frequency
+local a2022_re   sq141    // rental income amount (per period)
+local f2022_bus  sq153    // business income frequency
 local a2022_bus  sq155
-local f2022_ira  sq194
+local f2022_ira  sq194    // IRA annuity frequency
 local a2022_ira  sq190
-local f2022_stk  sq322
+local f2022_stk  sq322    // stock dividends frequency
 local a2022_stk  sq324
-local f2022_bnd  sq336
+local f2022_bnd  sq336    // bond interest frequency
 local a2022_bnd  sq338
-local f2022_cash sq350
+local f2022_cash sq350    // checking/savings interest frequency
 local a2022_cash sq352
-local f2022_cds  sq362
+local f2022_cds  sq362    // cds/gov bond frequency
 local a2022_cds  sq364
 
 * ---------------------------------------------------------------------
-* Recode frequency codes 7,8,9 -> missing ONLY for the frequency variables
+* Create per-asset frequency multiplier variables using the explicit
+* mappings derived from the survey coding you provided.
 * ---------------------------------------------------------------------
-local freqvars "`f2022_re' `f2022_bus' `f2022_ira' `f2022_stk' `f2022_bnd' `f2022_cash' `f2022_cds'"
-di as txt "Recoding frequency codes 7/8/9 -> missing for 2022 frequency variables (only)."
-foreach v of local freqvars {
-    capture confirm variable `v'
-    if _rc {
-        di as txt "  Variable `v' not found in dataset -- skipping"
-    }
-    else {
-        capture confirm numeric variable `v'
-        if _rc {
-            di as txt "  Variable `v' is not numeric -- skipping recode (check type)."
-        }
-        else {
-            quietly count if inlist(`v',7,8,9)
-            di as txt "  `v' records with codes 7/8/9 before recode = " r(N)
-            quietly replace `v' = . if inlist(`v',7,8,9)
-            quietly count if inlist(`v',7,8,9)
-            di as txt "  `v' records with codes 7/8/9 after recode  = " r(N)
-        }
-    }
+
+* --- Rental income (survey codes you provided):
+* 1 WEEKLY, 2 2x per month, 3 MONTHLY, 4 QUARTERLY, 5 EVERY 6 MONTHS, 6 YEARLY,
+* 7 OTHER, 8 DK, 9 RF, Blank INAP
+capture drop `f2022_re'_mult
+gen double `f2022_re'_mult = .
+quietly replace `f2022_re'_mult = 52 if `f2022_re' == 1
+quietly replace `f2022_re'_mult = 24 if `f2022_re' == 2
+quietly replace `f2022_re'_mult = 12 if `f2022_re' == 3
+quietly replace `f2022_re'_mult = 4  if `f2022_re' == 4
+quietly replace `f2022_re'_mult = 2  if `f2022_re' == 5
+quietly replace `f2022_re'_mult = 1  if `f2022_re' == 6
+* leave 7/8/9/missing as . (OTHER/DK/RF/INAP)
+
+di as txt "`f2022_re'_mult nonmissing = " _N - sum(missing(`f2022_re'_mult))
+
+* --- Business income (survey codes): 1 WEEKLY, 2 2x per month, 3 MONTHLY,
+* 4 QUARTERLY, 5 EVERY 6 MONTHS, 6 YEARLY, 7 OTHER, 8 DK, 9 RF, Blank INAP
+capture drop `f2022_bus'_mult
+gen double `f2022_bus'_mult = .
+quietly replace `f2022_bus'_mult = 52 if `f2022_bus' == 1
+quietly replace `f2022_bus'_mult = 24 if `f2022_bus' == 2
+quietly replace `f2022_bus'_mult = 12 if `f2022_bus' == 3
+quietly replace `f2022_bus'_mult = 4  if `f2022_bus' == 4
+quietly replace `f2022_bus'_mult = 2  if `f2022_bus' == 5
+quietly replace `f2022_bus'_mult = 1  if `f2022_bus' == 6
+
+di as txt "`f2022_bus'_mult nonmissing = " _N - sum(missing(`f2022_bus'_mult))
+
+* --- IRA annuity frequency (survey codes): 3 = MONTH, 4 = QUARTER, 5 = 6 MONTH,
+* 6 = YEAR, 7 = OTHER, 8 = DK, 9 = RF, Blank INAP
+capture drop `f2022_ira'_mult
+gen double `f2022_ira'_mult = .
+quietly replace `f2022_ira'_mult = 12 if `f2022_ira' == 3
+quietly replace `f2022_ira'_mult = 4  if `f2022_ira' == 4
+quietly replace `f2022_ira'_mult = 2  if `f2022_ira' == 5
+quietly replace `f2022_ira'_mult = 1  if `f2022_ira' == 6
+* leave other codes missing
+
+di as txt "`f2022_ira'_mult nonmissing = " _N - sum(missing(`f2022_ira'_mult))
+
+* --- Stock dividends (survey codes): 1 = IT ACCUMULATES OR IS REINVESTED,
+* 3 = MONTHLY, 4 = QUARTERLY, 5 = EVERY 6 MONTHS, 6 = YEARLY, 7 OTHER, 8 DK, 9 RF
+capture drop `f2022_stk'_mult
+gen double `f2022_stk'_mult = .
+quietly replace `f2022_stk'_mult = 0  if `f2022_stk' == 1   // accumulates/reinvested -> no realized cash flow
+quietly replace `f2022_stk'_mult = 12 if `f2022_stk' == 3
+quietly replace `f2022_stk'_mult = 4  if `f2022_stk' == 4
+quietly replace `f2022_stk'_mult = 2  if `f2022_stk' == 5
+quietly replace `f2022_stk'_mult = 1  if `f2022_stk' == 6
+
+di as txt "`f2022_stk'_mult nonmissing = " _N - sum(missing(`f2022_stk'_mult))
+
+* --- Bond interest (survey codes similar to stock): 1 accumulates, 3 monthly,
+* 4 quarterly, 5 every 6 months, 6 yearly, 7 other, 8 DK, 9 RF
+capture drop `f2022_bnd'_mult
+gen double `f2022_bnd'_mult = .
+quietly replace `f2022_bnd'_mult = 0  if `f2022_bnd' == 1
+quietly replace `f2022_bnd'_mult = 12 if `f2022_bnd' == 3
+quietly replace `f2022_bnd'_mult = 4  if `f2022_bnd' == 4
+quietly replace `f2022_bnd'_mult = 2  if `f2022_bnd' == 5
+quietly replace `f2022_bnd'_mult = 1  if `f2022_bnd' == 6
+
+di as txt "`f2022_bnd'_mult nonmissing = " _N - sum(missing(`f2022_bnd'_mult))
+
+* --- Cash (checking/savings) interest: 1 accumulates, 3 monthly, 4 quarterly,
+* 5 every 6 months, 6 yearly, 7 other, 8 DK, 9 RF
+capture drop `f2022_cash'_mult
+gen double `f2022_cash'_mult = .
+quietly replace `f2022_cash'_mult = 0  if `f2022_cash' == 1
+quietly replace `f2022_cash'_mult = 12 if `f2022_cash' == 3
+quietly replace `f2022_cash'_mult = 4  if `f2022_cash' == 4
+quietly replace `f2022_cash'_mult = 2  if `f2022_cash' == 5
+quietly replace `f2022_cash'_mult = 1  if `f2022_cash' == 6
+
+di as txt "`f2022_cash'_mult nonmissing = " _N - sum(missing(`f2022_cash'_mult))
+
+* --- CDs / government bonds / T-bills: 1 accumulates, 3 monthly, 4 quarterly,
+* 5 every 6 months, 6 yearly, 7 other, 8 DK, 9 RF
+capture drop `f2022_cds'_mult
+gen double `f2022_cds'_mult = .
+quietly replace `f2022_cds'_mult = 0  if `f2022_cds' == 1
+quietly replace `f2022_cds'_mult = 12 if `f2022_cds' == 3
+quietly replace `f2022_cds'_mult = 4  if `f2022_cds' == 4
+quietly replace `f2022_cds'_mult = 2  if `f2022_cds' == 5
+quietly replace `f2022_cds'_mult = 1  if `f2022_cds' == 6
+
+di as txt "`f2022_cds'_mult nonmissing = " _N - sum(missing(`f2022_cds'_mult))
+
+* ---------------------------------------------------------------------
+* Annualize amount/per-period variables into interest/dividend components
+* int_*_2022 = amount_per_period * freq_mult
+* We only create the int_* vars if the amount vars exist in the dataset.
+* ---------------------------------------------------------------------
+
+capture confirm variable `a2022_re'
+if _rc == 0 {
+    capture drop int_re_2022
+    gen double int_re_2022 = .
+    replace int_re_2022 = `a2022_re' * `f2022_re'_mult if !missing(`a2022_re') & !missing(`f2022_re'_mult)
+    di as txt "int_re_2022 computed: nonmissing = " _N - sum(missing(int_re_2022))
+}
+
+capture confirm variable `a2022_bus'
+if _rc == 0 {
+    capture drop int_bus_2022
+    gen double int_bus_2022 = .
+    replace int_bus_2022 = `a2022_bus' * `f2022_bus'_mult if !missing(`a2022_bus') & !missing(`f2022_bus'_mult)
+    di as txt "int_bus_2022 computed: nonmissing = " _N - sum(missing(int_bus_2022))
+}
+
+capture confirm variable `a2022_ira'
+if _rc == 0 {
+    capture drop int_ira_2022
+    gen double int_ira_2022 = .
+    replace int_ira_2022 = `a2022_ira' * `f2022_ira'_mult if !missing(`a2022_ira') & !missing(`f2022_ira'_mult)
+    di as txt "int_ira_2022 computed: nonmissing = " _N - sum(missing(int_ira_2022))
+}
+
+capture confirm variable `a2022_stk'
+if _rc == 0 {
+    capture drop int_stk_2022
+    gen double int_stk_2022 = .
+    replace int_stk_2022 = `a2022_stk' * `f2022_stk'_mult if !missing(`a2022_stk') & !missing(`f2022_stk'_mult)
+    di as txt "int_stk_2022 computed: nonmissing = " _N - sum(missing(int_stk_2022))
+}
+
+capture confirm variable `a2022_bnd'
+if _rc == 0 {
+    capture drop int_bnd_2022
+    gen double int_bnd_2022 = .
+    replace int_bnd_2022 = `a2022_bnd' * `f2022_bnd'_mult if !missing(`a2022_bnd') & !missing(`f2022_bnd'_mult)
+    di as txt "int_bnd_2022 computed: nonmissing = " _N - sum(missing(int_bnd_2022))
+}
+
+capture confirm variable `a2022_cash'
+if _rc == 0 {
+    capture drop int_cash_2022
+    gen double int_cash_2022 = .
+    replace int_cash_2022 = `a2022_cash' * `f2022_cash'_mult if !missing(`a2022_cash') & !missing(`f2022_cash'_mult)
+    di as txt "int_cash_2022 computed: nonmissing = " _N - sum(missing(int_cash_2022))
+}
+
+capture confirm variable `a2022_cds'
+if _rc == 0 {
+    capture drop int_cds_2022
+    gen double int_cds_2022 = .
+    replace int_cds_2022 = `a2022_cds' * `f2022_cds'_mult if !missing(`a2022_cds') & !missing(`f2022_cds'_mult)
+    di as txt "int_cds_2022 computed: nonmissing = " _N - sum(missing(int_cds_2022))
 }
 
 * ---------------------------------------------------------------------
-* map_freq_to_mult: maps numeric frequency codes -> annual multipliers
-* with optional decode of value labels (for logging symmetry)
+* Summary diagnostics for the mapped multipliers and the annualized components
 * ---------------------------------------------------------------------
-capture program drop map_freq_to_mult
-program define map_freq_to_mult, rclass
-    syntax varname
-    local fq = "`varlist'"
 
-    capture drop `fq'_lbl
-    capture drop `fq'_mult
-
-    local labname : value label `fq'
-    if "`labname'" != "" {
-        decode `fq', gen(`fq'_lbl)
-    }
-
-    gen double `fq'_mult = .
-    quietly replace `fq'_mult = 52 if `fq' == 1
-    quietly replace `fq'_mult = 24 if `fq' == 2
-    quietly replace `fq'_mult = 12 if `fq' == 3
-    quietly replace `fq'_mult = 4  if `fq' == 4
-    quietly replace `fq'_mult = 2  if `fq' == 5
-    quietly replace `fq'_mult = 1  if `fq' == 6
-
-    di as txt "Mapping numeric codes to multipliers for `fq' completed."
-    capture confirm variable `fq'_lbl
+di as txt "=== Frequency multipliers: summary (per asset) ==="
+foreach v in `f2022_re' `f2022_bus' `f2022_ira' `f2022_stk' `f2022_bnd' `f2022_cash' `f2022_cds' {
+    capture confirm variable `v'_mult
     if _rc == 0 {
-        di as txt "Showing unique value-label text for `fq' (if present):"
-        tab `fq'_lbl, nolabel
+        di as txt "Variable: `v'_mult"
+        tab `v'_mult, missing
     }
-    else {
-        di as txt "No value label attached to `fq' (or decode missing). Showing raw numeric codes:"
-        tab `fq', missing
-    }
-    quietly count if !missing(`fq'_mult)
-    di as txt "`fq'_mult nonmissing observations = " r(N)
-end
-
-* ---------------------------
-* Apply mapping to all 2022 frequency variables
-* ---------------------------
-di as txt "=== Mapping 2022 frequency variables ==="
-map_freq_to_mult `f2022_re'
-map_freq_to_mult `f2022_bus'
-map_freq_to_mult `f2022_ira'
-map_freq_to_mult `f2022_stk'
-map_freq_to_mult `f2022_bnd'
-map_freq_to_mult `f2022_cash'
-map_freq_to_mult `f2022_cds'
-
-* ---------------------------------------------------------------------
-* Compute per-asset interest for 2022 when both amount & multiplier exist
-* ---------------------------------------------------------------------
-cap drop int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2022 int_cds_2022
-
-gen double int_re_2022 = .
-replace int_re_2022 = `a2022_re' * `f2022_re'_mult if !missing(`a2022_re') & !missing(`f2022_re'_mult)
-di as txt "Real estate (2022) summary:"
-summarize int_re_2022, detail
-
-gen double int_bus_2022 = .
-replace int_bus_2022 = `a2022_bus' * `f2022_bus'_mult if !missing(`a2022_bus') & !missing(`f2022_bus'_mult)
-di as txt "Private business (2022) summary:"
-summarize int_bus_2022, detail
-
-gen double int_ira_2022 = .
-replace int_ira_2022 = `a2022_ira' * `f2022_ira'_mult if !missing(`a2022_ira') & !missing(`f2022_ira'_mult)
-di as txt "IRA (2022) summary:"
-summarize int_ira_2022, detail
-
-gen double int_stk_2022 = .
-replace int_stk_2022 = `a2022_stk' * `f2022_stk'_mult if !missing(`a2022_stk') & !missing(`f2022_stk'_mult)
-di as txt "Stocks (2022) summary:"
-summarize int_stk_2022, detail
-
-gen double int_bnd_2022 = .
-replace int_bnd_2022 = `a2022_bnd' * `f2022_bnd'_mult if !missing(`a2022_bnd') & !missing(`f2022_bnd'_mult)
-di as txt "Bonds (2022) summary:"
-summarize int_bnd_2022, detail
-
-gen double int_cash_2022 = .
-replace int_cash_2022 = `a2022_cash' * `f2022_cash'_mult if !missing(`a2022_cash') & !missing(`f2022_cash'_mult)
-di as txt "Checking/savings (2022) summary:"
-summarize int_cash_2022, detail
-
-gen double int_cds_2022 = .
-replace int_cds_2022 = `a2022_cds' * `f2022_cds'_mult if !missing(`a2022_cds') & !missing(`f2022_cds'_mult)
-di as txt "CDS/t-bills (2022) summary:"
-summarize int_cds_2022, detail
-
-capture drop int_total_2022
-egen double int_total_2022 = rowtotal(int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2022 int_cds_2022)
-di as txt "TOTAL interest/dividends 2022 summary (sum across asset classes):"
-summarize int_total_2022, detail
-tabstat int_total_2022, stats(n mean sd p50 min max) format(%12.2f)
-
-* ---------------------------------------------------------------------
-* Diagnostics: amount present but multiplier missing (2022)
-* ---------------------------------------------------------------------
-di as txt "=== Diagnostics: amount present but freq multiplier missing (2022) ==="
-foreach pair in ///
-    "`f2022_re' `a2022_re' int_re_2022" ///
-    "`f2022_bus' `a2022_bus' int_bus_2022" ///
-    "`f2022_ira' `a2022_ira' int_ira_2022" ///
-    "`f2022_stk' `a2022_stk' int_stk_2022" ///
-    "`f2022_bnd' `a2022_bnd' int_bnd_2022" ///
-    "`f2022_cash' `a2022_cash' int_cash_2022" ///
-    "`f2022_cds' `a2022_cds' int_cds_2022" {
-    local fq : word 1 of `pair'
-    local amt : word 2 of `pair'
-    local intv : word 3 of `pair'
-    di as txt "---- `intv' (amount var `amt' ; freq var `fq')"
-    quietly tab `fq', missing
-    quietly count if !missing(`amt') & missing(`fq'_mult)
-    di as txt "Records with amount but missing multiplier = " r(N)
-    quietly list hhid rsubhh `fq' `amt' in 1/10 if !missing(`amt') & missing(`fq'_mult)
 }
 
+di as txt "=== Annualized interest/dividend components: summary ==="
+foreach v in int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2022 int_cds_2022 {
+    capture confirm variable `v'
+    if _rc == 0 {
+        di as txt "Summary for `v'"
+        summarize `v', detail
+    }
+}
+
+/* removed total computations; totals will be computed in compute_returns */
+
 * ---------------------------------------------------------------------
-* Save dataset with new computed variables BACK TO MASTER (overwrite)
+* Save back to master (overwrite) – comment out if you prefer to save to new file
 * ---------------------------------------------------------------------
 save "`master'", replace
-di as txt "Saved 2022 interest/dividend vars back to master: `master'"
 
 log close
+
+di as txt "Done. Modified file saved to `master'"
+
 

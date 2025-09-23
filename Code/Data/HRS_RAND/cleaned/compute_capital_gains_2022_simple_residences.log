@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_capital_gains_2022_simple_residences.log
   log type:  text
- opened on:  22 Sep 2025, 12:17:52
+ opened on:  23 Sep 2025, 16:48:40
 
 . 
 . set more off
@@ -392,90 +392,224 @@ Recoding common sentinel codes to missing for value vars (if present)...
 
 . egen double v_ira_2020 = rowtotal(rq166_1 rq166_2 rq166_3)
 
-. di as txt "IRA totals (2022 and 2020):"
-IRA totals (2022 and 2020):
+. replace v_ira_2022 = . if missing(sq166_1) & missing(sq166_2) & missing(sq166_3)
+(11,883 real changes made, 11,883 to missing)
+
+. replace v_ira_2020 = . if missing(rq166_1) & missing(rq166_2) & missing(rq166_3)
+(11,920 real changes made, 11,920 to missing)
+
+. di as txt "IRA totals (2022 and 2020; missing when all components missing):"
+IRA totals (2022 and 2020; missing when all components missing):
 
 . summarize v_ira_2022 v_ira_2020, detail
 
                          v_ira_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%            0              0       Obs              14,442
-25%            0              0       Sum of wgt.      14,442
+ 1%          752              0
+ 5%         5000              0
+10%        13000              0       Obs               2,559
+25%        45000              0       Sum of wgt.       2,559
 
-50%            0                      Mean           66308.44
-                        Largest       Std. dev.      342621.5
-75%            0        6900000
-90%       102000       1.02e+07       Variance       1.17e+11
-95%       355597       1.07e+07       Skewness        17.0141
-99%      1300000       1.65e+07       Kurtosis       545.9677
+50%       143000                      Mean             374219
+                        Largest       Std. dev.      739893.8
+75%       410000        6900000
+90%       950000       1.02e+07       Variance       5.47e+11
+95%      1392000       1.07e+07       Skewness        8.22171
+99%      3200000       1.65e+07       Kurtosis       127.0115
 
                          v_ira_2020
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%            0              0       Obs              14,442
-25%            0              0       Sum of wgt.      14,442
+ 1%          900              0
+ 5%         5000              0
+10%        10000              0       Obs               2,522
+25%        40000              0       Sum of wgt.       2,522
 
-50%            0                      Mean           53084.77
-                        Largest       Std. dev.      246836.4
-75%            0        4700000
-90%        90000        5600000       Variance       6.09e+10
-95%       292000        5940000       Skewness       10.65588
-99%      1083000        8250000       Kurtosis       192.7707
+50%       118000                      Mean             303985
+                        Largest       Std. dev.      522220.2
+75%       340000        4700000
+90%       813000        5600000       Variance       2.73e+11
+95%      1180000        5940000       Skewness       4.899273
+99%      2605000        8250000       Kurtosis       44.27868
 
 . quietly count if !missing(v_ira_2022) & !missing(v_ira_2020)
 
 . di as txt "Observations with BOTH IRA V_2022 & V_2020 present = " r(N)
-Observations with BOTH IRA V_2022 & V_2020 present = 14442
+Observations with BOTH IRA V_2022 & V_2020 present = 1599
+
+. * Overlap diagnostics for IRA components (2022 and 2020)
+. capture drop ok_ira22_1 ok_ira22_2 ok_ira22_3 ira22_pattern ok_ira20_1 ok_ira20_2 ok
+> _ira20_3 ira20_pattern
+
+. gen byte ok_ira22_1 = !missing(sq166_1)
+
+. gen byte ok_ira22_2 = !missing(sq166_2)
+
+. gen byte ok_ira22_3 = !missing(sq166_3)
+
+. gen byte ira22_pattern = ok_ira22_1*4 + ok_ira22_2*2 + ok_ira22_3
+
+. label define iraPat2 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+
+> 2" 7 "1+2+3", replace
+
+. label values ira22_pattern iraPat2
+
+. di as txt "Counts of presence patterns for IRA 2022 components (sq166_1/2/3):"
+Counts of presence patterns for IRA 2022 components (sq166_1/2/3):
+
+. tab ira22_pattern, missing
+
+ira22_patte |
+         rn |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       none |     11,883       82.28       82.28
+     3 only |          8        0.06       82.34
+     2 only |         58        0.40       82.74
+        2+3 |         12        0.08       82.82
+     1 only |      1,276        8.84       91.66
+        1+3 |         14        0.10       91.75
+        1+2 |        702        4.86       96.61
+      1+2+3 |        489        3.39      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. gen byte ok_ira20_1 = !missing(rq166_1)
+
+. gen byte ok_ira20_2 = !missing(rq166_2)
+
+. gen byte ok_ira20_3 = !missing(rq166_3)
+
+. gen byte ira20_pattern = ok_ira20_1*4 + ok_ira20_2*2 + ok_ira20_3
+
+. label define iraPat0 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+
+> 2" 7 "1+2+3", replace
+
+. label values ira20_pattern iraPat0
+
+. di as txt "Counts of presence patterns for IRA 2020 components (rq166_1/2/3):"
+Counts of presence patterns for IRA 2020 components (rq166_1/2/3):
+
+. tab ira20_pattern, missing
+
+ira20_patte |
+         rn |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       none |     11,920       82.54       82.54
+     3 only |         15        0.10       82.64
+     2 only |         53        0.37       83.01
+        2+3 |         21        0.15       83.15
+     1 only |      1,230        8.52       91.67
+        1+3 |         13        0.09       91.76
+        1+2 |        723        5.01       96.77
+      1+2+3 |        467        3.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
 
 . 
 . egen double v_res_2022 = rowtotal(sh020 sh162)
 
 . egen double v_res_2020 = rowtotal(rh020 rh162)
 
-. di as txt "Residence totals (combined primary + secondary):"
-Residence totals (combined primary + secondary):
+. replace v_res_2022 = . if missing(sh020) & missing(sh162)
+(8,138 real changes made, 8,138 to missing)
+
+. replace v_res_2020 = . if missing(rh020) & missing(rh162)
+(8,263 real changes made, 8,263 to missing)
+
+. di as txt "Residence totals (combined primary + secondary; missing when both compone
+> nts missing):"
+Residence totals (combined primary + secondary; missing when both components missing):
 
 . summarize v_res_2022 v_res_2020, detail
 
                          v_res_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%            0              0       Obs              14,442
-25%            0              0       Sum of wgt.      14,442
+ 1%        12000              0
+ 5%        50000              0
+10%        85000              0       Obs               6,304
+25%       165000              0       Sum of wgt.       6,304
 
-50%            0                      Mean           182720.7
-                        Largest       Std. dev.      378323.1
-75%       250000        6000000
-90%       525000        9000000       Variance       1.43e+11
-95%       800000       1.00e+07       Skewness       7.607184
-99%      1600000       1.20e+07       Kurtosis        144.452
+50%       300000                      Mean           418599.6
+                        Largest       Std. dev.      478718.5
+75%       500000        6000000
+90%       848000        9000000       Variance       2.29e+11
+95%      1135000       1.00e+07       Skewness       7.076668
+99%      2100000       1.20e+07       Kurtosis        113.613
 
                          v_res_2020
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            0              0
- 5%            0              0
-10%            0              0       Obs              14,442
-25%            0              0       Sum of wgt.      14,442
+ 1%        10000              0
+ 5%        45000              0
+10%        75000              0       Obs               6,179
+25%       130000              0       Sum of wgt.       6,179
 
-50%            0                      Mean           419502.3
-                        Largest       Std. dev.      2.63e+07
-75%       200000        8600000
-90%       400000       1.00e+07       Variance       6.92e+14
-95%       616000       1.00e+09       Skewness       106.3737
-99%      1228000       3.00e+09       Kurtosis       11837.76
+50%       240000                      Mean           980490.8
+                        Largest       Std. dev.      4.02e+07
+75%       400000        8600000
+90%       700000       1.00e+07       Variance       1.62e+15
+95%       900000       1.00e+09       Skewness        69.5729
+99%      1950000       3.00e+09       Kurtosis       5064.338
 
 . quietly count if !missing(v_res_2022) & !missing(v_res_2020)
 
-. di as txt "Observations with BOTH V_res_2022 & V_res_2020 present = " r(N)
-Observations with BOTH V_res_2022 & V_res_2020 present = 14442
+. di as txt "Observations with BOTH V_res_2022 & V_2020 present = " r(N)
+Observations with BOTH V_res_2022 & V_2020 present = 4317
+
+. * Overlap diagnostics for residence components (2022 and 2020)
+. capture drop ok_res22_p ok_res22_s res22_pattern ok_res20_p ok_res20_s res20_pattern
+
+. gen byte ok_res22_p = !missing(sh020)
+
+. gen byte ok_res22_s = !missing(sh162)
+
+. gen byte res22_pattern = ok_res22_p*2 + ok_res22_s
+
+. label define resPat22 0 "none" 1 "sec only" 2 "prim only" 3 "prim+sec", replace
+
+. label values res22_pattern resPat22
+
+. di as txt "Counts of presence patterns for residence 2022 components (sh020/sh162):"
+Counts of presence patterns for residence 2022 components (sh020/sh162):
+
+. tab res22_pattern, missing
+
+res22_patte |
+         rn |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       none |      8,138       56.35       56.35
+   sec only |        150        1.04       57.39
+  prim only |      5,366       37.16       94.54
+   prim+sec |        788        5.46      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. gen byte ok_res20_p = !missing(rh020)
+
+. gen byte ok_res20_s = !missing(rh162)
+
+. gen byte res20_pattern = ok_res20_p*2 + ok_res20_s
+
+. label define resPat20 0 "none" 1 "sec only" 2 "prim only" 3 "prim+sec", replace
+
+. label values res20_pattern resPat20
+
+. di as txt "Counts of presence patterns for residence 2020 components (rh020/rh162):"
+Counts of presence patterns for residence 2020 components (rh020/rh162):
+
+. tab res20_pattern, missing
+
+res20_patte |
+         rn |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       none |      8,263       57.22       57.22
+   sec only |        164        1.14       58.35
+  prim only |      5,202       36.02       94.37
+   prim+sec |        813        5.63      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
 
 . 
 . * Capital gains per class
@@ -503,17 +637,53 @@ Business cg (cg_bus_2022) summary:
 10%      -200000       -1000000       Obs                 249
 25%            0       -1000000       Sum of wgt.         249
 
-50%        10000                      Mean           223986.8
-                        Largest       Std. dev.      974972.7
-75%       199000        3000000
-90%       800000        5000000       Variance       9.51e+11
-95%      1300000        7000000       Skewness       6.493169
-99%      5000000       1.03e+07       Kurtosis        57.9512
+50%        10000                      Mean           223861.6
+                        Largest       Std. dev.      978859.7
+75%       199000        3100000
+90%       808000        5000000       Variance       9.58e+11
+95%      1300000        7000000       Skewness       6.426471
+99%      5000000       1.03e+07       Kurtosis       57.09662
 
 . quietly count if !missing(cg_bus_2022)
 
 . di as txt "Records with cg_bus_2022 computed = " r(N)
 Records with cg_bus_2022 computed = 249
+
+. * Tabulation of cases for business capital gains
+. capture drop bus_cases
+
+. gen byte bus_cases = .
+(14,442 missing values generated)
+
+. replace bus_cases = 1 if !missing(sq148) & !missing(rq148) & !missing(flow_bus_2022)
+>   // both years + flow
+(37 real changes made)
+
+. replace bus_cases = 2 if !missing(sq148) & !missing(rq148) & missing(flow_bus_2022) 
+>   // both years, no flow
+(212 real changes made)
+
+. replace bus_cases = 3 if missing(sq148) | missing(rq148)                            
+>   // missing years
+(14,193 real changes made)
+
+. label define busCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years
+> ", replace
+
+. label values bus_cases busCases
+
+. di as txt "Business capital gains cases:"
+Business capital gains cases:
+
+. tab bus_cases, missing
+
+          bus_cases |      Freq.     Percent        Cum.
+--------------------+-----------------------------------
+  both years + flow |         37        0.26        0.26
+both years, no flow |        212        1.47        1.72
+      missing years |     14,193       98.28      100.00
+--------------------+-----------------------------------
+              Total |     14,442      100.00
 
 . 
 . gen double cg_re_2022 = .
@@ -548,6 +718,42 @@ Real estate cg (cg_re_2022) summary:
 . di as txt "Records with cg_re_2022 computed = " r(N)
 Records with cg_re_2022 computed = 400
 
+. * Tabulation of cases for real estate capital gains
+. capture drop re_cases
+
+. gen byte re_cases = .
+(14,442 missing values generated)
+
+. replace re_cases = 1 if !missing(sq134) & !missing(rq134) & !missing(flow_re_2022)  
+> // both years + flow
+(118 real changes made)
+
+. replace re_cases = 2 if !missing(sq134) & !missing(rq134) & missing(flow_re_2022)   
+> // both years, no flow
+(282 real changes made)
+
+. replace re_cases = 3 if missing(sq134) | missing(rq134)                             
+>  // missing years
+(14,042 real changes made)
+
+. label define reCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years"
+> , replace
+
+. label values re_cases reCases
+
+. di as txt "Real estate capital gains cases:"
+Real estate capital gains cases:
+
+. tab re_cases, missing
+
+           re_cases |      Freq.     Percent        Cum.
+--------------------+-----------------------------------
+  both years + flow |        118        0.82        0.82
+both years, no flow |        282        1.95        2.77
+      missing years |     14,042       97.23      100.00
+--------------------+-----------------------------------
+              Total |     14,442      100.00
+
 . 
 . gen double cg_stk_2022 = .
 (14,442 missing values generated)
@@ -581,13 +787,49 @@ Stocks cg (cg_stk_2022) summary:
 . di as txt "Records with cg_stk_2022 computed = " r(N)
 Records with cg_stk_2022 computed = 679
 
+. * Tabulation of cases for stocks capital gains
+. capture drop stk_cases
+
+. gen byte stk_cases = .
+(14,442 missing values generated)
+
+. replace stk_cases = 1 if !missing(sq317) & !missing(rq317) & !missing(flow_stk_2022)
+>   // both years + flow
+(147 real changes made)
+
+. replace stk_cases = 2 if !missing(sq317) & !missing(rq317) & missing(flow_stk_2022) 
+>   // both years, no flow
+(532 real changes made)
+
+. replace stk_cases = 3 if missing(sq317) | missing(rq317)                            
+>   // missing years
+(13,763 real changes made)
+
+. label define stkCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years
+> ", replace
+
+. label values stk_cases stkCases
+
+. di as txt "Stocks capital gains cases:"
+Stocks capital gains cases:
+
+. tab stk_cases, missing
+
+          stk_cases |      Freq.     Percent        Cum.
+--------------------+-----------------------------------
+  both years + flow |        147        1.02        1.02
+both years, no flow |        532        3.68        4.70
+      missing years |     13,763       95.30      100.00
+--------------------+-----------------------------------
+              Total |     14,442      100.00
+
 . 
 . gen double cg_ira_2022 = .
 (14,442 missing values generated)
 
 . replace cg_ira_2022 = (v_ira_2022 - v_ira_2020) - cond(missing(flow_ira_2022),0,flow
 > _ira_2022) if !missing(v_ira_2022) & !missing(v_ira_2020)
-(14,442 real changes made)
+(1,599 real changes made)
 
 . di as txt "IRA cg (cg_ira_2022) summary:"
 IRA cg (cg_ira_2022) summary:
@@ -597,22 +839,58 @@ IRA cg (cg_ira_2022) summary:
                          cg_ira_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%      -472000       -4070000
- 5%       -70000       -3450000
-10%        -7000       -3000000       Obs              14,442
-25%            0       -3000000       Sum of wgt.      14,442
+ 1%      -770000       -2760000
+ 5%      -280000       -1900000
+10%      -123639       -1850000       Obs               1,599
+25%       -30500       -1600000       Sum of wgt.       1,599
 
-50%            0                      Mean           10203.22
-                        Largest       Std. dev.      253875.6
-75%            0        4000000
-90%        14000        4965000       Variance       6.45e+10
-95%       121000       1.01e+07       Skewness       22.06555
-99%       700000       1.56e+07       Kurtosis       1201.119
+50%         2200                      Mean           64484.53
+                        Largest       Std. dev.      520242.8
+75%        76000        2634000
+90%       276000        2800000       Variance       2.71e+11
+95%       600000        3280000       Skewness        17.1202
+99%      1571538       1.56e+07       Kurtosis       496.7231
 
 . quietly count if !missing(cg_ira_2022)
 
 . di as txt "Records with cg_ira_2022 computed = " r(N)
-Records with cg_ira_2022 computed = 14442
+Records with cg_ira_2022 computed = 1599
+
+. * Tabulation of cases for IRA capital gains
+. capture drop ira_cases
+
+. gen byte ira_cases = .
+(14,442 missing values generated)
+
+. replace ira_cases = 1 if !missing(v_ira_2022) & !missing(v_ira_2020) & !missing(flow
+> _ira_2022)  // both years + flow
+(831 real changes made)
+
+. replace ira_cases = 2 if !missing(v_ira_2022) & !missing(v_ira_2020) & missing(flow_
+> ira_2022)   // both years, no flow
+(768 real changes made)
+
+. replace ira_cases = 3 if missing(v_ira_2022) | missing(v_ira_2020)                  
+>             // missing years
+(12,843 real changes made)
+
+. label define iraCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years
+> ", replace
+
+. label values ira_cases iraCases
+
+. di as txt "IRA capital gains cases:"
+IRA capital gains cases:
+
+. tab ira_cases, missing
+
+          ira_cases |      Freq.     Percent        Cum.
+--------------------+-----------------------------------
+  both years + flow |        831        5.75        5.75
+both years, no flow |        768        5.32       11.07
+      missing years |     12,843       88.93      100.00
+--------------------+-----------------------------------
+              Total |     14,442      100.00
 
 . 
 . gen double cg_bnd_2022 = .
@@ -646,13 +924,41 @@ Bonds cg (cg_bnd_2022) summary:
 . di as txt "Records with cg_bnd_2022 computed = " r(N)
 Records with cg_bnd_2022 computed = 65
 
+. * Tabulation of cases for bonds capital gains (no flows)
+. capture drop bnd_cases
+
+. gen byte bnd_cases = .
+(14,442 missing values generated)
+
+. replace bnd_cases = 1 if !missing(sq331) & !missing(rq331)  // both years present
+(65 real changes made)
+
+. replace bnd_cases = 2 if missing(sq331) | missing(rq331)    // missing years
+(14,377 real changes made)
+
+. label define bndCases 1 "both years present" 2 "missing years", replace
+
+. label values bnd_cases bndCases
+
+. di as txt "Bonds capital gains cases:"
+Bonds capital gains cases:
+
+. tab bnd_cases, missing
+
+         bnd_cases |      Freq.     Percent        Cum.
+-------------------+-----------------------------------
+both years present |         65        0.45        0.45
+     missing years |     14,377       99.55      100.00
+-------------------+-----------------------------------
+             Total |     14,442      100.00
+
 . 
 . gen double cg_res_total_2022 = .
 (14,442 missing values generated)
 
 . replace cg_res_total_2022 = (v_res_2022 - v_res_2020) - cond(missing(flow_residences
 > _2022),0,flow_residences_2022) if !missing(v_res_2022) & !missing(v_res_2020)
-(14,442 real changes made)
+(4,317 real changes made)
 
 . di as txt "Combined residences cg (cg_res_total_2022) summary:"
 Combined residences cg (cg_res_total_2022) summary:
@@ -662,575 +968,61 @@ Combined residences cg (cg_res_total_2022) summary:
                       cg_res_total_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%      -800000      -3.00e+09
- 5%      -300000      -1.00e+09
-10%      -140000      -1.00e+07       Obs              14,442
-25%            0       -5600000       Sum of wgt.      14,442
+ 1%      -470000      -3.00e+09
+ 5%      -100000       -5600000
+10%       -20000       -2290000       Obs               4,317
+25%         6500       -1605000       Sum of wgt.       4,317
 
-50%            0                      Mean          -236086.1
-                        Largest       Std. dev.      2.63e+07
-75%        70000        6000000
-90%       265000        9000000       Variance       6.91e+14
-95%       450000        9090000       Skewness      -106.3454
-99%      1000000       1.00e+07       Kurtosis       11832.31
+50%        50000                      Mean            -604872
+                        Largest       Std. dev.      4.56e+07
+75%       127000        1800000
+90%       250000        2500000       Variance       2.08e+15
+95%       405000        2705000       Skewness       -65.6776
+99%       915000        9090000       Kurtosis       4314.698
 
 . quietly count if !missing(cg_res_total_2022)
 
 . di as txt "Records with cg_res_total_2022 computed = " r(N)
-Records with cg_res_total_2022 computed = 14442
+Records with cg_res_total_2022 computed = 4317
+
+. * Tabulation of cases for residences capital gains
+. capture drop res_cases
+
+. gen byte res_cases = .
+(14,442 missing values generated)
+
+. replace res_cases = 1 if !missing(v_res_2022) & !missing(v_res_2020) & !missing(flow
+> _residences_2022)  // both years + flow
+(1,110 real changes made)
+
+. replace res_cases = 2 if !missing(v_res_2022) & !missing(v_res_2020) & missing(flow_
+> residences_2022)   // both years, no flow
+(3,207 real changes made)
+
+. replace res_cases = 3 if missing(v_res_2022) | missing(v_res_2020)                  
+>             // missing years
+(10,125 real changes made)
+
+. label define resCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years
+> ", replace
+
+. label values res_cases resCases
+
+. di as txt "Residences capital gains cases:"
+Residences capital gains cases:
+
+. tab res_cases, missing
+
+          res_cases |      Freq.     Percent        Cum.
+--------------------+-----------------------------------
+  both years + flow |      1,110        7.69        7.69
+both years, no flow |      3,207       22.21       29.89
+      missing years |     10,125       70.11      100.00
+--------------------+-----------------------------------
+              Total |     14,442      100.00
 
 . 
-. capture drop cg_total_2022
-
-. egen double cg_total_2022 = rowtotal(cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 
-> cg_bnd_2022 cg_res_total_2022)
-
-. di as txt "TOTAL capital gains (cg_total_2022) summary (sum across classes):"
-TOTAL capital gains (cg_total_2022) summary (sum across classes):
-
-. summarize cg_total_2022, detail
-
-                        cg_total_2022
--------------------------------------------------------------
-      Percentiles      Smallest
- 1%     -1015000      -3.14e+09
- 5%      -360000      -1.00e+09
-10%      -180000      -1.00e+07       Obs              14,442
-25%            0       -4200000       Sum of wgt.      14,442
-
-50%            0                      Mean          -221592.4
-                        Largest       Std. dev.      2.75e+07
-75%        85000       1.15e+07
-90%       350000       1.26e+07       Variance       7.54e+14
-95%       642000       1.46e+07       Skewness      -107.2662
-99%      1685000       1.71e+07       Kurtosis       12020.09
-
-. tabstat cg_total_2022, stats(n mean sd p50 min max) format(%12.2f)
-
-    Variable |            N         Mean           SD          p50          Min
--------------+-----------------------------------------------------------------
-cg_tota~2022 |     14442.00   -221592.36  27456216.40         0.00    -3.14e+09
--------------------------------------------------------------------------------
-
-    Variable |          Max
--------------+-------------
-cg_tota~2022 |  17114116.00
----------------------------
-
-. 
-. * ---------------------------------------------------------------------
-. * Diagnostics: inspect top/bottom observations and counts per class
-. * ---------------------------------------------------------------------
-. di as txt "Top 30 largest positive cg_total_2022 (inspect components):"
-Top 30 largest positive cg_total_2022 (inspect components):
-
-. gsort -cg_total_2022
-
-. list hhid rsubhh cg_total_2022 cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd
-> _2022 cg_res_total_2022 in 1/30
-
-     +------------------------------------------------------------------------+
-  1. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 524071 |      0 | 17114116 |        0 |        . |   115000 | 15553116 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               1446000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  2. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 147589 |      0 | 14639800 |   200000 | 12265000 |  2150000 |  -230200 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                255000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  3. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 034763 |      2 | 12600000 |  2500000 |  9300000 |        . |        0 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                800000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  4. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 500044 |      0 | 11492000 |        . |  2400000 |        . |     2000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               9090000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  5. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 541556 |      0 | 10642000 | 10250000 |        0 |    50000 |    -3000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                345000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  6. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 558128 |      0 | 10060001 |        . |        . |        . |    60000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |              10000001              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  7. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 552818 |      0 |  9750000 |        . |        . |        . |   750000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               9000000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  8. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 076617 |      0 |  9437451 |        . |        . |   -30000 | 10117451 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               -650000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
-  9. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 118279 |      0 |  8940000 |        . |        . |        . |  3940000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               5000000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 10. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 122692 |      0 |  8165000 |        . |        . |  3000000 |  4965000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                200000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 11. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 500113 |      0 |  8049000 |        . |  5300000 |        . |  1080000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               1669000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 12. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 502452 |      0 |  7806400 |        . |        . |  7553000 |   269400 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                -16000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 13. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 147421 |      0 |  7070000 |  7000000 |        . |        . |        0 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                 70000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 14. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 528714 |      0 |  6625000 |        . |  1000000 |  5000000 |   125000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                500000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 15. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 137440 |      0 |  6574879 |        . |        . |  6424489 |   151454 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                -1064              |                     0              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 16. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 178976 |      1 |  6000000 |        . |        . |        . |        0 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               6000000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 17. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 541495 |      0 |  5584000 |  5000000 |        . |        . |    20000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                564000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 18. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 030423 |      0 |  5120000 |  3000000 |  2000000 |    70000 |        0 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                 50000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 19. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 552965 |      0 |  5025000 |        . |        . |        . |  3725000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               1300000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 20. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 502413 |      0 |  4650000 |        . |        . |        . |  3280000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               1370000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 21. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 534586 |      0 |  4600000 |        . |        . |        . |  4000000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                600000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 22. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 545994 |      0 |  4600000 |        . |        . |        . |  4000000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                600000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 23. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 532216 |      0 |  4452000 |  1400000 |        . |  2700000 |    -3000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |               -45000              |                400000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 24. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 212649 |      0 |  4141000 |        . |        . |  4600000 |  -459000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                     0              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 25. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 540399 |      0 |  4000000 |  1500000 |  2450000 |        . |        0 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                 50000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 26. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 552223 |      0 |  3980000 |        . |        . |        . |   580000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               3400000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 27. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 559300 |      0 |  3950000 |        . |        . |        . |  3300000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |                650000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 28. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 527180 |      0 |  3776893 |        . |        . |        . |  2746893 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               1030000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 29. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 501517 |      1 |  3663000 |    25000 |        . |        . |   335000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               3303000              |
-     +------------------------------------------------------------------------+
-
-     +------------------------------------------------------------------------+
- 30. |   hhid | rsubhh | cg_tot~2 | cg_bus~2 | cg_re_~2 | cg_stk~2 | cg_ira~2 |
-     | 558160 |      0 |  3641000 |        . |        . |        . |    41000 |
-     |------------------------------------------------------------------------|
-     |             cg_bnd~2              |              cg_res~2              |
-     |                    .              |               3600000              |
-     +------------------------------------------------------------------------+
-
-. 
-. di as txt "Top 30 largest negative cg_total_2022 (inspect components):"
-Top 30 largest negative cg_total_2022 (inspect components):
-
-. gsort cg_total_2022
-
-. list hhid rsubhh cg_total_2022 cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd
-> _2022 cg_res_total_2022 in 1/30
-
-     +----------------------------------------------------------------------------+
-  1. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 912430 |      0 | -3.144e+09 |        . | -1.474e+08 |        . |   700000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |              -2.997e+09               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  2. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 909496 |      0 | -1.000e+09 |        . |          . |        . |  -100000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |              -1.000e+09               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  3. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 540637 |      0 |  -10000000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |               -10000000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  4. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 501770 |      1 |   -4200000 |        . |          . |        . | -3000000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -1200000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  5. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 112575 |      0 |   -3823000 |        . |    1200000 |   300000 |   277000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -5600000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  6. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 015893 |      0 |   -3750000 |        . |          . |        . | -3450000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                 -300000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  7. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 525815 |      0 |   -3525000 |        . |          . |        . | -2000000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -1525000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  8. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 526133 |      0 |   -3460000 |        . |          . |        . |  -220000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -3240000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
-  9. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 076856 |      0 |   -3425000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -3425000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 10. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 210974 |      0 |   -3410000 |        . |          . | -1500000 |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -1910000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 11. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 523113 |      0 |   -3405000 |        . |          . |        . |  -800000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2605000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 12. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 075352 |      0 |   -3400000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -3400000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 13. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 137183 |      0 |   -3155000 |        . |          . |        . | -2760000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                 -395000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 14. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 535945 |      0 |   -3090000 |        . |          . |        . | -1200000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -1890000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 15. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 523913 |      0 |   -3090000 |        0 |   -3400000 |        . |    70000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                  240000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 16. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 544811 |      0 |   -3030000 |        . |          . |        . | -1030000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2000000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 17. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 055720 |      0 |   -3020000 |        . |          . |        . |  -810000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2210000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 18. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 010929 |      0 |   -3000000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -3000000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 19. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 542739 |      0 |   -3000000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -3000000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 20. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 083181 |      0 |   -3000000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -3000000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 21. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 211577 |      0 |   -2975000 |        . |          . |        . | -3000000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                   25000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 22. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 501053 |      0 |   -2838982 |        . |          . | -4100000 |   951018 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                  310000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 23. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 073406 |      0 |   -2823000 |        . |          . |        . | -2473000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                 -350000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 24. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 031208 |      0 |   -2800000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2800000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 25. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 914149 |      0 |   -2799500 |  -800000 |   -2200000 |      500 |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                  200000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 26. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 544248 |      0 |   -2750000 |        . |          . |        . | -1950000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                 -800000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 27. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 034126 |      0 |   -2500000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2500000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 28. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 501584 |      0 |   -2500000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2500000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 29. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 502225 |      1 |   -2500000 |        . |          . |        . |        0 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                -2500000               |
-     +----------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------+
- 30. |   hhid | rsubhh | cg_to~2022 | cg_bus~2 | cg_re_2022 | cg_stk~2 | cg_ira~2 |
-     | 529474 |      0 |   -2479000 |        . |   -2600000 |        . |  -139000 |
-     |----------------------------------------------------------------------------|
-     |              cg_bnd~2              |              cg_res_t~2               |
-     |                     .              |                  260000               |
-     +----------------------------------------------------------------------------+
-
-. 
-. foreach v in cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd_2022 cg_res_total
-> _2022 {
-  2.     quietly count if !missing(`v')
-  3.     di as txt "`v' computed for " r(N) " obs"
-  4. }
-cg_bus_2022 computed for 249 obs
-cg_re_2022 computed for 400 obs
-cg_stk_2022 computed for 679 obs
-cg_ira_2022 computed for 14442 obs
-cg_bnd_2022 computed for 65 obs
-cg_res_total_2022 computed for 14442 obs
-
+. * Totals and cross-class diagnostics moved to compute_returns
 . 
 . save "`master'", replace
 file /Volumes/SSD
@@ -1247,5 +1039,5 @@ Saved capital gains vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beli
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_capital_gains_2022_simple_residences.log
   log type:  text
- closed on:  22 Sep 2025, 12:17:52
+ closed on:  23 Sep 2025, 16:48:40
 --------------------------------------------------------------------------------------

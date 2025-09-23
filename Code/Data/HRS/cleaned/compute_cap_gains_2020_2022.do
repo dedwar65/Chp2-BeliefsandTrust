@@ -60,10 +60,30 @@ foreach v of local valuevars {
 capture drop V_ira_2022 V_ira_2020
 egen double V_ira_2022 = rowtotal(SQ166_1 SQ166_2 SQ166_3)
 egen double V_ira_2020 = rowtotal(RQ166_1 RQ166_2 RQ166_3)
-di as txt "IRA totals (2022 and 2020):"
+replace V_ira_2022 = . if missing(SQ166_1) & missing(SQ166_2) & missing(SQ166_3)
+replace V_ira_2020 = . if missing(RQ166_1) & missing(RQ166_2) & missing(RQ166_3)
+di as txt "IRA totals (2022 and 2020; missing when all components missing):"
 summarize V_ira_2022 V_ira_2020, detail
 quietly count if !missing(V_ira_2022) & !missing(V_ira_2020)
 di as txt "Observations with BOTH IRA V_2022 & V_2020 present = " r(N)
+* Overlap diagnostics for IRA components
+capture drop ok_ira22_1 ok_ira22_2 ok_ira22_3 ira22_pattern ok_ira20_1 ok_ira20_2 ok_ira20_3 ira20_pattern
+gen byte ok_ira22_1 = !missing(SQ166_1)
+gen byte ok_ira22_2 = !missing(SQ166_2)
+gen byte ok_ira22_3 = !missing(SQ166_3)
+gen byte ira22_pattern = ok_ira22_1*4 + ok_ira22_2*2 + ok_ira22_3
+label define iraPat22 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+2" 7 "1+2+3", replace
+label values ira22_pattern iraPat22
+di as txt "Counts of presence patterns for IRA 2022 components (SQ166_1/2/3):"
+tab ira22_pattern, missing
+gen byte ok_ira20_1 = !missing(RQ166_1)
+gen byte ok_ira20_2 = !missing(RQ166_2)
+gen byte ok_ira20_3 = !missing(RQ166_3)
+gen byte ira20_pattern = ok_ira20_1*4 + ok_ira20_2*2 + ok_ira20_3
+label define iraPat20 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+2" 7 "1+2+3", replace
+label values ira20_pattern iraPat20
+di as txt "Counts of presence patterns for IRA 2020 components (RQ166_1/2/3):"
+tab ira20_pattern, missing
 
 * ---------------------------------------------------------------------
 * Combined residence totals (primary + secondary) at 2022 and 2020
@@ -71,10 +91,28 @@ di as txt "Observations with BOTH IRA V_2022 & V_2020 present = " r(N)
 capture drop V_res_2022 V_res_2020
 egen double V_res_2022 = rowtotal(SH020 SH162)
 egen double V_res_2020 = rowtotal(RH020 RH162)
-di as txt "Residence totals (combined primary + secondary):"
+replace V_res_2022 = . if missing(SH020) & missing(SH162)
+replace V_res_2020 = . if missing(RH020) & missing(RH162)
+di as txt "Residence totals (combined primary + secondary; missing when both components missing):"
 summarize V_res_2022 V_res_2020, detail
 quietly count if !missing(V_res_2022) & !missing(V_res_2020)
 di as txt "Observations with BOTH V_res_2022 & V_res_2020 present = " r(N)
+* Overlap diagnostics for residence components
+capture drop ok_res22_p ok_res22_s res22_pattern ok_res20_p ok_res20_s res20_pattern
+gen byte ok_res22_p = !missing(SH020)
+gen byte ok_res22_s = !missing(SH162)
+gen byte res22_pattern = ok_res22_p*2 + ok_res22_s
+label define resPat22 0 "none" 1 "sec only" 2 "prim only" 3 "prim+sec", replace
+label values res22_pattern resPat22
+di as txt "Counts of presence patterns for residence 2022 components (SH020/SH162):"
+tab res22_pattern, missing
+gen byte ok_res20_p = !missing(RH020)
+gen byte ok_res20_s = !missing(RH162)
+gen byte res20_pattern = ok_res20_p*2 + ok_res20_s
+label define resPat20 0 "none" 1 "sec only" 2 "prim only" 3 "prim+sec", replace
+label values res20_pattern resPat20
+di as txt "Counts of presence patterns for residence 2020 components (RH020/RH162):"
+tab res20_pattern, missing
 
 * ---------------------------------------------------------------------
 * Helper: a small function to compute cg safely treating missing flow as zero
@@ -110,6 +148,16 @@ else {
     summarize cg_bus_2022, detail
     quietly count if !missing(cg_bus_2022)
     di as txt "Records with cg_bus_2022 computed = " r(N)
+    * Tabulation of cases for business capital gains
+    capture drop bus_cases
+    gen byte bus_cases = .
+    replace bus_cases = 1 if !missing(SQ148) & !missing(RQ148) & !missing(flow_bus_2022)  // both years + flow
+    replace bus_cases = 2 if !missing(SQ148) & !missing(RQ148) & missing(flow_bus_2022)   // both years, no flow
+    replace bus_cases = 3 if missing(SQ148) | missing(RQ148)                              // missing years
+    label define busCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years", replace
+    label values bus_cases busCases
+    di as txt "Business capital gains cases:"
+    tab bus_cases, missing
 }
 
 * ---------------------------------------------------------------------
@@ -129,6 +177,16 @@ else {
     summarize cg_re_2022, detail
     quietly count if !missing(cg_re_2022)
     di as txt "Records with cg_re_2022 computed = " r(N)
+    * Tabulation of cases for real estate capital gains
+    capture drop re_cases
+    gen byte re_cases = .
+    replace re_cases = 1 if !missing(SQ134) & !missing(RQ134) & !missing(flow_re_2022)  // both years + flow
+    replace re_cases = 2 if !missing(SQ134) & !missing(RQ134) & missing(flow_re_2022)   // both years, no flow
+    replace re_cases = 3 if missing(SQ134) | missing(RQ134)                              // missing years
+    label define reCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years", replace
+    label values re_cases reCases
+    di as txt "Real estate capital gains cases:"
+    tab re_cases, missing
 }
 
 * ---------------------------------------------------------------------
@@ -148,6 +206,16 @@ else {
     summarize cg_stk_2022, detail
     quietly count if !missing(cg_stk_2022)
     di as txt "Records with cg_stk_2022 computed = " r(N)
+    * Tabulation of cases for stocks capital gains
+    capture drop stk_cases
+    gen byte stk_cases = .
+    replace stk_cases = 1 if !missing(SQ317) & !missing(RQ317) & !missing(flow_stk_2022)  // both years + flow
+    replace stk_cases = 2 if !missing(SQ317) & !missing(RQ317) & missing(flow_stk_2022)   // both years, no flow
+    replace stk_cases = 3 if missing(SQ317) | missing(RQ317)                              // missing years
+    label define stkCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years", replace
+    label values stk_cases stkCases
+    di as txt "Stocks capital gains cases:"
+    tab stk_cases, missing
 }
 
 * ---------------------------------------------------------------------
@@ -160,6 +228,16 @@ di as txt "IRA cg (cg_ira_2022) summary:"
 summarize cg_ira_2022, detail
 quietly count if !missing(cg_ira_2022)
 di as txt "Records with cg_ira_2022 computed = " r(N)
+* Tabulation of cases for IRA capital gains
+capture drop ira_cases
+gen byte ira_cases = .
+replace ira_cases = 1 if !missing(V_ira_2022) & !missing(V_ira_2020) & !missing(flow_ira_2022)  // both years + flow
+replace ira_cases = 2 if !missing(V_ira_2022) & !missing(V_ira_2020) & missing(flow_ira_2022)   // both years, no flow
+replace ira_cases = 3 if missing(V_ira_2022) | missing(V_ira_2020)                              // missing years
+label define iraCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years", replace
+label values ira_cases iraCases
+di as txt "IRA capital gains cases:"
+tab ira_cases, missing
 
 * ---------------------------------------------------------------------
 * 5) Bonds: cg_bnd_2022 = SQ331 - RQ331  (no flow subtraction)
@@ -177,6 +255,15 @@ else {
     summarize cg_bnd_2022, detail
     quietly count if !missing(cg_bnd_2022)
     di as txt "Records with cg_bnd_2022 computed = " r(N)
+    * Tabulation of cases for bonds capital gains (no flows)
+    capture drop bnd_cases
+    gen byte bnd_cases = .
+    replace bnd_cases = 1 if !missing(SQ331) & !missing(RQ331)  // both years present
+    replace bnd_cases = 2 if missing(SQ331) | missing(RQ331)    // missing years
+    label define bndCases 1 "both years present" 2 "missing years", replace
+    label values bnd_cases bndCases
+    di as txt "Bonds capital gains cases:"
+    tab bnd_cases, missing
 }
 
 * ---------------------------------------------------------------------
@@ -190,31 +277,25 @@ di as txt "Combined residences cg (cg_res_total_2022) summary:"
 summarize cg_res_total_2022, detail
 quietly count if !missing(cg_res_total_2022)
 di as txt "Records with cg_res_total_2022 computed = " r(N)
+* Tabulation of cases for residences capital gains
+capture drop res_cases
+gen byte res_cases = .
+replace res_cases = 1 if !missing(V_res_2022) & !missing(V_res_2020) & !missing(flow_residences_2022)  // both years + flow
+replace res_cases = 2 if !missing(V_res_2022) & !missing(V_res_2020) & missing(flow_residences_2022)   // both years, no flow
+replace res_cases = 3 if missing(V_res_2022) | missing(V_res_2020)                              // missing years
+label define resCases 1 "both years + flow" 2 "both years, no flow" 3 "missing years", replace
+label values res_cases resCases
+di as txt "Residences capital gains cases:"
+tab res_cases, missing
 
 * ---------------------------------------------------------------------
-* 7) Total capital gains across classes (sum)
+* (Total capital gains across classes moved to compute_returns)
 * ---------------------------------------------------------------------
-capture drop cg_total_2022
-egen double cg_total_2022 = rowtotal(cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd_2022 cg_res_total_2022)
-di as txt "TOTAL capital gains (cg_total_2022) summary (sum across classes):"
-summarize cg_total_2022, detail
-tabstat cg_total_2022, stats(n mean sd p50 min max) format(%12.2f)
 
 * ---------------------------------------------------------------------
 * 8) Diagnostics: inspect top/bottom observations and counts per class
 * ---------------------------------------------------------------------
-di as txt "Top 30 largest positive cg_total_2022 (inspect components):"
-gsort -cg_total_2022
-list HHID RSUBHH cg_total_2022 cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd_2022 cg_res_total_2022 in 1/30
-
-di as txt "Top 30 largest negative cg_total_2022 (inspect components):"
-gsort cg_total_2022
-list HHID RSUBHH cg_total_2022 cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd_2022 cg_res_total_2022 in 1/30
-
-foreach v in cg_bus_2022 cg_re_2022 cg_stk_2022 cg_ira_2022 cg_bnd_2022 cg_res_total_2022 {
-    quietly count if !missing(`v')
-    di as txt "`v' computed for " r(N) " obs"
-}
+* Diagnostics will focus on per-class components only (totals in compute_returns)
 
 * ---------------------------------------------------------------------
 * Save dataset with new capital gains variables BACK TO MASTER (overwrite)
