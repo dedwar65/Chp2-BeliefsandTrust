@@ -1,16 +1,16 @@
---------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
-> aned/compute_mortgage_payments_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
+> pute_mortgage_payments_2022.log
   log type:  text
- opened on:  23 Sep 2025, 20:00:14
+ opened on:  24 Sep 2025, 14:41:38
 
 . 
 . set more off
 
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/
-> cleaned/hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
+> hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -23,8 +23,8 @@
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
-> ND/cleaned/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
+> ed/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -151,8 +151,7 @@ Cleaning mortgage amount sentinel codes to missing for: sh025 sh036 sh175
   2.     local fq = "`varlist'"
   3.     capture confirm variable `fq'
   4.     if _rc {
-  5.         di as txt "  map_freq_to_mult: variable `fq' not found -> exiting program
-> "
+  5.         di as txt "  map_freq_to_mult: variable `fq' not found -> exiting program"
   6.         exit 0
   7.     }
   8.     capture drop `fq'_mult
@@ -241,15 +240,15 @@ Computing annual mortgage payments (amount * multiplier)...
 . else {
 .     capture confirm variable sh029_mult
 .     if _rc {
-.         di as txt "sh029_mult not found -> cannot annualize sh025 -> mort1_pay_annua
-> l missing"
+.         di as txt "sh029_mult not found -> cannot annualize sh025 -> mort1_pay_annual missin
+> g"
 .         gen double mort1_pay_annual = .
 .     }
 .     else {
 .         gen double mort1_pay_annual = .
 (14,442 missing values generated)
-.         replace mort1_pay_annual = sh025 * sh029_mult if !missing(sh025) & !missing(
-> sh029_mult)
+.         replace mort1_pay_annual = sh025 * sh029_mult if !missing(sh025) & !missing(sh029_mu
+> lt)
 (2,694 real changes made)
 .         di as txt "First mortgage annual payment summary (mort1_pay_annual):"
 First mortgage annual payment summary (mort1_pay_annual):
@@ -284,15 +283,15 @@ First mortgage annual payment summary (mort1_pay_annual):
 . else {
 .     capture confirm variable sh040_mult
 .     if _rc {
-.         di as txt "sh040_mult not found -> cannot annualize sh036 -> mort2_pay_annua
-> l missing"
+.         di as txt "sh040_mult not found -> cannot annualize sh036 -> mort2_pay_annual missin
+> g"
 .         gen double mort2_pay_annual = .
 .     }
 .     else {
 .         gen double mort2_pay_annual = .
 (14,442 missing values generated)
-.         replace mort2_pay_annual = sh036 * sh040_mult if !missing(sh036) & !missing(
-> sh040_mult)
+.         replace mort2_pay_annual = sh036 * sh040_mult if !missing(sh036) & !missing(sh040_mu
+> lt)
 (57 real changes made)
 .         di as txt "Second mortgage annual payment summary (mort2_pay_annual):"
 Second mortgage annual payment summary (mort2_pay_annual):
@@ -327,15 +326,15 @@ Second mortgage annual payment summary (mort2_pay_annual):
 . else {
 .     capture confirm variable sh179_mult
 .     if _rc {
-.         di as txt "sh179_mult not found -> cannot annualize sh175 -> secmort_pay_ann
-> ual missing"
+.         di as txt "sh179_mult not found -> cannot annualize sh175 -> secmort_pay_annual miss
+> ing"
 .         gen double secmort_pay_annual = .
 .     }
 .     else {
 .         gen double secmort_pay_annual = .
 (14,442 missing values generated)
-.         replace secmort_pay_annual = sh175 * sh179_mult if !missing(sh175) & !missin
-> g(sh179_mult)
+.         replace secmort_pay_annual = sh175 * sh179_mult if !missing(sh175) & !missing(sh179_
+> mult)
 (137 real changes made)
 .         di as txt "Secondary mortgage annual payment summary (secmort_pay_annual):"
 Secondary mortgage annual payment summary (secmort_pay_annual):
@@ -371,18 +370,18 @@ Secondary mortgage annual payment summary (secmort_pay_annual):
 . * ---------------------------------------------------------------------
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
-    > 022_master.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
+    > er.dta saved
 
 . di as txt "Saved mortgage payment vars back to master: `master'"
-Saved mortgage payment vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beliefs
-> andTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved mortgage payment vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
-> aned/compute_mortgage_payments_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
+> pute_mortgage_payments_2022.log
   log type:  text
- closed on:  23 Sep 2025, 20:00:14
---------------------------------------------------------------------------------------
+ closed on:  24 Sep 2025, 14:41:38
+----------------------------------------------------------------------------------------------

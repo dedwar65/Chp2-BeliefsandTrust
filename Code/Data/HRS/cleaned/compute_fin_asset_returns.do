@@ -13,7 +13,7 @@
 *----------------------------------------------------------------------
 clear all
 capture log close
-log using "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/compute_fin_asset_returns.log", replace text
+log using "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS/cleaned/compute_fin_asset_returns_2022.log", replace text
 
 set more off
 
@@ -40,7 +40,21 @@ use "`master'", clear
 di as txt "Using master file: `master'"
 
 * ---------------------------------------------------------------------
-* Define financial asset sample: households with stocks OR bonds in both years
+* Raw variable locals (align with compute_int_inc_div_2020_2022.do)
+* ---------------------------------------------------------------------
+local F2022_STK  SQ322
+local A2022_STK  SQ324
+local F2022_BND  SQ336
+local A2022_BND  SQ338
+local F2022_CASH SQ350
+local A2022_CASH SQ352
+local F2022_CDS  SQ362
+local A2022_CDS  SQ364
+
+* ---------------------------------------------------------------------
+* Define financial asset sample
+* Baseline: stocks OR bonds in both years
+* Augmented: OR any numerator signal (any INT_* non-missing OR stock flows non-missing)
 * ---------------------------------------------------------------------
 di as txt "=== Defining financial asset sample ==="
 
@@ -50,8 +64,18 @@ gen byte has_stocks_both = !missing(SQ317) & !missing(RQ317)
 * Check for bonds in both years (SQ331 and RQ331)  
 gen byte has_bonds_both = !missing(SQ331) & !missing(RQ331)
 
-* Financial asset sample: must have either stocks OR bonds in both years
-gen byte fin_sample = has_stocks_both | has_bonds_both
+* Exposure via numerator components present (raw checks)
+* Interest income exposure: amount present AND mapped frequency multiplier present
+gen byte fin_exposure = 0
+replace fin_exposure = 1 if !missing(`A2022_STK')  & !missing(`F2022_STK'_mult)
+replace fin_exposure = 1 if !missing(`A2022_BND')  & !missing(`F2022_BND'_mult)
+replace fin_exposure = 1 if !missing(`A2022_CASH') & !missing(`F2022_CASH'_mult)
+replace fin_exposure = 1 if !missing(`A2022_CDS')  & !missing(`F2022_CDS'_mult)
+* Stock flow exposure: either private (SR064 with sr063_dir) or public sells (SR073)
+replace fin_exposure = 1 if (!missing(SR064) & !missing(sr063_dir)) | !missing(SR073)
+
+* Financial asset sample: baseline OR exposure
+gen byte fin_sample = has_stocks_both | has_bonds_both | fin_exposure
 
 * Report sample statistics
 di as txt "Sample definition results:"
@@ -65,6 +89,8 @@ di as txt "Households in financial asset sample: `n_fin_sample' out of `n_total'
 * Breakdown by asset type
 di as txt "Breakdown by asset type:"
 tab has_stocks_both has_bonds_both, missing
+di as txt "Additional inclusions due to numerator exposure:"
+tab fin_exposure if !has_stocks_both & !has_bonds_both, missing
 quietly count if has_stocks_both & has_bonds_both
 di as txt "Households with BOTH stocks and bonds in both years: " r(N)
 quietly count if has_stocks_both & !has_bonds_both
@@ -73,28 +99,12 @@ quietly count if !has_stocks_both & has_bonds_both
 di as txt "Households with bonds only (both years): " r(N)
 
 * ---------------------------------------------------------------------
-* Use total wealth (beginning of period net worth) as denominator
+* Denominator components
 * ---------------------------------------------------------------------
-di as txt "=== Using total wealth (A_2020) as denominator ==="
+di as txt "=== Denominator components (A_2020, F_2022) ==="
 
-* Use existing networth_A2020 (total beginning of period wealth)
 capture drop A_2020
 gen double A_2020 = networth_A2020 if fin_sample
-
-* Apply wealth threshold (10k minimum) to restrict sample
-gen byte A_positive = A_2020 > 0 if fin_sample
-gen byte A_above_10k = A_2020 >= 10000 if fin_sample
-
-di as txt "Total wealth (A_2020) summary (before final denominator threshold):"
-summarize A_2020 if fin_sample, detail
-tabstat A_2020 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
-
-di as txt "Initial wealth threshold results:"
-quietly count if fin_sample == 1
-local n_initial_sample = r(N)
-di as txt "Initial sample size after beginning wealth threshold (≥$10k): `n_initial_sample'"
-tab A_positive if fin_sample, missing
-tab A_above_10k if fin_sample, missing
 
 * ---------------------------------------------------------------------
 * Compute financial asset flows (F_fin_2022) for numerator
@@ -115,7 +125,7 @@ tabstat F_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 * ---------------------------------------------------------------------
 * Use total flows (F_2022) as denominator
 * ---------------------------------------------------------------------
-di as txt "=== Using total flows (F_2022) as denominator ==="
+di as txt "=== Using total flows (F_2022) component for denominator ==="
 
 * Use existing flow_total_2022 (total net investment flows)
 capture drop F_2022
@@ -178,9 +188,10 @@ di as txt "Financial asset denominator (A_2020 + 0.5*F_2022) summary BEFORE fina
 summarize denom_fin_2022 if fin_sample, detail
 tabstat denom_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-di as txt "Financial asset denominator thresholds:"
-tab denom_fin_positive if fin_sample, missing
-tab denom_fin_above_10k if fin_sample, missing
+* Count before applying denominator threshold
+quietly count if fin_sample == 1
+local n_initial_sample = r(N)
+di as txt "Initial sample size before denominator threshold: `n_initial_sample'"
 
 * Update financial sample to include final denominator threshold
 replace fin_sample = fin_sample & denom_fin_above_10k
@@ -294,57 +305,15 @@ gsort -r_fin_2022_trim
 list HHID RSUBHH r_fin_2022_trim yc_fin_2022 cg_fin_2022 F_fin_2022 A_2020 F_2022 denom_fin_2022 in 1/20 if !missing(r_fin_2022_trim)
 
 * ---------------------------------------------------------------------
-* Verification of summed variables and sample logic
+* Zero-value checks for summed components
 * ---------------------------------------------------------------------
-di as txt "=== Verification of summed variables and sample logic ==="
-
-* Check that all observations in sample have the summed variables
-quietly count if fin_sample
-local n_sample = r(N)
-di as txt "Total observations in financial sample: `n_sample'"
-
-* Verify interest income total (yc_fin_2022)
-quietly count if !missing(yc_fin_2022) & fin_sample
-di as txt "yc_fin_2022 non-missing in sample: " r(N) " (should equal `n_sample')"
-quietly count if missing(yc_fin_2022) & fin_sample
-di as txt "yc_fin_2022 missing in sample: " r(N) " (should equal 0)"
-
-* Verify capital gains total (cg_fin_2022)
-quietly count if !missing(cg_fin_2022) & fin_sample
-di as txt "cg_fin_2022 non-missing in sample: " r(N) " (should equal `n_sample')"
-quietly count if missing(cg_fin_2022) & fin_sample
-di as txt "cg_fin_2022 missing in sample: " r(N) " (should equal 0)"
-
-* Verify financial flows total (F_fin_2022)
-quietly count if !missing(F_fin_2022) & fin_sample
-di as txt "F_fin_2022 non-missing in sample: " r(N) " (should equal `n_sample')"
-quietly count if missing(F_fin_2022) & fin_sample
-di as txt "F_fin_2022 missing in sample: " r(N) " (should equal 0)"
-
-* Verify denominator (denom_fin_2022)
-quietly count if !missing(denom_fin_2022) & fin_sample
-di as txt "denom_fin_2022 non-missing in sample: " r(N) " (should equal `n_sample')"
-quietly count if missing(denom_fin_2022) & fin_sample
-di as txt "denom_fin_2022 missing in sample: " r(N) " (should equal 0)"
-
-* Check for zero values (should be possible if all components are missing)
+di as txt "=== Zero-value checks for components (financial) ==="
 quietly count if yc_fin_2022 == 0 & fin_sample
-di as txt "yc_fin_2022 equals 0 in sample: " r(N) " (households with no interest income)"
+di as txt "yc_fin_2022 equals 0 in sample: " r(N)
 quietly count if cg_fin_2022 == 0 & fin_sample
-di as txt "cg_fin_2022 equals 0 in sample: " r(N) " (households with no capital gains)"
+di as txt "cg_fin_2022 equals 0 in sample: " r(N)
 quietly count if F_fin_2022 == 0 & fin_sample
-di as txt "F_fin_2022 equals 0 in sample: " r(N) " (households with no stock flows)"
-
-* Summary of summed variables
-di as txt "Summary of summed variables:"
-di as txt "  Interest income total (yc_fin_2022):"
-summarize yc_fin_2022 if fin_sample, detail
-di as txt "  Capital gains total (cg_fin_2022):"
-summarize cg_fin_2022 if fin_sample, detail
-di as txt "  Financial flows total (F_fin_2022):"
-summarize F_fin_2022 if fin_sample, detail
-di as txt "  Final denominator (denom_fin_2022):"
-summarize denom_fin_2022 if fin_sample, detail
+di as txt "F_fin_2022 equals 0 in sample: " r(N)
 
 * ---------------------------------------------------------------------
 * Save dataset with new financial asset return variables

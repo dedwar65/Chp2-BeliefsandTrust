@@ -1,0 +1,1199 @@
+----------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
+> pute_retirement_returns_2022.log
+  log type:  text
+ opened on:  24 Sep 2025, 14:41:43
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * Prerequisites (run manually first):
+. * - extract_household_2020_ret_calc_end
+. * - extract_household_2022_ret_calc_start
+. * - merge_2020_2022
+. * - compute_int_inc_div_2020_2022
+. * - compute_net_inv_flows_2020_2022
+. * - compute_debt_payments_2020_2022
+. * - compute_cap_gains_2020_2022
+. * - compute_beg_per_net_worth_2020_2022
+. * ---------------------------------------------------------------------
+. 
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
+> hrs_rand_2020_2022_master.dta"
+
+. capture confirm file "`master'"
+
+. if _rc {
+.     di as error "ERROR: master file not found -> `master'"
+.     exit 198
+. }
+
+. 
+. use "`master'", clear
+
+. di as txt "Using master file: `master'"
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
+> ed/hrs_rand_2020_2022_master.dta
+
+. 
+. * ---------------------------------------------------------------------
+. * Define IRA sample
+. * Baseline: households with IRA totals in BOTH years (v_ira_2022 & v_ira_2020)
+. * Augmented: OR any numerator signal (IRA income amount+freq, or IRA flow components)
+. * ---------------------------------------------------------------------
+. di as txt "=== Defining IRA asset sample ==="
+=== Defining IRA asset sample ===
+
+. 
+. capture confirm variable v_ira_2022
+
+. if _rc {
+.     di as error "ERROR: v_ira_2022 not found. Run compute_cap_gains_2020_2022.do first."
+.     exit 198
+. }
+
+. capture confirm variable v_ira_2020
+
+. if _rc {
+.     di as error "ERROR: v_ira_2020 not found. Run compute_cap_gains_2020_2022.do first."
+.     exit 198
+. }
+
+. 
+. gen byte has_ira_both = !missing(v_ira_2022) & !missing(v_ira_2020)
+
+. gen byte ira_exposure = 0
+
+. * Income exposure: IRA amount present AND mapped frequency multiplier present
+. * (int_ira_2022 was built from `a2022_ira' * `f2022_ira'_mult in the interest script)
+. capture confirm variable sq190
+
+. capture confirm variable sq194_mult
+
+. replace ira_exposure = 1 if !_rc & !missing(sq190) & !missing(sq194_mult)
+(15 real changes made)
+
+. * Flow exposure: any IRA flow component present (sq171_1/2/3)
+. replace ira_exposure = 1 if !missing(sq171_1) | !missing(sq171_2) | !missing(sq171_3)
+(1,283 real changes made)
+
+. 
+. * IRA sample: baseline OR exposure
+. gen byte ira_sample = has_ira_both | ira_exposure
+
+. 
+. di as txt "Sample definition results:"
+Sample definition results:
+
+. tab ira_sample, missing
+
+ ira_sample |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |     12,377       85.70       85.70
+          1 |      2,065       14.30      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. quietly count if ira_sample == 1
+
+. local n_ira_sample = r(N)
+
+. quietly count
+
+. local n_total = r(N)
+
+. di as txt "Households in IRA asset sample: `n_ira_sample' out of `n_total' (" %4.1f 100*`n_i
+> ra_sample'/`n_total' "%)"
+Households in IRA asset sample: 2065 out of 14442 (14.3%)
+
+. 
+. * ---------------------------------------------------------------------
+. * Denominator components
+. * ---------------------------------------------------------------------
+. di as txt "=== Denominator components (A_2020, F_2022) ==="
+=== Denominator components (A_2020, F_2022) ===
+
+. 
+. capture drop A_2020 F_2022
+
+. gen double A_2020 = networth_A2020 if ira_sample
+(12,542 missing values generated)
+
+. gen double F_2022 = flow_total_2022 if ira_sample
+(12,813 missing values generated)
+
+. replace F_2022 = 0 if missing(F_2022) & ira_sample
+(436 real changes made)
+
+. 
+. di as txt "A_2020 summary (before final denominator threshold):"
+A_2020 summary (before final denominator threshold):
+
+. summarize A_2020 if ira_sample, detail
+
+                           A_2020
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         3000        -336000
+ 5%        60000        -301000
+10%       122000         -98300       Obs               1,900
+25%       277000         -93000       Sum of wgt.       1,900
+
+50%       595000                      Mean            1036122
+                        Largest       Std. dev.       1449200
+75%      1197250       1.29e+07
+90%      2384000       1.31e+07       Variance       2.10e+12
+95%      3476500       1.42e+07       Skewness       4.354488
+99%      7230500       1.85e+07       Kurtosis       32.30126
+
+. tabstat A_2020 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+      A_2020 |      1900.00   1036122.08   1449200.40    595000.00   -336000.00  18465000.00
+--------------------------------------------------------------------------------------------
+
+. 
+. di as txt "F_2022 summary:"
+F_2022 summary:
+
+. summarize F_2022 if ira_sample, detail
+
+                           F_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -410000       -6400000
+ 5%       -72000       -2660000
+10%       -24000       -2050000       Obs               2,065
+25%            0       -1750000       Sum of wgt.       2,065
+
+50%         2700                      Mean           29335.93
+                        Largest       Std. dev.      259559.9
+75%        25000        1820000
+90%       100000        2862500       Variance       6.74e+10
+95%       245000        3450000       Skewness      -4.626261
+99%       800000        3474000       Kurtosis        232.406
+
+. tabstat F_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+      F_2022 |      2065.00     29335.93    259559.93      2700.00  -6400000.00   3474000.00
+--------------------------------------------------------------------------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Numerator components (treat missing as 0 within sample)
+. * ---------------------------------------------------------------------
+. di as txt "=== Building numerator components for IRA ==="
+=== Building numerator components for IRA ===
+
+. 
+. capture confirm variable int_ira_2022
+
+. if _rc {
+.     di as error "ERROR: int_ira_2022 not found. Run compute_int_inc_div_2020_2022.do first."
+.     exit 198
+. }
+
+. capture confirm variable cg_ira_2022
+
+. if _rc {
+.     di as error "ERROR: cg_ira_2022 not found. Run compute_cap_gains_2020_2022.do first."
+.     exit 198
+. }
+
+. capture confirm variable flow_ira_2022
+
+. if _rc {
+.     di as error "ERROR: flow_ira_2022 not found. Run compute_net_inv_flows_2020_2022.do firs
+> t."
+.     exit 198
+. }
+
+. 
+. capture drop yc_ira_2022 F_ira_2022
+
+. gen double yc_ira_2022 = .
+(14,442 missing values generated)
+
+. gen double F_ira_2022  = .
+(14,442 missing values generated)
+
+. replace yc_ira_2022 = cond(missing(int_ira_2022),0,int_ira_2022) if ira_sample
+(2,065 real changes made)
+
+. replace F_ira_2022  = cond(missing(flow_ira_2022),0,flow_ira_2022) if ira_sample
+(2,065 real changes made)
+
+. 
+. di as txt "IRA income (yc_ira_2022) summary:"
+IRA income (yc_ira_2022) summary:
+
+. summarize yc_ira_2022 if ira_sample, detail
+
+                         yc_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               2,065
+25%            0              0       Sum of wgt.       2,065
+
+50%            0                      Mean           176.9695
+                        Largest       Std. dev.      4450.123
+75%            0          18000
+90%            0          26246       Variance       1.98e+07
+95%            0          48500       Skewness        39.5971
+99%            0         192000       Kurtosis       1680.971
+
+. tabstat yc_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+ yc_ira_2022 |      2065.00       176.97      4450.12         0.00         0.00    192000.00
+--------------------------------------------------------------------------------------------
+
+. 
+. di as txt "IRA flows (F_ira_2022) summary:"
+IRA flows (F_ira_2022) summary:
+
+. summarize F_ira_2022 if ira_sample, detail
+
+                         F_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               2,065
+25%            0              0       Sum of wgt.       2,065
+
+50%         3000                      Mean           21124.15
+                        Largest       Std. dev.      55184.24
+75%        20000         500000
+90%        60000         700000       Variance       3.05e+09
+95%       100000         895000       Skewness       8.463926
+99%       240000        1060000       Kurtosis       116.7387
+
+. tabstat F_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+  F_ira_2022 |      2065.00     21124.15     55184.24      3000.00         0.00   1060000.00
+--------------------------------------------------------------------------------------------
+
+. 
+. di as txt "IRA capital gains (cg_ira_2022) summary:"
+IRA capital gains (cg_ira_2022) summary:
+
+. summarize cg_ira_2022 if ira_sample, detail
+
+                         cg_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -770000       -2760000
+ 5%      -280000       -1900000
+10%      -123639       -1850000       Obs               1,599
+25%       -30500       -1600000       Sum of wgt.       1,599
+
+50%         2200                      Mean           64484.53
+                        Largest       Std. dev.      520242.8
+75%        76000        2634000
+90%       276000        2800000       Variance       2.71e+11
+95%       600000        3280000       Skewness        17.1202
+99%      1571538       1.56e+07       Kurtosis       496.7231
+
+. tabstat cg_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+ cg_ira_2022 |      1599.00     64484.53    520242.76      2200.00  -2760000.00  15553116.00
+--------------------------------------------------------------------------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Denominator and thresholds
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing IRA denominator and applying threshold ==="
+=== Computing IRA denominator and applying threshold ===
+
+. 
+. capture drop denom_ira_2022
+
+. gen double denom_ira_2022 = A_2020 + 0.5*F_2022 if ira_sample
+(12,542 missing values generated)
+
+. 
+. gen byte denom_ira_positive  = denom_ira_2022 > 0 if ira_sample
+(12,377 missing values generated)
+
+. gen byte denom_ira_above_10k = denom_ira_2022 >= 10000 if ira_sample
+(12,377 missing values generated)
+
+. 
+. di as txt "IRA denominator summary BEFORE final threshold:"
+IRA denominator summary BEFORE final threshold:
+
+. summarize denom_ira_2022 if ira_sample, detail
+
+                       denom_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1925        -326000
+ 5%        60500        -296000
+10%       121925        -107500       Obs               1,900
+25%       279875        -106000       Sum of wgt.       1,900
+
+50%       601875                      Mean            1049992
+                        Largest       Std. dev.       1468300
+75%      1214000       1.30e+07
+90%      2394553       1.35e+07       Variance       2.16e+12
+95%      3452750       1.45e+07       Skewness       4.350194
+99%      7575750       1.88e+07       Kurtosis       32.17828
+
+. tabstat denom_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+denom_i~2022 |      1900.00   1049991.80   1468299.89    601875.00   -326000.00  18780000.00
+--------------------------------------------------------------------------------------------
+
+. 
+. di as txt "IRA denominator thresholds:"
+IRA denominator thresholds:
+
+. tab denom_ira_positive if ira_sample, missing
+
+denom_ira_p |
+    ositive |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         18        0.87        0.87
+          1 |      2,047       99.13      100.00
+------------+-----------------------------------
+      Total |      2,065      100.00
+
+. tab denom_ira_above_10k if ira_sample, missing
+
+denom_ira_a |
+   bove_10k |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         31        1.50        1.50
+          1 |      2,034       98.50      100.00
+------------+-----------------------------------
+      Total |      2,065      100.00
+
+. 
+. replace ira_sample = ira_sample & denom_ira_above_10k
+(31 real changes made)
+
+. 
+. quietly count if ira_sample == 1
+
+. local n_final_sample = r(N)
+
+. di as txt "Final IRA sample size after denominator threshold (≥$10k): `n_final_sample'"
+Final IRA sample size after denominator threshold (≥$10k): 2034
+
+. 
+. di as txt "IRA denominator summary AFTER final threshold:"
+IRA denominator summary AFTER final threshold:
+
+. summarize denom_ira_2022 if ira_sample, detail
+
+                       denom_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%        19700          10000
+ 5%        72000          10000
+10%       139900          10500       Obs               1,869
+25%       294500          10750       Sum of wgt.       1,869
+
+50%       615000                      Mean            1068047
+                        Largest       Std. dev.       1473630
+75%      1228500       1.30e+07
+90%      2454000       1.35e+07       Variance       2.17e+12
+95%      3493000       1.45e+07       Skewness       4.344635
+99%      7630000       1.88e+07       Kurtosis       32.02287
+
+. tabstat denom_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+denom_i~2022 |      1869.00   1068046.61   1473629.66    615000.00     10000.00  18780000.00
+--------------------------------------------------------------------------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Returns and trimming
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing IRA returns ==="
+=== Computing IRA returns ===
+
+. 
+. capture drop r_ira_2022
+
+. gen double r_ira_2022 = .
+(14,442 missing values generated)
+
+. replace r_ira_2022 = (yc_ira_2022 + cond(missing(cg_ira_2022),0,cg_ira_2022) - F_ira_2022) /
+>  denom_ira_2022 if ira_sample
+(1,869 real changes made)
+
+. 
+. di as txt "IRA returns summary:"
+IRA returns summary:
+
+. summarize r_ira_2022 if ira_sample, detail
+
+                         r_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -.9180556      -2.857143
+ 5%    -.3929595      -2.727273
+10%    -.2248677      -1.969487       Obs               1,869
+25%    -.0839476      -1.684211       Sum of wgt.       1,869
+
+50%     -.007228                      Mean           .0207287
+                        Largest       Std. dev.      .4165251
+75%     .0644172       3.592358
+90%     .2752294       3.731343       Variance       .1734931
+95%     .4639334        5.05814       Skewness       5.415156
+99%     1.493602       7.538462       Kurtosis       84.91142
+
+. tabstat r_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.4f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+  r_ira_2022 |    1869.0000       0.0207       0.4165      -0.0072      -2.8571       7.5385
+--------------------------------------------------------------------------------------------
+
+. 
+. quietly count if !missing(r_ira_2022) & ira_sample
+
+. local n_valid_returns = r(N)
+
+. di as txt "Records with valid r_ira_2022 computed = `n_valid_returns' out of `n_final_sample
+> ' in IRA sample"
+Records with valid r_ira_2022 computed = 1869 out of 2034 in IRA sample
+
+. 
+. di as txt "=== Applying 5% trimming to IRA returns ==="
+=== Applying 5% trimming to IRA returns ===
+
+. _pctile r_ira_2022 if ira_sample & !missing(r_ira_2022), p(5 95)
+
+. scalar trim_low = r(r1)
+
+. scalar trim_high = r(r2)
+
+. di as txt "Trim thresholds: `=trim_low' to `=trim_high'"
+Trim thresholds: -.3929594760540319 to .4639334155363748
+
+. 
+. capture drop r_ira_2022_trim
+
+. gen double r_ira_2022_trim = r_ira_2022 if ira_sample & !missing(r_ira_2022) & inrange(r_ira
+> _2022, trim_low, trim_high)
+(12,759 missing values generated)
+
+. 
+. quietly count if !missing(r_ira_2022_trim)
+
+. local n_trim = r(N)
+
+. quietly count if ira_sample & !missing(r_ira_2022)
+
+. local n_original = r(N)
+
+. di as txt "Observations after 5% trimming: `n_trim' (dropped `=`n_original'-`n_trim'')"
+Observations after 5% trimming: 1683 (dropped 186)
+
+. 
+. di as txt "Trimmed IRA returns summary:"
+Trimmed IRA returns summary:
+
+. summarize r_ira_2022_trim, detail
+
+                       r_ira_2022_trim
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -.3385922      -.3929595
+ 5%    -.2325581      -.3906053
+10%    -.1786911      -.3889908       Obs               1,683
+25%    -.0702576      -.3815343       Sum of wgt.       1,683
+
+50%     -.007228                      Mean          -.0012849
+                        Largest       Std. dev.       .143949
+75%     .0509438       .4606061
+90%     .1859128       .4630113       Variance       .0207213
+95%     .2880435       .4634146       Skewness       .5261061
+99%     .4274973       .4639334       Kurtosis       4.250687
+
+. tabstat r_ira_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
+
+    Variable |            N         Mean           SD          p50          Min          Max
+-------------+------------------------------------------------------------------------------
+r_ira_2022~m |    1683.0000      -0.0013       0.1439      -0.0072      -0.3930       0.4639
+--------------------------------------------------------------------------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Descriptive splits: withdrawals vs no withdrawals
+. * (SQ171_* are withdrawals; contributions not observed here)
+. * ---------------------------------------------------------------------
+. di as txt "=== IRA returns by withdrawal status (untrimmed and trimmed) ==="
+=== IRA returns by withdrawal status (untrimmed and trimmed) ===
+
+. capture drop ira_withdrawal ira_no_withdrawal
+
+. gen byte ira_withdrawal     = F_ira_2022 > 0 if ira_sample
+(12,408 missing values generated)
+
+. gen byte ira_no_withdrawal  = F_ira_2022 == 0 if ira_sample
+(12,408 missing values generated)
+
+. 
+. di as txt "Untrimmed returns by withdrawal status:"
+Untrimmed returns by withdrawal status:
+
+. di as txt "  Withdrawal reported (F_ira_2022 > 0):"
+  Withdrawal reported (F_ira_2022 > 0):
+
+. summarize r_ira_2022 if ira_sample & ira_withdrawal, detail
+
+                         r_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         -1.2      -2.857143
+ 5%    -.4433578      -2.727273
+10%    -.2608696      -1.969487       Obs               1,102
+25%     -.119891      -1.684211       Sum of wgt.       1,102
+
+50%    -.0293584                      Mean          -.0490643
+                        Largest       Std. dev.      .3231404
+75%     .0083397       1.494774
+90%     .1666667       1.734358       Variance       .1044197
+95%     .3242883       2.481229       Skewness      -.3358796
+99%     .8938792       2.822838       Kurtosis       26.48154
+
+. di as txt "  No withdrawal (F_ira_2022 == 0):"
+  No withdrawal (F_ira_2022 == 0):
+
+. summarize r_ira_2022 if ira_sample & ira_no_withdrawal, detail
+
+                         r_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     -.619883      -.9156627
+ 5%    -.2676056        -.70939
+10%    -.1479245      -.6697924       Obs                 767
+25%    -.0154696      -.6465517       Sum of wgt.         767
+
+50%     .0242634                      Mean           .1210049
+                        Largest       Std. dev.      .5058905
+75%     .1421801       3.592358
+90%     .4076305       3.731343       Variance       .2559252
+95%     .7297297        5.05814       Skewness       7.143266
+99%     1.981221       7.538462       Kurtosis       82.85194
+
+. 
+. di as txt "Trimmed returns by withdrawal status:"
+Trimmed returns by withdrawal status:
+
+. di as txt "  Withdrawal reported (trimmed):"
+  Withdrawal reported (trimmed):
+
+. summarize r_ira_2022_trim if ira_withdrawal, detail
+
+                       r_ira_2022_trim
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -.3462921      -.3929595
+ 5%    -.2457757      -.3906053
+10%     -.198652      -.3889908       Obs                 998
+25%    -.0973403      -.3815343       Sum of wgt.         998
+
+50%    -.0270207                      Mean          -.0318489
+                        Largest       Std. dev.      .1336808
+75%     .0046431       .4498121
+90%     .1285001       .4554865       Variance       .0178705
+95%     .2234332       .4606061       Skewness       .5840457
+99%     .3947368       .4630113       Kurtosis       4.793832
+
+. di as txt "  No withdrawal (trimmed):"
+  No withdrawal (trimmed):
+
+. summarize r_ira_2022_trim if ira_no_withdrawal, detail
+
+                       r_ira_2022_trim
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -.3295195      -.3787879
+ 5%    -.2040816      -.3560831
+10%    -.1261261      -.3546588       Obs                 685
+25%    -.0146699      -.3539095       Sum of wgt.         685
+
+50%     .0182482                      Mean           .0432449
+                        Largest       Std. dev.      .1468268
+75%     .1134796       .4593951
+90%     .2331002         .45961       Variance       .0215581
+95%     .3273007       .4634146       Skewness       .4068305
+99%     .4504732       .4639334       Kurtosis       4.024773
+
+. 
+. * ---------------------------------------------------------------------
+. * Diagnostics: extremes and zero-value checks
+. * ---------------------------------------------------------------------
+. di as txt "=== Diagnostics: extremes and components (IRA) ==="
+=== Diagnostics: extremes and components (IRA) ===
+
+. di as txt "Top 20 positive IRA returns:"
+Top 20 positive IRA returns:
+
+. gsort -r_ira_2022
+
+. list hhid rsubhh r_ira_2022 yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_2022 
+> in 1/20 if ira_sample
+
+     +----------------------------------------------------------------------------------+
+  1. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 210186 |      0 | 7.5384615 |        0 |    98000 |        0 |   13000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                        13000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  2. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 542504 |      0 | 5.0581395 |        0 |   870000 |        0 |  207000 |  -70000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       172000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  3. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 531180 |      0 | 3.7313433 |        0 |   250000 |        0 |  -93000 |  320000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                        67000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  4. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 524071 |      0 | 3.5923585 |        0 | 15553116 |        0 | 4610000 | -561000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      4329500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  5. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 544876 |      0 | 3.2841163 |        0 |  1468000 |        0 |  447000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       447000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  6. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 528520 |      0 | 2.8228381 |        0 |   738500 |    40000 |  227446 |   40000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       247446                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  7. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 525516 |      0 | 2.4812287 |        0 |   398500 |    35000 |  129000 |   35000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       146500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  8. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 912313 |      0 | 2.2407407 |        0 |    48400 |        0 |   21600 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                        21600                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  9. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 525382 |      0 | 2.0267825 |        0 |  2800000 |        0 | 1394000 |  -25000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1381500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 10. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 526872 |      0 | 1.9812207 |        0 |   844000 |        0 |  426000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       426000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 11. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 521068 |      2 | 1.8611111 |        0 |   134000 |        0 |  -16500 |  177000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                        72000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 12. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 520836 |      0 | 1.8436874 |        0 |   920000 |        0 |  499000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       499000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 13. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 527079 |      0 |      1.75 |        0 |  1050000 |        0 |  600000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       600000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 14. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 073485 |      0 | 1.7343578 |        0 |   397500 |     2500 |  235000 |  -14500 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       227750                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 15. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 543962 |      0 | 1.6254459 |        0 |   683500 |        0 |  420500 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       420500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 16. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 023119 |      0 | 1.5533333 |        0 |  1165000 |        0 |  750000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       750000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 17. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 500476 |      0 | 1.5151515 |        0 |  1150000 |        0 |  771500 |  -25000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       759000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 18. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 521541 |      0 | 1.4947735 |        0 |   449000 |    20000 |  277000 |   20000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       287000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 19. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 543445 |      0 | 1.4936024 |        0 |   303500 |        0 |  203200 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       203200                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 20. |   hhid | rsubhh | r_ir~2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 915680 |      0 | 1.4574732 |        0 |  1765000 |        0 | 1242000 |  -62000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1211000                                     |
+     +----------------------------------------------------------------------------------+
+
+. 
+. di as txt "Top 20 negative IRA returns:"
+Top 20 negative IRA returns:
+
+. gsort r_ira_2022
+
+. list hhid rsubhh r_ira_2022 yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_2022 
+> in 1/20 if ira_sample
+
+     +-----------------------------------------------------------------------------------+
+  1. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 545965 |      0 | -2.8571429 |        0 |        . |    60000 |   -9000 |   60000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        21000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  2. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 500570 |      0 | -2.7272727 |        0 |   -35000 |    10000 |  149000 | -265000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        16500                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  3. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 501284 |      0 | -1.9694868 |        0 |   -72000 |    70000 |  -82900 |  310000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        72100                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  4. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 016221 |      2 | -1.6842105 |        0 |        . |    32000 |    3000 |   32000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        19000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  5. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 500105 |      0 | -1.6666667 |        0 |        . |    50000 |    5000 |   50000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        30000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  6. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 543648 |      0 | -1.4175258 |        0 |  -105000 |    60000 |   85400 |   62000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                       116400                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  7. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 523537 |      0 | -1.3866667 |        0 |   -27000 |    25000 |   25000 |   25000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        37500                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  8. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 523659 |      0 | -1.3636364 |        0 |        . |    30000 |    7000 |   30000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        22000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+  9. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 062262 |      0 |  -1.291866 |        0 |   -63000 |    45000 |   61100 |   45000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        83600                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 10. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 150347 |      0 | -1.2403101 |        0 |        . |   368000 |  112700 |  368000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                       296700                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 11. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 039059 |      0 | -1.2278308 |        0 |   -31000 |    14000 |   29650 |   14000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        36650                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 12. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 083474 |      1 |       -1.2 |        0 |   -29000 |     4000 |   30000 |   -5000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        27500                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 13. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 523160 |      0 | -1.1461318 |        0 |        . |   400000 |  149000 |  400000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                       349000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 14. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 521103 |      0 | -1.1320755 |        0 |        . |    60000 |   28000 |   50000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        53000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 15. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 546561 |      0 | -1.1203008 |        0 |  -109000 |    40000 |  163000 |  -60000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                       133000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 16. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 524580 |      0 |         -1 |        0 |        . |    10000 |    5000 |   10000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        10000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 17. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 541207 |      1 | -.97560976 |        0 |   -55000 |    25000 |   69500 |   25000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        82000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 18. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 540591 |      0 | -.96803653 |        0 |   -86000 |    20000 |  158000 |  -97000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                       109500                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 19. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 032687 |      0 | -.91805556 |        0 |   -44100 |    22000 |   61000 |   22000 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                        72000                                      |
+     +-----------------------------------------------------------------------------------+
+
+     +-----------------------------------------------------------------------------------+
+ 20. |   hhid | rsubhh | r_ira_2022 | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 022243 |      0 | -.91566265 |        0 | -1900000 |        0 | 2075000 |       0 |
+     |-----------------------------------------------------------------------------------|
+     |                                     den~2022                                      |
+     |                                      2075000                                      |
+     +-----------------------------------------------------------------------------------+
+
+. 
+. di as txt "Top 20 trimmed IRA returns:"
+Top 20 trimmed IRA returns:
+
+. gsort -r_ira_2022_trim
+
+. list hhid rsubhh r_ira_2022_trim yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_
+> 2022 in 1/20 if !missing(r_ira_2022_trim)
+
+     +----------------------------------------------------------------------------------+
+  1. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 536262 |      0 | .46393342 |        0 |   150500 |        0 |  323500 |    1800 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       324400                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  2. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 542831 |      0 | .46341463 |        0 |    19000 |        0 |   41000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                        41000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  3. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 078253 |      0 | .46301131 |        0 |   289000 |    23000 |  563000 |   23000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       574500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  4. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 501486 |      0 | .46060606 |        0 |   235000 |    45000 |  390000 |   45000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       412500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  5. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 523695 |      0 | .45961003 |        0 |    33000 |        0 |   71800 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                        71800                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  6. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 540111 |      0 | .45939505 |        0 |   501200 |        0 | 1082000 |   18000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1091000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  7. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 528185 |      0 | .45801527 |        0 |   600000 |        0 | 1360000 | -100000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1310000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  8. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 535056 |      0 | .45548654 |        0 |   700000 |   150000 | 1155000 |  105000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1207500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+  9. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 014028 |      0 | .45105328 |        0 |   182000 |        0 |  416000 |  -25000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       403500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 10. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 542282 |      0 | .45047319 |        0 |   357000 |        0 |  796500 |   -8000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       792500                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 11. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 544706 |      0 | .44981213 |        0 |  1698000 |    22000 | 3565000 |  322000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      3726000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 12. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 530591 |      0 | .44009217 |        0 |   382000 |        0 |  868000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       868000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 13. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 133865 |      0 | .43685074 |        0 |   372800 |    53200 |  705000 |   53200 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       731600                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 14. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 501665 |      0 |   .433687 |        0 |  1635000 |        0 | 3770000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      3770000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 15. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 071258 |      0 | .43046358 |        0 |   130000 |        0 |  302000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       302000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 16. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 540470 |      2 | .42857143 |        0 |   300000 |        0 |  700000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       700000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 17. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 502044 |      0 | .42749731 |        0 |   796000 |        0 | 1862000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1862000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 18. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 501993 |      0 | .42553191 |        0 |   600000 |        0 | 1410000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1410000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 19. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 907380 |      0 | .42492918 |        0 |   750000 |        0 | 1765000 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                      1765000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 20. |   hhid | rsubhh | r_ira_2~m | yc_~2022 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
+     | 073112 |      1 | .42458101 |        0 |   190000 |        0 |  450000 |   -5000 |
+     |----------------------------------------------------------------------------------|
+     |                                     den~2022                                     |
+     |                                       447500                                     |
+     +----------------------------------------------------------------------------------+
+
+. 
+. di as txt "=== Zero-value checks for components (IRA) ==="
+=== Zero-value checks for components (IRA) ===
+
+. quietly count if yc_ira_2022 == 0 & ira_sample
+
+. di as txt "yc_ira_2022 equals 0 in sample: " r(N)
+yc_ira_2022 equals 0 in sample: 2019
+
+. quietly count if cg_ira_2022 == 0 & ira_sample
+
+. di as txt "cg_ira_2022 equals 0 in sample: " r(N)
+cg_ira_2022 equals 0 in sample: 49
+
+. quietly count if F_ira_2022 == 0 & ira_sample
+
+. di as txt "F_ira_2022 equals 0 in sample: " r(N)
+F_ira_2022 equals 0 in sample: 772
+
+. 
+. * ---------------------------------------------------------------------
+. * Save back to master
+. * ---------------------------------------------------------------------
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
+    > er.dta saved
+
+. di as txt "Saved IRA return variables to master: `master'"
+Saved IRA return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/
+> Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. di as txt "Done. IRA returns computed with 5% trimming."
+Done. IRA returns computed with 5% trimming.
+
+. 
+. 
+. 
+end of do-file
+

@@ -1,16 +1,16 @@
---------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
-> aned/compute_interest_dividends_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
+> pute_interest_dividends_2022.log
   log type:  text
- opened on:  23 Sep 2025, 20:00:10
+ opened on:  24 Sep 2025, 14:41:34
 
 . 
 . set more off
 
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/
-> cleaned/hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
+> hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -24,8 +24,8 @@
 
 . 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
-> ND/cleaned/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
+> ed/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -144,8 +144,8 @@ sq194_mult nonmissing = 14441
 . gen double `f2022_stk'_mult = .
 (14,442 missing values generated)
 
-. quietly replace `f2022_stk'_mult = 0  if `f2022_stk' == 1   // accumulates/reinveste
-> d -> no realized cash flow
+. quietly replace `f2022_stk'_mult = 0  if `f2022_stk' == 1   // accumulates/reinvested -> no 
+> realized cash flow
 
 . quietly replace `f2022_stk'_mult = 12 if `f2022_stk' == 3
 
@@ -238,8 +238,8 @@ sq362_mult nonmissing = 14441
 .     capture drop int_re_2022
 .     gen double int_re_2022 = .
 (14,442 missing values generated)
-.     replace int_re_2022 = `a2022_re' * `f2022_re'_mult if !missing(`a2022_re') & !mi
-> ssing(`f2022_re'_mult)
+.     replace int_re_2022 = `a2022_re' * `f2022_re'_mult if !missing(`a2022_re') & !missing(`f
+> 2022_re'_mult)
 (492 real changes made)
 .     di as txt "int_re_2022 computed: nonmissing = " _N - sum(missing(int_re_2022))
 int_re_2022 computed: nonmissing = 14441
@@ -252,8 +252,8 @@ int_re_2022 computed: nonmissing = 14441
 .     capture drop int_bus_2022
 .     gen double int_bus_2022 = .
 (14,442 missing values generated)
-.     replace int_bus_2022 = `a2022_bus' * `f2022_bus'_mult if !missing(`a2022_bus') &
->  !missing(`f2022_bus'_mult)
+.     replace int_bus_2022 = `a2022_bus' * `f2022_bus'_mult if !missing(`a2022_bus') & !missin
+> g(`f2022_bus'_mult)
 (212 real changes made)
 .     di as txt "int_bus_2022 computed: nonmissing = " _N - sum(missing(int_bus_2022))
 int_bus_2022 computed: nonmissing = 14441
@@ -266,8 +266,8 @@ int_bus_2022 computed: nonmissing = 14441
 .     capture drop int_ira_2022
 .     gen double int_ira_2022 = .
 (14,442 missing values generated)
-.     replace int_ira_2022 = `a2022_ira' * `f2022_ira'_mult if !missing(`a2022_ira') &
->  !missing(`f2022_ira'_mult)
+.     replace int_ira_2022 = `a2022_ira' * `f2022_ira'_mult if !missing(`a2022_ira') & !missin
+> g(`f2022_ira'_mult)
 (15 real changes made)
 .     di as txt "int_ira_2022 computed: nonmissing = " _N - sum(missing(int_ira_2022))
 int_ira_2022 computed: nonmissing = 14441
@@ -280,8 +280,8 @@ int_ira_2022 computed: nonmissing = 14441
 .     capture drop int_stk_2022
 .     gen double int_stk_2022 = .
 (14,442 missing values generated)
-.     replace int_stk_2022 = `a2022_stk' * `f2022_stk'_mult if !missing(`a2022_stk') &
->  !missing(`f2022_stk'_mult)
+.     replace int_stk_2022 = `a2022_stk' * `f2022_stk'_mult if !missing(`a2022_stk') & !missin
+> g(`f2022_stk'_mult)
 (454 real changes made)
 .     di as txt "int_stk_2022 computed: nonmissing = " _N - sum(missing(int_stk_2022))
 int_stk_2022 computed: nonmissing = 14441
@@ -294,8 +294,8 @@ int_stk_2022 computed: nonmissing = 14441
 .     capture drop int_bnd_2022
 .     gen double int_bnd_2022 = .
 (14,442 missing values generated)
-.     replace int_bnd_2022 = `a2022_bnd' * `f2022_bnd'_mult if !missing(`a2022_bnd') &
->  !missing(`f2022_bnd'_mult)
+.     replace int_bnd_2022 = `a2022_bnd' * `f2022_bnd'_mult if !missing(`a2022_bnd') & !missin
+> g(`f2022_bnd'_mult)
 (58 real changes made)
 .     di as txt "int_bnd_2022 computed: nonmissing = " _N - sum(missing(int_bnd_2022))
 int_bnd_2022 computed: nonmissing = 14441
@@ -308,11 +308,10 @@ int_bnd_2022 computed: nonmissing = 14441
 .     capture drop int_cash_2022
 .     gen double int_cash_2022 = .
 (14,442 missing values generated)
-.     replace int_cash_2022 = `a2022_cash' * `f2022_cash'_mult if !missing(`a2022_cash
-> ') & !missing(`f2022_cash'_mult)
+.     replace int_cash_2022 = `a2022_cash' * `f2022_cash'_mult if !missing(`a2022_cash') & !mi
+> ssing(`f2022_cash'_mult)
 (1,834 real changes made)
-.     di as txt "int_cash_2022 computed: nonmissing = " _N - sum(missing(int_cash_2022
-> ))
+.     di as txt "int_cash_2022 computed: nonmissing = " _N - sum(missing(int_cash_2022))
 int_cash_2022 computed: nonmissing = 14441
 . }
 
@@ -323,8 +322,8 @@ int_cash_2022 computed: nonmissing = 14441
 .     capture drop int_cds_2022
 .     gen double int_cds_2022 = .
 (14,442 missing values generated)
-.     replace int_cds_2022 = `a2022_cds' * `f2022_cds'_mult if !missing(`a2022_cds') &
->  !missing(`f2022_cds'_mult)
+.     replace int_cds_2022 = `a2022_cds' * `f2022_cds'_mult if !missing(`a2022_cds') & !missin
+> g(`f2022_cds'_mult)
 (153 real changes made)
 .     di as txt "int_cds_2022 computed: nonmissing = " _N - sum(missing(int_cds_2022))
 int_cds_2022 computed: nonmissing = 14441
@@ -338,8 +337,8 @@ int_cds_2022 computed: nonmissing = 14441
 . di as txt "=== Frequency multipliers: summary (per asset) ==="
 === Frequency multipliers: summary (per asset) ===
 
-. foreach v in `f2022_re' `f2022_bus' `f2022_ira' `f2022_stk' `f2022_bnd' `f2022_cash'
->  `f2022_cds' {
+. foreach v in `f2022_re' `f2022_bus' `f2022_ira' `f2022_stk' `f2022_bnd' `f2022_cash' `f2022_
+> cds' {
   2.     capture confirm variable `v'_mult
   3.     if _rc == 0 {
   4.         di as txt "Variable: `v'_mult"
@@ -433,8 +432,8 @@ Variable: sq362_mult
 . di as txt "=== Annualized interest/dividend components: summary ==="
 === Annualized interest/dividend components: summary ===
 
-. foreach v in int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cas
-> h_2022 int_cds_2022 {
+. foreach v in int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int_cash_2022 i
+> nt_cds_2022 {
   2.     capture confirm variable `v'
   3.     if _rc == 0 {
   4.         di as txt "Summary for `v'"
@@ -562,14 +561,14 @@ Summary for int_cds_2022
 . * ---------------------------------------------------------------------
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
-    > 022_master.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
+    > er.dta saved
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
-> aned/compute_interest_dividends_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
+> pute_interest_dividends_2022.log
   log type:  text
- closed on:  23 Sep 2025, 20:00:10
---------------------------------------------------------------------------------------
+ closed on:  24 Sep 2025, 14:41:34
+----------------------------------------------------------------------------------------------

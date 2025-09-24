@@ -1,29 +1,29 @@
---------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
-> aned/merge_hrs_rand_2020_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/mer
+> ge_hrs_rand_2020_2022.log
   log type:  text
- opened on:  23 Sep 2025, 20:00:08
+ opened on:  24 Sep 2025, 14:41:32
 
 . 
 . set more off
 
 . 
 . * --- file paths
-. local cleaned "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND
-> /cleaned"
+. local cleaned "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> "
 
-. local file2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
-> D/_raw/2020/h20f1a_STATA/hrs_2020_selected.dta"
+. local file2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw/2
+> 020/h20f1a_STATA/hrs_2020_selected.dta"
 
-. local file2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
-> D/_raw/2022/h22e3a_STATA/hrs_2022_selected.dta"
+. local file2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw/2
+> 022/h22e3a_STATA/hrs_2022_selected.dta"
 
-. local alt2020  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
-> D/cleaned/hrs_2020_selected.dta"
+. local alt2020  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleane
+> d/hrs_2020_selected.dta"
 
-. local alt2022  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
-> D/cleaned/hrs_2022_selected.dta"
+. local alt2022  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleane
+> d/hrs_2022_selected.dta"
 
 . local out "`cleaned'/hrs_rand_2020_2022_master.dta"
 
@@ -78,9 +78,8 @@
 . rename ssubhh rsubhh
 
 . save "`using2022'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_10464.000001 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_10464.000001 saved as .dta
-    format
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_00899.000001 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_00899.000001 saved as .dta format
 
 . 
 . * ---------------------------------------------------------------------
@@ -128,18 +127,18 @@ Merge 2020 + 2022 RAND results:
 . * ---------------------------------------------------------------------
 . save "`out'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
-    > 022_master.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
+    > er.dta saved
 
 . di as txt "Saved merged 2020+2022 HRS RAND data to `out'"
-Saved merged 2020+2022 HRS RAND data to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandT
-> rust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved merged 2020+2022 HRS RAND data to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Cod
+> e/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
-> aned/merge_hrs_rand_2020_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/mer
+> ge_hrs_rand_2020_2022.log
   log type:  text
- closed on:  23 Sep 2025, 20:00:08
---------------------------------------------------------------------------------------
+ closed on:  24 Sep 2025, 14:41:32
+----------------------------------------------------------------------------------------------
