@@ -210,15 +210,15 @@ di as txt "Observations after trimming: " r(N)
 * ---------------------------------------------------------------------
 di as txt "Top 20 positive real estate returns:"
 gsort -r_re_2022
-list HHID RSUBHH r_re_2022 yc_re_2022 cg_re_2022 F_re_2022 A_2020 F_2022 denom_re_2022 in 1/20 if re_sample
+list hhid rsubhh r_re_2022 yc_re_2022 cg_re_2022 F_re_2022 A_2020 F_2022 denom_re_2022 in 1/20 if re_sample
 
 di as txt "Top 20 negative real estate returns:"
 gsort r_re_2022
-list HHID RSUBHH r_re_2022 yc_re_2022 cg_re_2022 F_re_2022 A_2020 F_2022 denom_re_2022 in 1/20 if re_sample
+list hhid rsubhh r_re_2022 yc_re_2022 cg_re_2022 F_re_2022 A_2020 F_2022 denom_re_2022 in 1/20 if re_sample
 
 di as txt "Top 20 trimmed real estate returns:"
 gsort -r_re_2022_trimmed
-list HHID RSUBHH r_re_2022_trimmed yc_re_2022 cg_re_2022 F_re_2022 A_2020 F_2022 denom_re_2022 in 1/20 if !missing(r_re_2022_trimmed)
+list hhid rsubhh r_re_2022_trimmed yc_re_2022 cg_re_2022 F_re_2022 A_2020 F_2022 denom_re_2022 in 1/20 if !missing(r_re_2022_trimmed)
 
 * ---------------------------------------------------------------------
 * Zero-value checks

@@ -214,15 +214,15 @@ di as txt "Observations after trimming: " r(N)
 * ---------------------------------------------------------------------
 di as txt "Top 20 positive residential housing returns:"
 gsort -r_res_2022
-list HHID RSUBHH r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 in 1/20 if res_sample
+list hhid rsubhh r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 in 1/20 if res_sample
 
 di as txt "Top 20 negative residential housing returns:"
 gsort r_res_2022
-list HHID RSUBHH r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 in 1/20 if res_sample
+list hhid rsubhh r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 in 1/20 if res_sample
 
 di as txt "Top 20 trimmed residential housing returns:"
 gsort -r_res_2022_trimmed
-list HHID RSUBHH r_res_2022_trimmed yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 in 1/20 if !missing(r_res_2022_trimmed)
+list hhid rsubhh r_res_2022_trimmed yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 in 1/20 if !missing(r_res_2022_trimmed)
 
 * ---------------------------------------------------------------------
 * Zero-value checks

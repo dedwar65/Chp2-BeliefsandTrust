@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
 > pute_retirement_returns_2022.log
   log type:  text
- opened on:  24 Sep 2025, 18:55:57
+ opened on:  24 Sep 2025, 19:40:04
 
 . 
 . set more off
@@ -1198,18 +1198,18 @@ Done. IRA returns computed with 5% trimming.
 end of do-file
 
 . do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/compute_re
-> sidential_returns_2020_2022.do"
+> al_estate_returns_2020_2022.do"
 
 . *----------------------------------------------------------------------
-. * compute_residential_returns_2020_2022.do
-. * Compute returns for residential housing assets for 2022
+. * compute_real_estate_returns_2020_2022.do
+. * Compute returns for real estate assets for 2022
 . * 
-. * Formula: r_res = (yc_res + cg_res - F_res) / (A_2020 + 0.5*F_2022)
+. * Formula: r_re = (yc_re + cg_re - F_re) / (A_2020 + 0.5*F_2022)
 . * 
 . * Where:
-. * - yc_res = 0 (no interest income/dividends for residential housing)
-. * - cg_res = capital gains from residential housing (v_res_2022 - v_res_2020)
-. * - F_res = net investment flows into residential housing (buy/sell/improvements)
+. * - yc_re = rental income from real estate
+. * - cg_re = capital gains from real estate (sq134 - rq134)
+. * - F_re = net investment flows into real estate (buy/sell/improvements)
 . * - A_2020 = total beginning period net worth
 . * - F_2022 = total net investment flows
 . *----------------------------------------------------------------------
