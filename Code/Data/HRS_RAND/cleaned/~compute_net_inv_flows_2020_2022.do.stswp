@@ -218,4 +218,5 @@ save "`master'", replace
 di as txt "Saved 2022 net-flow vars back to master: `master'"
 
 log close
+exit, clear
 

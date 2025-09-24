@@ -223,6 +223,7 @@ foreach v in int_re_2022 int_bus_2022 int_ira_2022 int_stk_2022 int_bnd_2022 int
 save "`master'", replace
 
 log close
+exit, clear
 
 di as txt "Done. Modified file saved to `master'"
 

@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_capital_gains_2022_simple_residences.log
   log type:  text
- opened on:  23 Sep 2025, 16:48:40
+ opened on:  23 Sep 2025, 20:00:16
 
 . 
 . set more off
@@ -37,41 +37,8 @@ Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/
 > 2
 . * ---------------------------------------------------------------------
 . 
-. di as txt "Checking presence of the main vars..."
-Checking presence of the main vars...
-
-. local checkvars "sq148 rq148 sq134 rq134 sq317 rq317 sq166_1 rq166_1 sq166_2 rq166_2
->  sq166_3 rq166_3 sq331 rq331 sh020 rh020 sh162 rh162 flow_bus_2022 flow_re_2022 flow
-> _stk_2022 flow_ira_2022 flow_residences_2022"
-
-. foreach v of local checkvars {
-  2.     capture confirm variable `v'
-  3.     if _rc di as warn "  MISSING: `v'" 
-  4.     else di as txt "  OK: `v'"
-  5. }
-  OK: sq148
-  OK: rq148
-  OK: sq134
-  OK: rq134
-  OK: sq317
-  OK: rq317
-  OK: sq166_1
-  OK: rq166_1
-  OK: sq166_2
-  OK: rq166_2
-  OK: sq166_3
-  OK: rq166_3
-  OK: sq331
-  OK: rq331
-  OK: sh020
-  OK: rh020
-  OK: sh162
-  OK: rh162
-  OK: flow_bus_2022
-  OK: flow_re_2022
-  OK: flow_stk_2022
-  OK: flow_ira_2022
-  OK: flow_residences_2022
+. di as txt "Proceeding with capital gains computation..."
+Proceeding with capital gains computation...
 
 . 
 . * ---------------------------------------------------------------------
@@ -1039,5 +1006,5 @@ Saved capital gains vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beli
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_capital_gains_2022_simple_residences.log
   log type:  text
- closed on:  23 Sep 2025, 16:48:40
+ closed on:  23 Sep 2025, 20:00:16
 --------------------------------------------------------------------------------------

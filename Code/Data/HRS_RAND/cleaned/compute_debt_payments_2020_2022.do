@@ -180,4 +180,5 @@ save "`master'", replace
 di as txt "Saved mortgage payment vars back to master: `master'"
 
 log close
+exit, clear
 

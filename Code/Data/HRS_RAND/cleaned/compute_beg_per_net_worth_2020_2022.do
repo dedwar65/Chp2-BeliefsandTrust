@@ -86,4 +86,5 @@ save "`master'", replace
 di as txt "Saved A2020 net worth back to master: `master'"
 
 log close
+exit, clear
 

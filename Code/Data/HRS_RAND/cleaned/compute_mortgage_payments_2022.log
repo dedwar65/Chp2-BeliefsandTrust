@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
 > aned/compute_mortgage_payments_2022.log
   log type:  text
- opened on:  23 Sep 2025, 16:18:00
+ opened on:  23 Sep 2025, 20:00:14
 
 . 
 . set more off
@@ -62,7 +62,7 @@ Recoding frequency codes 7,8,9 -> missing for mortgage frequency vars...
  12.         quietly tab `v', missing
  13.     }
  14. }
-  sh029 records with codes 7/8/9 before recode = 0
+  sh029 records with codes 7/8/9 before recode = 2
   sh029 records with codes 7/8/9 after recode  = 0
   sh040 records with codes 7/8/9 before recode = 0
   sh040 records with codes 7/8/9 after recode  = 0
@@ -247,29 +247,142 @@ Computing annual mortgage payments (amount * multiplier)...
 .     }
 .     else {
 .         gen double mort1_pay_annual = .
-variable mort1_pay_annual already defined
-r(110);
+(14,442 missing values generated)
 .         replace mort1_pay_annual = sh025 * sh029_mult if !missing(sh025) & !missing(
 > sh029_mult)
+(2,694 real changes made)
 .         di as txt "First mortgage annual payment summary (mort1_pay_annual):"
+First mortgage annual payment summary (mort1_pay_annual):
 .         summarize mort1_pay_annual, detail
+
+                      mort1_pay_annual
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         2640            135
+ 5%         4800            786
+10%         6000            792       Obs               2,694
+25%         9000            792       Sum of wgt.       2,694
+
+50%        14052                      Mean            16898.9
+                        Largest       Std. dev.      29636.78
+75%        21420          73200
+90%        29088          84000       Variance       8.78e+08
+95%        36000         264000       Skewness       41.39421
+99%        51600        1440000       Kurtosis       1976.783
 .  
 .     }
-r(110);
 . }
-r(110);
 
-end of do-file
+. 
+. capture confirm variable sh036
 
-r(110);
+. if _rc {
+.     di as txt "sh036 not found -> mort2_pay_annual set to missing"
+.     gen double mort2_pay_annual = .
+. }
 
-. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/co
-> mpute_cap_gains_2020_2022.do"
+. else {
+.     capture confirm variable sh040_mult
+.     if _rc {
+.         di as txt "sh040_mult not found -> cannot annualize sh036 -> mort2_pay_annua
+> l missing"
+.         gen double mort2_pay_annual = .
+.     }
+.     else {
+.         gen double mort2_pay_annual = .
+(14,442 missing values generated)
+.         replace mort2_pay_annual = sh036 * sh040_mult if !missing(sh036) & !missing(
+> sh040_mult)
+(57 real changes made)
+.         di as txt "Second mortgage annual payment summary (mort2_pay_annual):"
+Second mortgage annual payment summary (mort2_pay_annual):
+.         summarize mort2_pay_annual, detail
 
-. *----------------------------------------------------------------------
-. * RAND: compute_capital_gains_2022_simple_residences.do
-. * Lowercase RAND vars, same logic
-. *----------------------------------------------------------------------
-. clear all
+                      mort2_pay_annual
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          480            480
+ 5%         1200            960
+10%         1800           1200       Obs                  57
+25%         3600           1380       Sum of wgt.          57
 
-. capture log close
+50%         5400                      Mean           7412.421
+                        Largest       Std. dev.      5745.248
+75%         9960          16800
+90%        15768          16800       Variance       3.30e+07
+95%        16800          21600       Skewness       1.562541
+99%        30000          30000       Kurtosis       5.886858
+.  
+.     }
+. }
+
+. 
+. capture confirm variable sh175
+
+. if _rc {
+.     di as txt "sh175 not found -> secmort_pay_annual set to missing"
+.     gen double secmort_pay_annual = .
+. }
+
+. else {
+.     capture confirm variable sh179_mult
+.     if _rc {
+.         di as txt "sh179_mult not found -> cannot annualize sh175 -> secmort_pay_ann
+> ual missing"
+.         gen double secmort_pay_annual = .
+.     }
+.     else {
+.         gen double secmort_pay_annual = .
+(14,442 missing values generated)
+.         replace secmort_pay_annual = sh175 * sh179_mult if !missing(sh175) & !missin
+> g(sh179_mult)
+(137 real changes made)
+.         di as txt "Secondary mortgage annual payment summary (secmort_pay_annual):"
+Secondary mortgage annual payment summary (secmort_pay_annual):
+.         summarize secmort_pay_annual, detail
+
+                     secmort_pay_annual
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1380            600
+ 5%         2760           1380
+10%         4200           1620       Obs                 137
+25%         8400           2244       Sum of wgt.         137
+
+50%        13200                      Mean           16081.23
+                        Largest       Std. dev.      15316.19
+75%        20400          48000
+90%        27600          54000       Variance       2.35e+08
+95%        36000          59412       Skewness       4.723502
+99%        59412         144000       Kurtosis       37.33738
+.  
+.     }
+. }
+
+. 
+. * ---------------------------------------------------------------------
+. * 6) Diagnostics: amount present but multiplier missing
+. * ---------------------------------------------------------------------
+.  
+. 
+. * ---------------------------------------------------------------------
+. * (Total across mortgage types will be computed in compute_returns)
+. * Save dataset with new mortgage payment variables BACK TO MASTER
+. * ---------------------------------------------------------------------
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2
+    > 022_master.dta saved
+
+. di as txt "Saved mortgage payment vars back to master: `master'"
+Saved mortgage payment vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-Beliefs
+> andTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cle
+> aned/compute_mortgage_payments_2022.log
+  log type:  text
+ closed on:  23 Sep 2025, 20:00:14
+--------------------------------------------------------------------------------------

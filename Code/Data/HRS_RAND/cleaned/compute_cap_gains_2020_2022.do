@@ -27,13 +27,7 @@ di as txt "Using master file: `master'"
 * Residences:  sh020 + sh162 (2022), rh020 + rh162 (2020), flow: flow_residences_2022
 * ---------------------------------------------------------------------
 
-di as txt "Checking presence of the main vars..."
-local checkvars "sq148 rq148 sq134 rq134 sq317 rq317 sq166_1 rq166_1 sq166_2 rq166_2 sq166_3 rq166_3 sq331 rq331 sh020 rh020 sh162 rh162 flow_bus_2022 flow_re_2022 flow_stk_2022 flow_ira_2022 flow_residences_2022"
-foreach v of local checkvars {
-    capture confirm variable `v'
-    if _rc di as warn "  MISSING: `v'" 
-    else di as txt "  OK: `v'"
-}
+di as txt "Proceeding with capital gains computation..."
 
 * ---------------------------------------------------------------------
 * Optional: clean sentinel special-missing codes for value vars (adjust if already cleaned)
@@ -215,4 +209,5 @@ save "`master'", replace
 di as txt "Saved capital gains vars back to master: `master'"
 
 log close
+exit, clear
 
