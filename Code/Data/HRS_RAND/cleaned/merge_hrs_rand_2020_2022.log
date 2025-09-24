@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/mer
 > ge_hrs_rand_2020_2022.log
   log type:  text
- opened on:  24 Sep 2025, 14:41:32
+ opened on:  24 Sep 2025, 18:55:35
 
 . 
 . set more off
@@ -78,8 +78,8 @@
 . rename ssubhh rsubhh
 
 . save "`using2022'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_00899.000001 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_00899.000001 saved as .dta format
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_29064.000001 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_29064.000001 saved as .dta format
 
 . 
 . * ---------------------------------------------------------------------
@@ -140,5 +140,5 @@ Saved merged 2020+2022 HRS RAND data to /Volumes/SSD PRO/Github-forks/Chp2-Belie
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/mer
 > ge_hrs_rand_2020_2022.log
   log type:  text
- closed on:  24 Sep 2025, 14:41:32
+ closed on:  24 Sep 2025, 18:55:35
 ----------------------------------------------------------------------------------------------

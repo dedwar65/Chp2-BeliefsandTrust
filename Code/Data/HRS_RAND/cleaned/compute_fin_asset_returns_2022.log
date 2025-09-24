@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
 > pute_fin_asset_returns_2022.log
   log type:  text
- opened on:  24 Sep 2025, 14:40:37
+ opened on:  24 Sep 2025, 18:55:50
 
 . 
 . set more off
@@ -1325,12 +1325,23 @@ Done. Financial asset returns computed with 5% trimming.
 . 
 end of do-file
 
-. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/extract_ho
-> usehold_2020_ret_calc_end.do"
+. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/compute_bu
+> s_returns_2020_2022.do"
 
 . *----------------------------------------------------------------------
-. * Create: select variables from RAND 2020 household file and save
-. * Mirrors HRS extract script but uses RAND file and lowercase vars
-. * Usage: do "/Volumes/SSD PRO/Github-forks/.../extract_household_2020_ret_calc_end.do"
+. * RAND: compute_bus_returns.do
+. * Compute returns for BUSINESS assets for 2022
+. * Using lowercase RAND variable names
+. *
+. * Formula: r_bus = (yc_bus + cg_bus - F_bus) / (A_2020 + 0.5*F_2022)
+. *
+. * Where:
+. * - yc_bus = business income (annualized from frequency/amount)
+. * - cg_bus = capital gains for business
+. * - F_bus  = net investment flows into business
+. * - A_2020 = total beginning period net worth
+. * - F_2022 = total net investment flows (all asset classes)
 . *----------------------------------------------------------------------
+. clear all
+
 . capture log close
