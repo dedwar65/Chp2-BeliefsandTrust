@@ -195,6 +195,116 @@ local n_trimmed_total = r(N)
 di as txt "Final trimmed sample: `n_final_trim' out of `n_trimmed_total' trimmed total returns (" %4.1f 100*`n_final_trim'/`n_trimmed_total' "%)"
 
 * ---------------------------------------------------------------------
+* Step 7b: Robustness variants excluding asset classes
+* ---------------------------------------------------------------------
+di as txt "=== Computing robustness variants (exclusions) ==="
+
+* Variant A: Exclude residential (use fin + bus + ira + re)
+gen byte has_returns_excl_res = 0
+replace has_returns_excl_res = 1 if !missing(r_fin_2022)
+replace has_returns_excl_res = 1 if !missing(r_bus_2022)
+replace has_returns_excl_res = 1 if !missing(r_ira_2022)
+replace has_returns_excl_res = 1 if !missing(r_re_2022)
+
+capture drop r_total_2022_excl_res
+gen double r_total_2022_excl_res = .
+replace r_total_2022_excl_res = cond(missing(r_fin_2022), 0, r_fin_2022) + ///
+                                cond(missing(r_bus_2022), 0, r_bus_2022) + ///
+                                cond(missing(r_ira_2022), 0, r_ira_2022) + ///
+                                cond(missing(r_re_2022), 0, r_re_2022) ///
+                                if has_returns_excl_res
+
+capture drop r_total_2022_excl_res_trim
+gen double r_total_2022_excl_res_trim = .
+replace r_total_2022_excl_res_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) + ///
+                                     cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) + ///
+                                     cond(missing(r_ira_2022_trim), 0, r_ira_2022_trim) + ///
+                                     cond(missing(r_re_2022_trimmed), 0, r_re_2022_trimmed) ///
+                                     if has_returns_excl_res
+
+capture drop r_total_2022_excl_res_ftrim
+gen double r_total_2022_excl_res_ftrim = .
+quietly _pctile r_total_2022_excl_res_trim if has_returns_excl_res, p(5 95)
+scalar p5_excl_res = r(r1)
+scalar p95_excl_res = r(r2)
+replace r_total_2022_excl_res_ftrim = r_total_2022_excl_res_trim if has_returns_excl_res & ///
+                                      r_total_2022_excl_res_trim >= p5_excl_res & ///
+                                      r_total_2022_excl_res_trim <= p95_excl_res
+
+di as txt "Variant A (exclude residential) sample sizes:"
+quietly count if has_returns_excl_res
+di as txt "  In-sample: " r(N)
+quietly count if !missing(r_total_2022_excl_res_ftrim)
+di as txt "  Final-trim retained: " r(N)
+
+* Variant B: Exclude housing (residential + real estate) (use fin + bus + ira)
+gen byte has_returns_excl_housing = 0
+replace has_returns_excl_housing = 1 if !missing(r_fin_2022)
+replace has_returns_excl_housing = 1 if !missing(r_bus_2022)
+replace has_returns_excl_housing = 1 if !missing(r_ira_2022)
+
+capture drop r_total_2022_excl_housing
+gen double r_total_2022_excl_housing = .
+replace r_total_2022_excl_housing = cond(missing(r_fin_2022), 0, r_fin_2022) + ///
+                                     cond(missing(r_bus_2022), 0, r_bus_2022) + ///
+                                     cond(missing(r_ira_2022), 0, r_ira_2022) ///
+                                     if has_returns_excl_housing
+
+capture drop r_total_2022_excl_housing_trim
+gen double r_total_2022_excl_housing_trim = .
+replace r_total_2022_excl_housing_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) + ///
+                                         cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) + ///
+                                         cond(missing(r_ira_2022_trim), 0, r_ira_2022_trim) ///
+                                         if has_returns_excl_housing
+
+capture drop r_total_2022_excl_housing_ftrim
+gen double r_total_2022_excl_housing_ftrim = .
+quietly _pctile r_total_2022_excl_housing_trim if has_returns_excl_housing, p(5 95)
+scalar p5_excl_housing = r(r1)
+scalar p95_excl_housing = r(r2)
+replace r_total_2022_excl_housing_ftrim = r_total_2022_excl_housing_trim if has_returns_excl_housing & ///
+                                          r_total_2022_excl_housing_trim >= p5_excl_housing & ///
+                                          r_total_2022_excl_housing_trim <= p95_excl_housing
+
+di as txt "Variant B (exclude residential + real estate) sample sizes:"
+quietly count if has_returns_excl_housing
+di as txt "  In-sample: " r(N)
+quietly count if !missing(r_total_2022_excl_housing_ftrim)
+di as txt "  Final-trim retained: " r(N)
+
+* Variant C: Exclude housing + retirement (use fin + bus)
+gen byte has_returns_excl_hsg_ira = 0
+replace has_returns_excl_hsg_ira = 1 if !missing(r_fin_2022)
+replace has_returns_excl_hsg_ira = 1 if !missing(r_bus_2022)
+
+capture drop r_total_2022_excl_hsg_ira
+gen double r_total_2022_excl_hsg_ira = .
+replace r_total_2022_excl_hsg_ira = cond(missing(r_fin_2022), 0, r_fin_2022) + ///
+                                    cond(missing(r_bus_2022), 0, r_bus_2022) ///
+                                    if has_returns_excl_hsg_ira
+
+capture drop r_total_2022_excl_hsg_ira_trim
+gen double r_total_2022_excl_hsg_ira_trim = .
+replace r_total_2022_excl_hsg_ira_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) + ///
+                                          cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) ///
+                                          if has_returns_excl_hsg_ira
+
+capture drop r_total_2022_excl_hsg_ira_ftrim
+gen double r_total_2022_excl_hsg_ira_ftrim = .
+quietly _pctile r_total_2022_excl_hsg_ira_trim if has_returns_excl_hsg_ira, p(5 95)
+scalar p5_excl_hsg_ira = r(r1)
+scalar p95_excl_hsg_ira = r(r2)
+replace r_total_2022_excl_hsg_ira_ftrim = r_total_2022_excl_hsg_ira_trim if has_returns_excl_hsg_ira & ///
+                                          r_total_2022_excl_hsg_ira_trim >= p5_excl_hsg_ira & ///
+                                          r_total_2022_excl_hsg_ira_trim <= p95_excl_hsg_ira
+
+di as txt "Variant C (exclude residential + real estate + retirement) sample sizes:"
+quietly count if has_returns_excl_hsg_ira
+di as txt "  In-sample: " r(N)
+quietly count if !missing(r_total_2022_excl_hsg_ira_ftrim)
+di as txt "  Final-trim retained: " r(N)
+
+* ---------------------------------------------------------------------
 * Step 8: Summaries and diagnostics
 * ---------------------------------------------------------------------
 di as txt "=== Total returns summaries ==="
@@ -210,6 +320,31 @@ tabstat r_total_2022_trimmed if has_any_returns, stats(n mean sd p50 min max) fo
 di as txt "Final trimmed total returns (r_total_2022_final_trim) summary:"
 summarize r_total_2022_final_trim, detail
 tabstat r_total_2022_final_trim, stats(n mean sd p50 min max) format(%12.4f)
+
+di as txt "--- Robustness variant summaries ---"
+di as txt "Exclude residential: raw"
+tabstat r_total_2022_excl_res if has_returns_excl_res, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Exclude residential: trimmed"
+tabstat r_total_2022_excl_res_trim if has_returns_excl_res, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Exclude residential: final trimmed"
+summarize r_total_2022_excl_res_ftrim, detail
+tabstat r_total_2022_excl_res_ftrim, stats(n mean sd p50 min max) format(%12.4f)
+
+di as txt "Exclude res + re: raw"
+tabstat r_total_2022_excl_housing if has_returns_excl_housing, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Exclude res + re: trimmed"
+tabstat r_total_2022_excl_housing_trim if has_returns_excl_housing, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Exclude res + re: final trimmed"
+summarize r_total_2022_excl_housing_ftrim, detail
+tabstat r_total_2022_excl_housing_ftrim, stats(n mean sd p50 min max) format(%12.4f)
+
+di as txt "Exclude res + re + ira: raw"
+tabstat r_total_2022_excl_hsg_ira if has_returns_excl_hsg_ira, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Exclude res + re + ira: trimmed"
+tabstat r_total_2022_excl_hsg_ira_trim if has_returns_excl_hsg_ira, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Exclude res + re + ira: final trimmed"
+summarize r_total_2022_excl_hsg_ira_ftrim, detail
+tabstat r_total_2022_excl_hsg_ira_ftrim, stats(n mean sd p50 min max) format(%12.4f)
 
 * Check for extreme values
 quietly count if r_total_2022 > 5 & has_any_returns
@@ -227,26 +362,7 @@ di as txt "Final trimmed total returns > 500%: " r(N)
 quietly count if r_total_2022_final_trim < -1
 di as txt "Final trimmed total returns < -100%: " r(N)
 
-* ---------------------------------------------------------------------
-* Step 9: Top 20 returns display
-* ---------------------------------------------------------------------
-di as txt "=== Top 20 total returns ==="
-
-di as txt "Top 20 positive raw total returns:"
-gsort -r_total_2022
-list hhid rsubhh r_total_2022 r_fin_2022 r_bus_2022 r_ira_2022 r_re_2022 r_res_2022 in 1/20 if has_any_returns
-
-di as txt "Top 20 negative raw total returns:"
-gsort r_total_2022
-list hhid rsubhh r_total_2022 r_fin_2022 r_bus_2022 r_ira_2022 r_re_2022 r_res_2022 in 1/20 if has_any_returns
-
-di as txt "Top 20 positive trimmed total returns:"
-gsort -r_total_2022_trimmed
-list hhid rsubhh r_total_2022_trimmed r_fin_2022_trim r_bus_2022_trim r_ira_2022_trim r_re_2022_trimmed r_res_2022_trimmed in 1/20 if has_any_returns
-
-di as txt "Top 20 positive final trimmed total returns:"
-gsort -r_total_2022_final_trim
-list hhid rsubhh r_total_2022_final_trim r_fin_2022_trim r_bus_2022_trim r_ira_2022_trim r_re_2022_trimmed r_res_2022_trimmed in 1/20 if !missing(r_total_2022_final_trim)
+* (Top 20 returns display removed per request)
 
 * ---------------------------------------------------------------------
 * Step 10: Save results
@@ -263,6 +379,15 @@ di as txt "  n_asset_returns: number of asset classes with returns"
 di as txt "  r_total_2022: raw total returns (sum of raw asset class returns)"
 di as txt "  r_total_2022_trimmed: trimmed total returns (sum of trimmed asset class returns)"
 di as txt "  r_total_2022_final_trim: final trimmed total returns (additional 5% trimming applied to sum of trimmed returns)"
+di as txt "  r_total_2022_excl_res: raw total returns excluding residential"
+di as txt "  r_total_2022_excl_res_trim: trimmed total returns excluding residential"
+di as txt "  r_total_2022_excl_res_ftrim: final trimmed total returns excluding residential"
+di as txt "  r_total_2022_excl_housing: raw total returns excluding residential and real estate"
+di as txt "  r_total_2022_excl_housing_trim: trimmed total returns excluding residential and real estate"
+di as txt "  r_total_2022_excl_housing_ftrim: final trimmed total returns excluding residential and real estate"
+di as txt "  r_total_2022_excl_hsg_ira: raw total returns excluding residential, real estate, and retirement"
+di as txt "  r_total_2022_excl_hsg_ira_trim: trimmed total returns excluding residential, real estate, and retirement"
+di as txt "  r_total_2022_excl_hsg_ira_ftrim: final trimmed total returns excluding residential, real estate, and retirement"
 
 di as txt ""
 di as txt "Total returns computation completed successfully!"

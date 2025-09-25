@@ -291,19 +291,7 @@ tabstat r_fin_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
 * ---------------------------------------------------------------------
 * Diagnostics: show extremes and component breakdowns
 * ---------------------------------------------------------------------
-di as txt "=== Diagnostics: extreme returns and component inspection ==="
-
-di as txt "Top 20 positive financial asset returns:"
-gsort -r_fin_2022
-list hhid rsubhh r_fin_2022 yc_fin_2022 cg_fin_2022 F_fin_2022 A_2020 F_2022 denom_fin_2022 in 1/20 if fin_sample
-
-di as txt "Top 20 negative financial asset returns:"
-gsort r_fin_2022
-list hhid rsubhh r_fin_2022 yc_fin_2022 cg_fin_2022 F_fin_2022 A_2020 F_2022 denom_fin_2022 in 1/20 if fin_sample
-
-di as txt "Top 20 trimmed financial asset returns:"
-gsort -r_fin_2022_trim
-list hhid rsubhh r_fin_2022_trim yc_fin_2022 cg_fin_2022 F_fin_2022 A_2020 F_2022 denom_fin_2022 in 1/20 if !missing(r_fin_2022_trim)
+di as txt "=== Diagnostics: component inspection (no top-20 listings) ==="
 
 * ---------------------------------------------------------------------
 * Zero-value checks for summed components
@@ -315,6 +303,119 @@ quietly count if cg_fin_2022 == 0 & fin_sample
 di as txt "cg_fin_2022 equals 0 in sample: " r(N)
 quietly count if F_fin_2022 == 0 & fin_sample
 di as txt "F_fin_2022 equals 0 in sample: " r(N)
+
+* ---------------------------------------------------------------------
+* Additional: Compute separate stock and bond returns (no structural changes)
+* ---------------------------------------------------------------------
+di as txt "=== Computing separate stock and bond returns ==="
+
+* ---------------------------
+* STOCK RETURNS
+* ---------------------------
+di as txt "-- Stock returns --"
+
+* Sample: stocks in both years OR exposure via income or stock flows
+capture drop has_stk_both
+gen byte has_stk_both = !missing(sq317) & !missing(rq317)
+capture drop stk_exposure
+gen byte stk_exposure = 0
+replace stk_exposure = 1 if !missing(`a2022_stk') & !missing(`f2022_stk'_mult)
+replace stk_exposure = 1 if (!missing(sr064) & !missing(sr063_dir)) | !missing(sr073)
+capture drop stk_sample
+gen byte stk_sample = has_stk_both | stk_exposure
+
+* Denominator components for stocks
+capture drop A_2020_stk
+gen double A_2020_stk = networth_A2020 if stk_sample
+capture drop F_2022_stk
+gen double F_2022_stk = flow_total_2022 if stk_sample
+replace F_2022_stk = 0 if missing(F_2022_stk) & stk_sample
+capture drop denom_stk_2022
+gen double denom_stk_2022 = A_2020_stk + 0.5*F_2022_stk if stk_sample
+capture drop denom_stk_above_10k
+gen byte denom_stk_above_10k = denom_stk_2022 >= 10000 if stk_sample
+replace stk_sample = stk_sample & denom_stk_above_10k
+
+* Numerator: yc, cg, flows
+capture drop yc_stk_2022
+gen double yc_stk_2022 = int_stk_2022 if stk_sample
+replace yc_stk_2022 = 0 if missing(yc_stk_2022) & stk_sample
+capture drop cg_stk_used_2022
+gen double cg_stk_used_2022 = cg_stk_2022 if stk_sample
+replace cg_stk_used_2022 = 0 if missing(cg_stk_used_2022) & stk_sample
+capture drop F_stk_2022
+gen double F_stk_2022 = flow_stk_2022 if stk_sample
+replace F_stk_2022 = 0 if missing(F_stk_2022) & stk_sample
+
+* Return and trimming
+capture drop r_stk_2022
+gen double r_stk_2022 = (yc_stk_2022 + cg_stk_used_2022 - F_stk_2022) / denom_stk_2022 if stk_sample
+quietly _pctile r_stk_2022 if stk_sample & !missing(r_stk_2022), p(5 95)
+scalar stk_p5 = r(r1)
+scalar stk_p95 = r(r2)
+capture drop r_stk_2022_trim
+gen double r_stk_2022_trim = r_stk_2022 if stk_sample & !missing(r_stk_2022) & inrange(r_stk_2022, stk_p5, stk_p95)
+
+* Summaries
+di as txt "Stock returns summary (raw):"
+summarize r_stk_2022 if stk_sample, detail
+tabstat r_stk_2022 if stk_sample, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Stock returns summary (trimmed):"
+summarize r_stk_2022_trim, detail
+tabstat r_stk_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
+
+* ---------------------------
+* BOND RETURNS
+* ---------------------------
+di as txt "-- Bond returns --"
+
+* Sample: bonds in both years OR exposure via income (no flow component for bonds)
+capture drop has_bnd_both
+gen byte has_bnd_both = !missing(sq331) & !missing(rq331)
+capture drop bnd_exposure
+gen byte bnd_exposure = 0
+replace bnd_exposure = 1 if !missing(`a2022_bnd') & !missing(`f2022_bnd'_mult)
+capture drop bnd_sample
+gen byte bnd_sample = has_bnd_both | bnd_exposure
+
+* Denominator components for bonds
+capture drop A_2020_bnd
+gen double A_2020_bnd = networth_A2020 if bnd_sample
+capture drop F_2022_bnd
+gen double F_2022_bnd = flow_total_2022 if bnd_sample
+replace F_2022_bnd = 0 if missing(F_2022_bnd) & bnd_sample
+capture drop denom_bnd_2022
+gen double denom_bnd_2022 = A_2020_bnd + 0.5*F_2022_bnd if bnd_sample
+capture drop denom_bnd_above_10k
+gen byte denom_bnd_above_10k = denom_bnd_2022 >= 10000 if bnd_sample
+replace bnd_sample = bnd_sample & denom_bnd_above_10k
+
+* Numerator: yc, cg, flows (flows = 0 for bonds)
+capture drop yc_bnd_2022
+gen double yc_bnd_2022 = int_bnd_2022 if bnd_sample
+replace yc_bnd_2022 = 0 if missing(yc_bnd_2022) & bnd_sample
+capture drop cg_bnd_used_2022
+gen double cg_bnd_used_2022 = cg_bnd_2022 if bnd_sample
+replace cg_bnd_used_2022 = 0 if missing(cg_bnd_used_2022) & bnd_sample
+capture drop F_bnd_2022
+gen double F_bnd_2022 = 0 if bnd_sample
+
+* Return and trimming
+capture drop r_bnd_2022
+gen double r_bnd_2022 = (yc_bnd_2022 + cg_bnd_used_2022 - F_bnd_2022) / denom_bnd_2022 if bnd_sample
+quietly _pctile r_bnd_2022 if bnd_sample & !missing(r_bnd_2022), p(5 95)
+scalar bnd_p5 = r(r1)
+scalar bnd_p95 = r(r2)
+capture drop r_bnd_2022_trim
+gen double r_bnd_2022_trim = r_bnd_2022 if bnd_sample & !missing(r_bnd_2022) & inrange(r_bnd_2022, bnd_p5, bnd_p95)
+
+* Summaries
+di as txt "Bond returns summary (raw):"
+summarize r_bnd_2022 if bnd_sample, detail
+tabstat r_bnd_2022 if bnd_sample, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "Bond returns summary (trimmed):"
+summarize r_bnd_2022_trim, detail
+tabstat r_bnd_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
 
 * ---------------------------------------------------------------------
 * Save dataset with new financial asset return variables
