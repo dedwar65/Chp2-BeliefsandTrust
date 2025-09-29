@@ -372,6 +372,13 @@ di as txt "=== Saving results ==="
 save "`master'", replace
 di as txt "Saved total return variables to master: `master'"
 
+* Reload the updated master so all variables are in memory for inspection
+use "`master'", clear
+quietly describe
+local k = r(k)
+di as txt "Variables in memory after total returns: `k'"
+capture noisily ds
+
 * List of variables created
 di as txt "Variables created:"
 di as txt "  has_any_returns: sample indicator (at least 1 asset class return)"
@@ -393,4 +400,3 @@ di as txt ""
 di as txt "Total returns computation completed successfully!"
 
 log close
-exit, clear

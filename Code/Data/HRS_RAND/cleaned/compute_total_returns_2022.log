@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
 > pute_total_returns_2022.log
   log type:  text
- opened on:  25 Sep 2025, 09:45:14
+ opened on:  29 Sep 2025, 11:57:43
 
 . 
 . di as txt "=== COMPUTING TOTAL RETURNS TO NET WORTH ==="
@@ -815,6 +815,58 @@ Saved total return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-Belie
 > e/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
+. * Reload the updated master so all variables are in memory for inspection
+. use "`master'", clear
+
+. quietly describe
+
+. local k = r(k)
+
+. di as txt "Variables in memory after total returns: `k'"
+Variables in memory after total returns: 233
+
+. capture noisily ds
+hhid          sq352         flow_~c_2022  ok_res20_p    cg_stk_use~2  re_exposure
+rsubhh        sq362         flow_stk_2~2  ok_res20_s    F_stk_2022    re_sample
+rh020         sq364         flow_re_2022  res20_patt~n  r_stk_2022    denom_re_2~2
+rh032         sr007         ok_buy        cg_bus_2022   r_stk_2022~m  denom_re_a~k
+rh162         sr013         ok_sell       bus_cases     has_bnd_both  yc_re_2022
+rh171         sr024         ok_impr       re_cases      bnd_exposure  cg_re_2022
+rq134         sr030         re_pattern    cg_stk_2022   bnd_sample    F_re_2022
+rq148         sr035         flow_ir~2022  stk_cases     A_2020_bnd    r_re_2022
+rq166_1       sr045         ok_ira1       cg_ira_2022   F_2022_bnd    r_re_2022_~d
+rq166_2       sr050         ok_ira2       ira_cases     denom_bnd_~2  has_res_both
+rq166_3       sr055         ok_ira3       cg_bnd_2022   denom_bn~10k  res_exposure
+rq317         sr063         ira_pattern   bnd_cases     yc_bnd_2022   res_sample
+rq331         sr064         flow_resid~2  cg_res_tot~2  cg_bnd_use~2  A_2020
+rq345         sr073         ok_res_buy    res_cases     F_bnd_2022    F_2022
+rq357         sh020         ok_res_sell   n_asset~2020  r_bnd_2022    denom_res_~2
+rq371         sh025         ok_res_impr   n_liab_2020   r_bnd_2022~m  denom_res_~k
+rq381         sh029         res_pattern   assets_~2020  has_busine~h  yc_res_2022
+rq478         sh036         flow_to~2022  liab_to~2020  bus_exposure  cg_res_2022
+sq134         sh040         sh029_mult    networt~2020  bus_sample    F_res_2022
+sq139         sh162         sh040_mult    has_stocks~h  F_bus_2022    r_res_2022
+sq141         sh175         sh179_mult    has_bonds_~h  yc_bus_2022   r_res_2022~d
+sq148         sh179         mort1_pay_~l  fin_exposure  denom_bus_~2  has_any_re~s
+sq153         sq139_mult    mort2_pay_~l  fin_sample    denom_bus_~e  n_asset_re~s
+sq155         sq153_mult    secmort_pa~l  F_fin_2022    denom_bu~10k  r_total_2022
+sq166_1       sq194_mult    v_ira_2022    yc_fin_2022   r_bus_2022    r_total_20~d
+sq166_2       sq322_mult    v_ira_2020    cg_fin_2022   r_bus_2022~m  r_tot~l_trim
+sq166_3       sq336_mult    ok_ira22_1    denom_f~2022  has_ira_both  has_return~s
+sq171_1       sq350_mult    ok_ira22_2    denom_fin_~e  ira_exposure  r_total_20~s
+sq171_2       sq362_mult    ok_ira22_3    denom_fi~10k  ira_sample    r_tot~s_trim
+sq171_3       int_re_2022   ira22_patt~n  r_fin_2022    yc_ira_2022   r_to~s_ftrim
+sq190         int_bus_2022  ok_ira20_1    r_fin_2022~m  F_ira_2022    has_return~g
+sq194         int_ira_2022  ok_ira20_2    has_stk_both  denom_i~2022  r_total_20~g
+sq317         int_stk_2022  ok_ira20_3    stk_exposure  denom_ira_~e  r_tot~g_trim
+sq322         int_bnd_2022  ira20_patt~n  stk_sample    denom_ir~10k  r_to~g_ftrim
+sq324         int_cas~2022  v_res_2022    A_2020_stk    r_ira_2022    has_return~a
+sq331         int_cds_2022  v_res_2020    F_2022_stk    r_ira_2022~m  r_total_20~a
+sq336         sr063_dir     ok_res22_p    denom_s~2022  ira_withdr~l  r_tot~a_trim
+sq338         flow_bu~2022  ok_res22_s    denom_st~10k  ira_no_wit~l  r_to~a_ftrim
+sq350         flow~te_2022  res22_patt~n  yc_stk_2022   has_re_both
+
+. 
 . * List of variables created
 . di as txt "Variables created:"
 Variables created:
@@ -887,5 +939,5 @@ Total returns computation completed successfully!
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
 > pute_total_returns_2022.log
   log type:  text
- closed on:  25 Sep 2025, 09:45:14
+ closed on:  29 Sep 2025, 11:57:43
 ----------------------------------------------------------------------------------------------

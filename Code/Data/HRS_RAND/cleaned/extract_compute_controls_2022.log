@@ -1,0 +1,465 @@
+----------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/ext
+> ract_compute_controls_2022.log
+  log type:  text
+ opened on:  29 Sep 2025, 11:57:45
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. local raw2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw/20
+> 20/h20f1a_STATA/h20f1a.dta"
+
+. local cleaned  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleane
+> d"
+
+. local master   "`cleaned'/hrs_rand_2020_2022_master.dta"
+
+. 
+. di as txt "Master path: `master'"
+Master path: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs
+> _rand_2020_2022_master.dta
+
+. 
+. * ---------------------------------------------------------------------
+. * Verify source and master files
+. * ---------------------------------------------------------------------
+. capture confirm file "`raw2020'"
+
+. if _rc {
+.         di as error "ERROR: RAND 2020 raw file not found -> `raw2020'"
+.         exit 198
+. }
+
+. 
+. capture confirm file "`master'"
+
+. if _rc di as error "ERROR: master file not found -> `master'"
+
+. if _rc exit 198
+
+. 
+. * ---------------------------------------------------------------------
+. * Variables to extract (guided by RepNotes_G2008.md)
+. * Notes mapping (lowercase RAND vars):
+. *   Education: rz216, rb014
+. *   Age: ra019
+. *   Gender: rx060_r
+. *   Employment: rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020
+. *   Marital status: ra034, rz080
+. *   Immigration: rb085, rz230 (citizenship)
+. * ---------------------------------------------------------------------
+. local keepvars "hhid rsubhh rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m
+> 5 rj020 ra034 rz080 rb085 rz230 rv557 rv559 rv560 rv561 rv562 rv563 rv564"
+
+. 
+. * ---------------------------------------------------------------------
+. * Load 2020 raw, keep requested controls and keys
+. * ---------------------------------------------------------------------
+. use "`raw2020'", clear
+
+. 
+. * Safety: trim keys if string
+. capture confirm string variable hhid
+
+. if !_rc replace hhid = trim(hhid)
+(0 real changes made)
+
+. 
+. * RAND 2020 household key: rsubhh
+. capture confirm string variable rsubhh
+
+. if !_rc replace rsubhh = trim(rsubhh)
+(0 real changes made)
+
+. if !_rc replace rsubhh = "0" if rsubhh == ""
+(0 real changes made)
+
+. 
+. * Check variables exist and keep
+. foreach v of local keepvars {
+  2.         capture confirm variable `v'
+  3.         if _rc di as warn "MISSING control var in 2020: `v'"
+  4. }
+
+. 
+. keep `keepvars'
+
+. 
+. * Deduplicate by keys keeping row with most non-missing controls
+. sort hhid rsubhh
+
+. bys hhid rsubhh: gen dupN = _N
+
+. count if dupN > 1
+  8,466
+
+. if r(N) > 0 {
+.         egen nm = rownonmiss(rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005
+> m5 rj020 ra034 rz080 rb085 rz230), strok
+.         bys hhid rsubhh (nm): keep if _n==_N
+(4,233 observations deleted)
+.         drop nm dupN
+.         sort hhid rsubhh
+. }
+
+. capture drop dupN
+
+. 
+. * Clean common numeric special missing codes to Stata missing
+. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 99999999
+> 99 9999999998 -8 -9
+
+. foreach v of varlist _all {
+  2.         capture confirm numeric variable `v'
+  3.         if !_rc {
+  4.                 foreach mc of local misscodes {
+  5.                         quietly replace `v' = . if `v' == `mc'
+  6.                 }
+  7.         }
+  8. }
+
+. 
+. di as txt "2020 controls extracted: obs = " _N
+2020 controls extracted: obs = 11490
+
+. 
+. * ---------------------------------------------------------------------
+. * Diagnostics on extracted controls (summaries for all variables)
+. * ---------------------------------------------------------------------
+. qui count
+
+. local n_controls = r(N)
+
+. 
+. di as txt "Sample size in controls file (2020): `n_controls'"
+Sample size in controls file (2020): 11490
+
+. 
+. * Define continuous vs categorical sets for clearer output
+. local cont_vars "rz216 rb014 ra019"
+
+. local cat_vars  "rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085 rz2
+> 30"
+
+. 
+. di as txt "-- Continuous variables (summarize, detail) --"
+-- Continuous variables (summarize, detail) --
+
+. foreach v of local cont_vars {
+  2.         di as txt "[summarize] `v'"
+  3.         capture noisily summarize `v', detail
+  4. }
+[summarize] rz216
+
+                    r years of education
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            1              0
+ 5%            6              0
+10%            9              0       Obs              11,407
+25%           12              0       Sum of wgt.      11,407
+
+50%           13                      Mean           12.89094
+                        Largest       Std. dev.      3.214664
+75%           16             17
+90%           17             17       Variance       10.33406
+95%           17             17       Skewness      -1.306007
+99%           17             17       Kurtosis       5.785334
+[summarize] rb014
+
+                r highest level of education
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            5              5
+ 5%            6              6
+10%            9              6       Obs                  54
+25%           12              6       Sum of wgt.          54
+
+50%           14                      Mean           14.64815
+                        Largest       Std. dev.       11.8356
+75%           16             17
+90%           17             17       Variance       140.0814
+95%           17             17       Skewness       6.372291
+99%           97             97       Kurtosis       45.08812
+[summarize] ra019
+
+                  r current age calculation
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           47             24
+ 5%           54             29
+10%           56             29       Obs              11,490
+25%           60             30       Sum of wgt.      11,490
+
+50%           67                      Mean           68.58964
+                        Largest       Std. dev.      11.00756
+75%           77            101
+90%           84            102       Variance       121.1663
+95%           88            102       Skewness        .327123
+99%           94            104       Kurtosis       2.569605
+
+. 
+. di as txt "-- Categorical variables (tabulate) --"
+-- Categorical variables (tabulate) --
+
+. foreach v of local cat_vars {
+  2.         di as txt "[tab] `v'"
+  3.         capture noisily tab `v', missing
+  4. }
+[tab] rx060_r
+
+     sex of |
+individual- |
+updated - r |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      4,212       36.66       36.66
+          2 |      7,276       63.32       99.98
+          . |          2        0.02      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rj005m1
+
+current job |
+  status- 1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      3,278       28.53       28.53
+          2 |        329        2.86       31.39
+          3 |        317        2.76       34.15
+          4 |      1,494       13.00       47.15
+          5 |      5,287       46.01       93.17
+          6 |        572        4.98       98.15
+          7 |         96        0.84       98.98
+          8 |         17        0.15       99.13
+         98 |          7        0.06       99.19
+         99 |         13        0.11       99.30
+          . |         80        0.70      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rj005m2
+
+current job |
+  status- 2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        184        1.60        1.60
+          2 |         31        0.27        1.87
+          3 |         42        0.37        2.24
+          4 |        150        1.31        3.54
+          5 |        356        3.10        6.64
+          6 |        314        2.73        9.37
+          7 |         43        0.37        9.75
+          8 |          7        0.06        9.81
+          . |     10,363       90.19      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rj005m3
+
+current job |
+  status- 3 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          6        0.05        0.05
+          2 |          1        0.01        0.06
+          3 |          4        0.03        0.10
+          4 |          5        0.04        0.14
+          5 |          5        0.04        0.18
+          6 |          7        0.06        0.24
+          7 |          6        0.05        0.30
+          . |     11,456       99.70      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rj005m4
+
+current job |
+  status- 4 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          2 |          1        0.01        0.01
+          3 |          1        0.01        0.02
+          6 |          1        0.01        0.03
+          . |     11,487       99.97      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rj005m5
+
+current job |
+  status- 5 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          . |     11,490      100.00      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rj020
+
+working for |
+        pay |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      3,972       34.57       34.57
+          5 |      7,424       64.61       99.18
+          8 |          3        0.03       99.21
+          9 |          9        0.08       99.29
+          . |         82        0.71      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] ra034
+
+ married or |
+  separated |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         93        0.81        0.81
+          2 |         69        0.60        1.41
+          8 |          4        0.03        1.44
+          . |     11,324       98.56      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rz080
+
+prev wave r |
+    marital |
+     status |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        160        1.39        1.39
+          1 |      5,001       43.52       44.92
+          2 |         17        0.15       45.07
+          3 |         31        0.27       45.34
+          4 |      2,782       24.21       69.55
+          5 |      2,395       20.84       90.39
+          6 |      1,098        9.56       99.95
+          . |          6        0.05      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rb085
+
+         us |
+citizenship |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         17        0.15        0.15
+          5 |         10        0.09        0.23
+          . |     11,463       99.77      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+[tab] rz230
+
+  r us born |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      7,329       63.79       63.79
+          5 |      1,344       11.70       75.48
+          . |      2,817       24.52      100.00
+------------+-----------------------------------
+      Total |     11,490      100.00
+
+. 
+. * ---------------------------------------------------------------------
+. * Merge controls into master
+. * ---------------------------------------------------------------------
+. tempfile controls2020
+
+. save "`controls2020'", replace
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_41372.000001 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_41372.000001 saved as .dta format
+
+. 
+. use "`master'", clear
+
+. 
+. * Ensure key format matches (master uses hhid + rsubhh)
+. capture confirm string variable hhid
+
+. if !_rc replace hhid = trim(hhid)
+(0 real changes made)
+
+. capture confirm string variable rsubhh
+
+. if !_rc replace rsubhh = trim(rsubhh)
+(0 real changes made)
+
+. if !_rc replace rsubhh = "0" if rsubhh == ""
+(0 real changes made)
+
+. 
+. merge 1:1 hhid rsubhh using "`controls2020'"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         2,952
+        from master                     2,952  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                            11,490  (_merge==3)
+    -----------------------------------------
+
+. 
+. di as txt "Merge results (master + controls2020):"
+Merge results (master + controls2020):
+
+. quietly tab _merge
+
+. 
+. di as txt "_merge counts:"
+_merge counts:
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |      2,952       20.44       20.44
+            Matched (3) |     11,490       79.56      100.00
+------------------------+-----------------------------------
+                  Total |     14,442      100.00
+
+. 
+. * keep all master households; drop _merge after
+. * Optionally fill controls only where missing in master
+. 
+. * Drop merge indicator
+. drop _merge
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
+    > er.dta saved
+
+. 
+. di as txt "Saved updated master with controls -> `master'"
+Saved updated master with controls -> /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/
+> Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+
+. 
+. * Load the updated master to leave it in memory for next steps
+. use "`master'", clear
+
+. di as txt "Loaded updated master: `master'"
+Loaded updated master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
+
+. 
+. * Show which control variables are now present in master (explicit RHS list)
+. local controls_only "rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020
+>  ra034 rz080 rb085 rz230"
+
+. local found ""
+
+. foreach v of local controls_only {
+  2.         capture confirm variable `v'
+  3.         if !_rc local found "`found' `v'"
+  4. }
+
+. di as txt "Controls present in master (post-merge):"
+Controls present in master (post-merge):
+
+. di as txt "`found'"
+ rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085 rz2
+> 30
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/ext
+> ract_compute_controls_2022.log
+  log type:  text
+ closed on:  29 Sep 2025, 11:57:45
+----------------------------------------------------------------------------------------------
