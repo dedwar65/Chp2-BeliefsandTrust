@@ -1,9 +1,9 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/ext
-> ract_compute_controls_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /extract_compute_controls_2022.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:45
+ opened on:   2 Oct 2025, 12:34:16
 
 . 
 . set more off
@@ -12,18 +12,18 @@
 . * ---------------------------------------------------------------------
 . * File paths
 . * ---------------------------------------------------------------------
-. local raw2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw/20
-> 20/h20f1a_STATA/h20f1a.dta"
+. local raw2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_ra
+> w/2020/h20f1a_STATA/h20f1a.dta"
 
-. local cleaned  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleane
-> d"
+. local cleaned  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cl
+> eaned"
 
 . local master   "`cleaned'/hrs_rand_2020_2022_master.dta"
 
 . 
 . di as txt "Master path: `master'"
-Master path: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs
-> _rand_2020_2022_master.dta
+Master path: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -54,8 +54,8 @@ Master path: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
 . *   Marital status: ra034, rz080
 . *   Immigration: rb085, rz230 (citizenship)
 . * ---------------------------------------------------------------------
-. local keepvars "hhid rsubhh rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m
-> 5 rj020 ra034 rz080 rb085 rz230 rv557 rv559 rv560 rv561 rv562 rv563 rv564"
+. local keepvars "hhid rsubhh rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj
+> 005m5 rj020 ra034 rz080 rb085 rz230 rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
 
 . 
 . * ---------------------------------------------------------------------
@@ -100,8 +100,8 @@ Master path: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
   8,466
 
 . if r(N) > 0 {
-.         egen nm = rownonmiss(rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005
-> m5 rj020 ra034 rz080 rb085 rz230), strok
+.         egen nm = rownonmiss(rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 r
+> j005m5 rj020 ra034 rz080 rb085 rz230), strok
 .         bys hhid rsubhh (nm): keep if _n==_N
 (4,233 observations deleted)
 .         drop nm dupN
@@ -112,8 +112,8 @@ Master path: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
 
 . 
 . * Clean common numeric special missing codes to Stata missing
-. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 99999999
-> 99 9999999998 -8 -9
+. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 9999
+> 999999 9999999998 -8 -9
 
 . foreach v of varlist _all {
   2.         capture confirm numeric variable `v'
@@ -144,8 +144,8 @@ Sample size in controls file (2020): 11490
 . * Define continuous vs categorical sets for clearer output
 . local cont_vars "rz216 rb014 ra019"
 
-. local cat_vars  "rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085 rz2
-> 30"
+. local cat_vars  "rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085
+>  rz230"
 
 . 
 . di as txt "-- Continuous variables (summarize, detail) --"
@@ -162,47 +162,47 @@ Sample size in controls file (2020): 11490
       Percentiles      Smallest
  1%            1              0
  5%            6              0
-10%            9              0       Obs              11,407
-25%           12              0       Sum of wgt.      11,407
+10%            9              0       Obs              11,400
+25%           12              0       Sum of wgt.      11,400
 
-50%           13                      Mean           12.89094
-                        Largest       Std. dev.      3.214664
+50%           13                      Mean           12.88947
+                        Largest       Std. dev.       3.22059
 75%           16             17
-90%           17             17       Variance       10.33406
-95%           17             17       Skewness      -1.306007
-99%           17             17       Kurtosis       5.785334
+90%           17             17       Variance        10.3722
+95%           17             17       Skewness        -1.2867
+99%           17             17       Kurtosis       5.697862
 [summarize] rb014
 
                 r highest level of education
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%            5              5
- 5%            6              6
-10%            9              6       Obs                  54
-25%           12              6       Sum of wgt.          54
+ 1%            4              4
+ 5%            6              5
+10%            9              6       Obs                  61
+25%           12              6       Sum of wgt.          61
 
-50%           14                      Mean           14.64815
-                        Largest       Std. dev.       11.8356
+50%           14                      Mean           14.29508
+                        Largest       Std. dev.      11.25662
 75%           16             17
-90%           17             17       Variance       140.0814
-95%           17             17       Skewness       6.372291
-99%           97             97       Kurtosis       45.08812
+90%           17             17       Variance       126.7115
+95%           17             17       Skewness       6.610549
+99%           97             97       Kurtosis        49.4198
 [summarize] ra019
 
                   r current age calculation
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%           47             24
+ 1%           47             29
  5%           54             29
-10%           56             29       Obs              11,490
-25%           60             30       Sum of wgt.      11,490
+10%           56             31       Obs              11,490
+25%           60             31       Sum of wgt.      11,490
 
-50%           67                      Mean           68.58964
-                        Largest       Std. dev.      11.00756
+50%           67                      Mean           68.59634
+                        Largest       Std. dev.      10.99183
 75%           77            101
-90%           84            102       Variance       121.1663
-95%           88            102       Skewness        .327123
-99%           94            104       Kurtosis       2.569605
+90%           84            102       Variance       120.8202
+95%           88            102       Skewness       .3367973
+99%           94            104       Kurtosis       2.544056
 
 . 
 . di as txt "-- Categorical variables (tabulate) --"
@@ -218,8 +218,8 @@ Sample size in controls file (2020): 11490
 individual- |
 updated - r |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |      4,212       36.66       36.66
-          2 |      7,276       63.32       99.98
+          1 |      4,232       36.83       36.83
+          2 |      7,256       63.15       99.98
           . |          2        0.02      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
@@ -228,16 +228,16 @@ updated - r |      Freq.     Percent        Cum.
 current job |
   status- 1 |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |      3,278       28.53       28.53
-          2 |        329        2.86       31.39
-          3 |        317        2.76       34.15
-          4 |      1,494       13.00       47.15
-          5 |      5,287       46.01       93.17
-          6 |        572        4.98       98.15
-          7 |         96        0.84       98.98
-          8 |         17        0.15       99.13
-         98 |          7        0.06       99.19
-         99 |         13        0.11       99.30
+          1 |      3,284       28.58       28.58
+          2 |        319        2.78       31.36
+          3 |        328        2.85       34.21
+          4 |      1,489       12.96       47.17
+          5 |      5,266       45.83       93.00
+          6 |        594        5.17       98.17
+          7 |         94        0.82       98.99
+          8 |         16        0.14       99.13
+         98 |          6        0.05       99.18
+         99 |         14        0.12       99.30
           . |         80        0.70      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
@@ -246,15 +246,15 @@ current job |
 current job |
   status- 2 |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |        184        1.60        1.60
-          2 |         31        0.27        1.87
-          3 |         42        0.37        2.24
-          4 |        150        1.31        3.54
-          5 |        356        3.10        6.64
-          6 |        314        2.73        9.37
-          7 |         43        0.37        9.75
-          8 |          7        0.06        9.81
-          . |     10,363       90.19      100.00
+          1 |        181        1.58        1.58
+          2 |         31        0.27        1.85
+          3 |         42        0.37        2.21
+          4 |        148        1.29        3.50
+          5 |        362        3.15        6.65
+          6 |        311        2.71        9.36
+          7 |         44        0.38        9.74
+          8 |          7        0.06        9.80
+          . |     10,364       90.20      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
 [tab] rj005m3
@@ -296,10 +296,10 @@ current job |
 working for |
         pay |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |      3,972       34.57       34.57
-          5 |      7,424       64.61       99.18
-          8 |          3        0.03       99.21
-          9 |          9        0.08       99.29
+          1 |      3,979       34.63       34.63
+          5 |      7,418       64.56       99.19
+          8 |          3        0.03       99.22
+          9 |          8        0.07       99.29
           . |         82        0.71      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
@@ -320,14 +320,14 @@ prev wave r |
     marital |
      status |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          0 |        160        1.39        1.39
-          1 |      5,001       43.52       44.92
-          2 |         17        0.15       45.07
-          3 |         31        0.27       45.34
-          4 |      2,782       24.21       69.55
-          5 |      2,395       20.84       90.39
-          6 |      1,098        9.56       99.95
-          . |          6        0.05      100.00
+          0 |        164        1.43        1.43
+          1 |      5,007       43.58       45.00
+          2 |         15        0.13       45.13
+          3 |         27        0.23       45.37
+          4 |      2,772       24.13       69.50
+          5 |      2,395       20.84       90.34
+          6 |      1,103        9.60       99.94
+          . |          7        0.06      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
 [tab] rb085
@@ -335,18 +335,18 @@ prev wave r |
          us |
 citizenship |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |         17        0.15        0.15
-          5 |         10        0.09        0.23
-          . |     11,463       99.77      100.00
+          1 |         19        0.17        0.17
+          5 |          9        0.08        0.24
+          . |     11,462       99.76      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
 [tab] rz230
 
   r us born |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |      7,329       63.79       63.79
-          5 |      1,344       11.70       75.48
-          . |      2,817       24.52      100.00
+          1 |      7,336       63.85       63.85
+          5 |      1,338       11.64       75.49
+          . |      2,816       24.51      100.00
 ------------+-----------------------------------
       Total |     11,490      100.00
 
@@ -357,8 +357,9 @@ citizenship |      Freq.     Percent        Cum.
 . tempfile controls2020
 
 . save "`controls2020'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_41372.000001 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_41372.000001 saved as .dta format
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000004 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000004 saved as .dta
+    format
 
 . 
 . use "`master'", clear
@@ -420,26 +421,26 @@ _merge counts:
 . 
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . 
 . di as txt "Saved updated master with controls -> `master'"
-Saved updated master with controls -> /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/
-> Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved updated master with controls -> /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/C
+> ode/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * Load the updated master to leave it in memory for next steps
 . use "`master'", clear
 
 . di as txt "Loaded updated master: `master'"
-Loaded updated master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
-> leaned/hrs_rand_2020_2022_master.dta
+Loaded updated master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RA
+> ND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * Show which control variables are now present in master (explicit RHS list)
-. local controls_only "rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020
->  ra034 rz080 rb085 rz230"
+. local controls_only "rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 r
+> j020 ra034 rz080 rb085 rz230"
 
 . local found ""
 
@@ -452,14 +453,1283 @@ Loaded updated master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/D
 Controls present in master (post-merge):
 
 . di as txt "`found'"
- rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085 rz2
-> 30
+ rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085
+>  rz230
 
 . 
-. log close
-      name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/ext
-> ract_compute_controls_2022.log
-  log type:  text
- closed on:  29 Sep 2025, 11:57:45
-----------------------------------------------------------------------------------------------
+. * Keep the updated master loaded and display a brief variables summary
+. quietly describe
+
+. local k = r(k)
+
+. di as txt "Variables in memory: `k'"
+Variables in memory: 256
+
+. capture noisily ds
+hhidpn        sr007         flow_ir~2022  bnd_cases     r_bnd_2022~m  r_res_2022
+hhid          sr013         ok_ira1       cg_res_tot~2  has_busine~h  r_res_2022~d
+rsubhh        sr024         ok_ira2       res_cases     bus_exposure  has_any_re~s
+rh020         sr030         ok_ira3       n_asset~2020  bus_sample    n_asset_re~s
+rh032         sr035         ira_pattern   n_liab_2020   F_bus_2022    r_total_2022
+rh162         sr045         flow_resid~2  assets_~2020  yc_bus_2022   r_total_20~d
+rh171         sr050         ok_res_buy    liab_to~2020  denom_bus_~2  r_tot~l_trim
+rq134         sr055         ok_res_sell   networt~2020  denom_bus_~e  has_return~s
+rq148         sr063         ok_res_impr   has_stocks~h  denom_bu~10k  r_total_20~s
+rq166_1       sr064         res_pattern   has_bonds_~h  r_bus_2022    r_tot~s_trim
+rq166_2       sr073         flow_to~2022  fin_exposure  r_bus_2022~m  r_to~s_ftrim
+rq166_3       sh020         sh029_mult    fin_sample    has_ira_both  has_return~g
+rq317         sh025         sh040_mult    F_fin_2022    ira_exposure  r_total_20~g
+rq331         sh029         sh179_mult    yc_fin_2022   ira_sample    r_tot~g_trim
+rq345         sh036         mort1_pay_~l  cg_fin_2022   yc_ira_2022   r_to~g_ftrim
+rq357         sh040         mort2_pay_~l  denom_f~2022  F_ira_2022    has_return~a
+rq371         sh162         secmort_pa~l  denom_fin_~e  denom_i~2022  r_total_20~a
+rq381         sh175         v_ira_2022    denom_fi~10k  denom_ira_~e  r_tot~a_trim
+rq478         sh179         v_ira_2020    r_fin_2022    denom_ir~10k  r_to~a_ftrim
+sq134         sq139_mult    ok_ira22_1    r_fin_2022~m  r_ira_2022    ra019
+sq139         sq153_mult    ok_ira22_2    has_stk_both  r_ira_2022~m  rb085
+sq141         sq194_mult    ok_ira22_3    stk_exposure  ira_withdr~l  rb014
+sq148         sq322_mult    ira22_patt~n  stk_sample    ira_no_wit~l  rj005m1
+sq153         sq336_mult    ok_ira20_1    A_2020_stk    has_re_both   rj005m2
+sq155         sq350_mult    ok_ira20_2    F_2022_stk    re_exposure   rj005m3
+sq166_1       sq362_mult    ok_ira20_3    denom_s~2022  re_sample     rj005m4
+sq166_2       int_re_2022   ira20_patt~n  denom_st~10k  denom_re_2~2  rj005m5
+sq166_3       int_bus_2022  v_res_2022    yc_stk_2022   denom_re_a~k  rj020
+sq171_1       int_ira_2022  v_res_2020    cg_stk_use~2  yc_re_2022    rx060_r
+sq171_2       int_stk_2022  ok_res22_p    F_stk_2022    cg_re_2022    rz080
+sq171_3       int_bnd_2022  ok_res22_s    r_stk_2022    F_re_2022     rz216
+sq190         int_cas~2022  res22_patt~n  r_stk_2022~m  r_re_2022     rz230
+sq194         int_cds_2022  ok_res20_p    has_bnd_both  r_re_2022_~d  rv557
+sq317         sr063_dir     ok_res20_s    bnd_exposure  has_res_both  rv558
+sq322         flow_bu~2022  res20_patt~n  bnd_sample    res_exposure  rv559
+sq324         flow~te_2022  cg_bus_2022   A_2020_bnd    res_sample    rv560
+sq331         flow_~c_2022  bus_cases     F_2022_bnd    A_2020        rv561
+sq336         flow_stk_2~2  re_cases      denom_bnd_~2  F_2022        rv562
+sq338         flow_re_2022  cg_stk_2022   denom_bn~10k  denom_res_~2  rv563
+sq350         ok_buy        stk_cases     yc_bnd_2022   denom_res_~k  rv564
+sq352         ok_sell       cg_ira_2022   cg_bnd_use~2  yc_res_2022   ra034
+sq362         ok_impr       ira_cases     F_bnd_2022    cg_res_2022
+sq364         re_pattern    cg_bnd_2022   r_bnd_2022    F_res_2022
+
+. 
+. * ---------------------------------------------------------------------
+. * Clean trust variables (rv557-rv564): recode 98/99 to missing; show summaries
+. * ---------------------------------------------------------------------
+. local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
+
+. foreach v of local trust_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc continue
+  4.     quietly replace `v' = . if inlist(`v',98,99)
+  5.     di as txt "[Trust] summarize `v'"
+  6.     capture noisily summarize `v', detail
+  7.     di as txt "[Trust] tabulate `v' (with missing)"
+  8.     capture noisily tab `v', missing
+  9. }
+[Trust] summarize rv557
+
+                  trust: people in general
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%          2.5              0       Obs                 970
+25%            5              0       Sum of wgt.         970
+
+50%            7                      Mean           6.261856
+                        Largest       Std. dev.      2.620765
+75%            8             10
+90%            9             10       Variance       6.868409
+95%           10             10       Skewness      -.8359633
+99%           10             10       Kurtosis       3.208203
+[Trust] tabulate rv557 (with missing)
+
+     trust: |
+  people in |
+    general |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         71        0.49        0.49
+          1 |          3        0.02        0.51
+          2 |         23        0.16        0.67
+          3 |         34        0.24        0.91
+          4 |         34        0.24        1.14
+          5 |        211        1.46        2.60
+          6 |         60        0.42        3.02
+          7 |        137        0.95        3.97
+          8 |        240        1.66        5.63
+          9 |         77        0.53        6.16
+         10 |         80        0.55        6.72
+          . |     13,472       93.28      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv558
+
+                   trust: social security
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            1              0
+10%            3              0       Obs                 964
+25%            5              0       Sum of wgt.         964
+
+50%            7                      Mean           6.448133
+                        Largest       Std. dev.      2.719952
+75%            8             10
+90%           10             10       Variance       7.398138
+95%           10             10       Skewness      -.5897771
+99%           10             10       Kurtosis       2.749156
+[Trust] tabulate rv558 (with missing)
+
+     trust: |
+     social |
+   security |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         47        0.33        0.33
+          1 |         16        0.11        0.44
+          2 |         31        0.21        0.65
+          3 |         32        0.22        0.87
+          4 |         47        0.33        1.20
+          5 |        215        1.49        2.69
+          6 |         50        0.35        3.03
+          7 |        124        0.86        3.89
+          8 |        173        1.20        5.09
+          9 |         63        0.44        5.53
+         10 |        166        1.15        6.67
+          . |     13,478       93.33      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv559
+
+                 trust: medicare or medicaid
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            1              0
+10%            3              0       Obs                 964
+25%            5              0       Sum of wgt.         964
+
+50%            7                      Mean           6.445021
+                        Largest       Std. dev.      2.631404
+75%            8             10
+90%           10             10       Variance       6.924285
+95%           10             10       Skewness      -.5211896
+99%           10             10       Kurtosis        2.77627
+[Trust] tabulate rv559 (with missing)
+
+     trust: |
+medicare or |
+   medicaid |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         40        0.28        0.28
+          1 |         12        0.08        0.36
+          2 |         31        0.21        0.57
+          3 |         31        0.21        0.79
+          4 |         48        0.33        1.12
+          5 |        236        1.63        2.76
+          6 |         59        0.41        3.16
+          7 |        126        0.87        4.04
+          8 |        149        1.03        5.07
+          9 |         74        0.51        5.58
+         10 |        158        1.09        6.67
+          . |     13,478       93.33      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv560
+
+                        trust: banks
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            1              0       Obs                 965
+25%            5              0       Sum of wgt.         965
+
+50%            6                      Mean           6.081865
+                        Largest       Std. dev.      2.938253
+75%            8             10
+90%           10             10       Variance       8.633333
+95%           10             10       Skewness      -.5753238
+99%           10             10       Kurtosis       2.498733
+[Trust] tabulate rv560 (with missing)
+
+     trust: |
+      banks |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |         84        0.58        0.58
+          1 |         20        0.14        0.72
+          2 |         25        0.17        0.89
+          3 |         43        0.30        1.19
+          4 |         57        0.39        1.59
+          5 |        181        1.25        2.84
+          6 |         74        0.51        3.35
+          7 |        103        0.71        4.06
+          8 |        157        1.09        5.15
+          9 |         94        0.65        5.80
+         10 |        127        0.88        6.68
+          . |     13,477       93.32      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv561
+
+                  trust: financial advisors
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 940
+25%            3              0       Sum of wgt.         940
+
+50%            5                      Mean           4.896809
+                        Largest       Std. dev.      3.081946
+75%            7             10
+90%            9             10       Variance       9.498392
+95%           10             10       Skewness      -.1659389
+99%           10             10       Kurtosis       2.029133
+[Trust] tabulate rv561 (with missing)
+
+     trust: |
+  financial |
+   advisors |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        156        1.08        1.08
+          1 |         20        0.14        1.22
+          2 |         57        0.39        1.61
+          3 |         55        0.38        1.99
+          4 |         63        0.44        2.43
+          5 |        212        1.47        3.90
+          6 |         65        0.45        4.35
+          7 |         81        0.56        4.91
+          8 |        112        0.78        5.68
+          9 |         51        0.35        6.04
+         10 |         68        0.47        6.51
+          . |     13,502       93.49      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv562
+
+                     trust: mutual funds
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 917
+25%            3              0       Sum of wgt.         917
+
+50%            5                      Mean           4.788441
+                        Largest       Std. dev.      3.010708
+75%            7             10
+90%            9             10       Variance       9.064364
+95%           10             10       Skewness      -.1800185
+99%           10             10       Kurtosis       2.110037
+[Trust] tabulate rv562 (with missing)
+
+     trust: |
+     mutual |
+      funds |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        161        1.11        1.11
+          1 |         14        0.10        1.21
+          2 |         52        0.36        1.57
+          3 |         50        0.35        1.92
+          4 |         59        0.41        2.33
+          5 |        234        1.62        3.95
+          6 |         59        0.41        4.36
+          7 |         93        0.64        5.00
+          8 |        102        0.71        5.71
+          9 |         34        0.24        5.94
+         10 |         59        0.41        6.35
+          . |     13,525       93.65      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv563
+
+                 trust: insurance companies
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 959
+25%            3              0       Sum of wgt.         959
+
+50%            5                      Mean           4.860271
+                        Largest       Std. dev.         2.796
+75%            7             10
+90%            8             10       Variance       7.817616
+95%           10             10       Skewness      -.1082693
+99%           10             10       Kurtosis        2.30491
+[Trust] tabulate rv563 (with missing)
+
+     trust: |
+  insurance |
+  companies |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        112        0.78        0.78
+          1 |         24        0.17        0.94
+          2 |         71        0.49        1.43
+          3 |         78        0.54        1.97
+          4 |         79        0.55        2.52
+          5 |        247        1.71        4.23
+          6 |         63        0.44        4.67
+          7 |         93        0.64        5.31
+          8 |        105        0.73        6.04
+          9 |         29        0.20        6.24
+         10 |         58        0.40        6.64
+          . |     13,483       93.36      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+[Trust] summarize rv564
+
+                      trust: mass media
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 956
+25%            0              0       Sum of wgt.         956
+
+50%            3                      Mean            3.34728
+                        Largest       Std. dev.      2.835213
+75%            5             10
+90%            7             10       Variance       8.038432
+95%            8             10       Skewness       .3998426
+99%           10             10       Kurtosis       2.166313
+[Trust] tabulate rv564 (with missing)
+
+trust: mass |
+      media |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        253        1.75        1.75
+          1 |         65        0.45        2.20
+          2 |        111        0.77        2.97
+          3 |         78        0.54        3.51
+          4 |         58        0.40        3.91
+          5 |        193        1.34        5.25
+          6 |         53        0.37        5.62
+          7 |         58        0.40        6.02
+          8 |         51        0.35        6.37
+          9 |         10        0.07        6.44
+         10 |         26        0.18        6.62
+          . |     13,486       93.38      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. 
+. * ---------------------------------------------------------------------
+. * Construct standardized controls for regression: Gender (rx060_r)
+. * Mapping per HRS codebook: 1=male, 2=female, missing otherwise
+. * User preference: create binary 'gender' where male=1, female=0
+. * ---------------------------------------------------------------------
+. capture drop gender
+
+. gen byte gender = .
+(14,442 missing values generated)
+
+. replace gender = 1 if rx060_r == 1
+(4,232 real changes made)
+
+. replace gender = 0 if rx060_r == 2
+(7,256 real changes made)
+
+. label variable gender "Gender (1=male, 0=female)"
+
+. label define male01 0 "Female" 1 "Male"
+
+. label values gender male01
+
+. di as txt "Sex (rx060_r) -> gender mapping (1=male,0=female):"
+Sex (rx060_r) -> gender mapping (1=male,0=female):
+
+. tab rx060_r gender, missing
+
+    sex of |
+individual |
+-updated - |    Gender (1=male, 0=female)
+         r |    Female       Male          . |     Total
+-----------+---------------------------------+----------
+         1 |         0      4,232          0 |     4,232 
+         2 |     7,256          0          0 |     7,256 
+         . |         0          0      2,954 |     2,954 
+-----------+---------------------------------+----------
+     Total |     7,256      4,232      2,954 |    14,442 
+
+. 
+. * Save updated master with constructed control and keep in memory
+. * ---------------------------------------------------------------------
+. * Construct standardized controls: Employment status (rj020)
+. * Mapping per codebook: 1=YES (working now), 5=NO (not working now)
+. * Treat -8/8/9 and blanks as missing in derived binary
+. * ---------------------------------------------------------------------
+. capture drop employed
+
+. gen byte employed = .
+(14,442 missing values generated)
+
+. replace employed = 1 if rj020 == 1
+(3,979 real changes made)
+
+. replace employed = 0 if rj020 == 5
+(7,418 real changes made)
+
+. label variable employed "Currently working for pay (1=yes,0=no)"
+
+. label define yesno2 0 "No" 1 "Yes"
+
+. label values employed yesno2
+
+. di as txt "Employment (rj020) -> employed mapping (1=yes,0=no):"
+Employment (rj020) -> employed mapping (1=yes,0=no):
+
+. tab rj020 employed, missing
+
+           |    Currently working for pay
+   working |           (1=yes,0=no)
+   for pay |        No        Yes          . |     Total
+-----------+---------------------------------+----------
+         1 |         0      3,979          0 |     3,979 
+         5 |     7,418          0          0 |     7,418 
+         8 |         0          0          3 |         3 
+         9 |         0          0          8 |         8 
+         . |         0          0      3,034 |     3,034 
+-----------+---------------------------------+----------
+     Total |     7,418      3,979      3,045 |    14,442 
+
+. 
+. * Save updated master with constructed controls and keep in memory
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. * ---------------------------------------------------------------------
+. * Rename core demographics to standard names
+. * ra019 -> age, rz216 -> education
+. * ---------------------------------------------------------------------
+. capture confirm variable ra019
+
+. if !_rc {
+.         capture confirm variable age
+.         if _rc rename ra019 age
+.         label variable age "Age"
+. }
+
+. 
+. capture confirm variable rz216
+
+. if !_rc {
+.         capture confirm variable education
+.         if _rc rename rz216 education
+.         label variable education "Education (years or code as provided)"
+. }
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute asset-class shares of wealth (denominator: networth_A2020)
+. * Asset classes:
+. *  - Residential: primary + secondary residences (rh020 + rh162)
+. *  - Real estate (non-residential): rq134
+. *  - Business: rq148
+. *  - Retirement: rq166_1 + rq166_2 + rq166_3 (v_ira_2020 if present)
+. *  - Financial: stocks rq317 + bonds rq331 + checking/savings rq345 + CDs rq357
+. * Denominator: networth_A2020; shares set missing when denom <= 0 or missing
+. * Missing numerators treated as 0 (no holdings)
+. * ---------------------------------------------------------------------
+. 
+. capture confirm variable networth_A2020
+
+. if _rc {
+.         di as error "ERROR: networth_A2020 not found in master. Run net worth scripts fi
+> rst."
+. }
+
+. 
+. * Redo numerators (2020 values) with strict missing policy tied to assets denominator on
+> ly
+. * Step 1: define total assets denominator
+. capture drop assets_ok
+
+. * Mirror compute_net_worth_A2020 approach using rowtotal/rownonmiss
+. local assets_vars "rh020 rh162 rq134 rq148 rq317 rq166_1 rq166_2 rq166_3 rq331 rq345 rq3
+> 57 rq371 rq381"
+
+. capture drop n_assets_2020
+
+. egen n_assets_2020 = rownonmiss(`assets_vars')
+
+. 
+. capture drop assets_total_2020
+
+. egen assets_total_2020 = rowtotal(`assets_vars')
+
+. recast double assets_total_2020
+
+. replace assets_total_2020 = . if n_assets_2020 == 0
+(5,233 real changes made, 5,233 to missing)
+
+. 
+. capture confirm variable assets_ok
+
+. if _rc gen byte assets_ok = .
+(14,442 missing values generated)
+
+. replace assets_ok = !missing(assets_total_2020) & assets_total_2020 > 0
+(14,442 real changes made)
+
+. 
+. quietly count if !missing(assets_total_2020)
+
+. di as txt "Non-missing assets_total_2020: " r(N)
+Non-missing assets_total_2020: 9209
+
+. quietly count if assets_total_2020 == 0
+
+. di as txt "Zero total assets: " r(N)
+Zero total assets: 107
+
+. quietly count if assets_ok
+
+. di as txt "Positive total assets (denominator for shares): " r(N)
+Positive total assets (denominator for shares): 9102
+
+. 
+. * Step 3: construct numerators only when assets_ok; within that, treat missing as 0
+. capture drop num_residential_2020 num_re_2020 num_bus_2020 num_ira_2020 num_fin_2020 num
+> _stocks_2020 num_safe_2020
+
+. gen double num_residential_2020 = .
+(14,442 missing values generated)
+
+. replace num_residential_2020 = cond(missing(rh020),0,rh020) + cond(missing(rh162),0,rh16
+> 2) if assets_ok
+(9,102 real changes made)
+
+. 
+. gen double num_re_2020 = .
+(14,442 missing values generated)
+
+. replace num_re_2020 = cond(missing(rq134),0,rq134) if assets_ok
+(9,102 real changes made)
+
+. 
+. gen double num_bus_2020 = .
+(14,442 missing values generated)
+
+. replace num_bus_2020 = cond(missing(rq148),0,rq148) if assets_ok
+(9,102 real changes made)
+
+. 
+. gen double num_ira_2020 = .
+(14,442 missing values generated)
+
+. replace num_ira_2020 = cond(missing(rq166_1),0,rq166_1) + cond(missing(rq166_2),0,rq166_
+> 2) + cond(missing(rq166_3),0,rq166_3) if assets_ok
+(9,102 real changes made)
+
+. 
+. gen double num_fin_2020 = .
+(14,442 missing values generated)
+
+. replace num_fin_2020 = cond(missing(rq317),0,rq317) + cond(missing(rq331),0,rq331) + con
+> d(missing(rq345),0,rq345) + cond(missing(rq357),0,rq357) if assets_ok
+(9,102 real changes made)
+
+. 
+. * Split financial into stocks vs safe (bonds+cash+CDs)
+. gen double num_stocks_2020 = .
+(14,442 missing values generated)
+
+. replace num_stocks_2020 = cond(missing(rq317),0,rq317) if assets_ok
+(9,102 real changes made)
+
+. 
+. gen double num_safe_2020 = .
+(14,442 missing values generated)
+
+. replace num_safe_2020 = cond(missing(rq331),0,rq331) + cond(missing(rq345),0,rq345) + co
+> nd(missing(rq357),0,rq357) if assets_ok
+(9,102 real changes made)
+
+. 
+. * Shares: numerator / networth_A2020 when denom > 0
+. capture drop share_residential share_realestate share_business share_retirement share_fi
+> nancial share_stocks share_safe
+
+. gen double share_residential = .
+(14,442 missing values generated)
+
+. gen double share_realestate = .
+(14,442 missing values generated)
+
+. gen double share_business   = .
+(14,442 missing values generated)
+
+. gen double share_retirement = .
+(14,442 missing values generated)
+
+. gen double share_financial  = .
+(14,442 missing values generated)
+
+. gen double share_stocks     = .
+(14,442 missing values generated)
+
+. gen double share_safe       = .
+(14,442 missing values generated)
+
+. 
+. replace share_residential = num_residential_2020 / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. replace share_realestate  = num_re_2020         / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. replace share_business    = num_bus_2020        / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. replace share_retirement  = num_ira_2020        / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. replace share_financial   = num_fin_2020        / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. replace share_stocks      = num_stocks_2020     / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. replace share_safe        = num_safe_2020       / assets_total_2020 if assets_ok
+(9,102 real changes made)
+
+. 
+. * Minimal diagnostics requested
+. quietly count if missing(rq317)
+
+. di as txt "Missing rq317: " r(N)
+Missing rq317: 13156
+
+. quietly count if missing(rq331)
+
+. di as txt "Missing rq331: " r(N)
+Missing rq331: 14234
+
+. quietly count if missing(rq345)
+
+. di as txt "Missing rq345: " r(N)
+Missing rq345: 8172
+
+. quietly count if missing(rq357)
+
+. di as txt "Missing rq357: " r(N)
+Missing rq357: 13769
+
+. 
+. quietly count if !missing(num_stocks_2020)
+
+. di as txt "N numerator_stocks (defined): " r(N)
+N numerator_stocks (defined): 9102
+
+. quietly count if !missing(num_safe_2020)
+
+. di as txt "N numerator_safe (defined): " r(N)
+N numerator_safe (defined): 9102
+
+. 
+. * Clarify why share Ns match: they are only defined where denom_ok
+. 
+. tabstat share_residential share_realestate share_business share_retirement share_financi
+> al share_stocks share_safe, stats(n mean sd p50 min max) format(%12.4f)
+
+   Stats |     sha~tial     share~te     share~ss     share_~t     sha~cial     share~ks
+---------+------------------------------------------------------------------------------
+       N |    9102.0000    9102.0000    9102.0000    9102.0000    9102.0000    9102.0000
+    Mean |       0.4821       0.0267       0.0175       0.0835       0.2040       0.0347
+      SD |       0.4026       0.1095       0.0940       0.1880       0.3159       0.1255
+     p50 |       0.5048       0.0000       0.0000       0.0000       0.0359       0.0000
+     Min |       0.0000       0.0000       0.0000       0.0000      -0.0191      -0.0382
+     Max |       1.0000       1.0000       1.0000       1.0000       1.0000       1.0000
+----------------------------------------------------------------------------------------
+
+   Stats |     share~fe
+---------+-------------
+       N |    9102.0000
+    Mean |       0.1693
+      SD |       0.2992
+     p50 |       0.0244
+     Min |       0.0000
+     Max |       1.0000
+-----------------------
+
+. 
+. di as txt "-- Share variables: summarize, detail --"
+-- Share variables: summarize, detail --
+
+. foreach s in share_residential share_realestate share_business share_retirement share_fi
+> nancial share_stocks share_safe {
+  2.     di as txt "[summarize] `s'"
+  3.     capture noisily summarize `s', detail
+  4. }
+[summarize] share_residential
+
+                      share_residential
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%     .5047508                      Mean           .4821339
+                        Largest       Std. dev.       .402565
+75%     .9047619              1
+90%     .9936407              1       Variance       .1620586
+95%            1              1       Skewness      -.0381056
+99%            1              1       Kurtosis       1.338136
+[summarize] share_realestate
+
+                      share_realestate
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%            0                      Mean           .0267171
+                        Largest       Std. dev.      .1094664
+75%            0              1
+90%            0              1       Variance       .0119829
+95%     .2118644              1       Skewness       5.269585
+99%     .5882353              1       Kurtosis       34.58304
+[summarize] share_business
+
+                       share_business
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%            0                      Mean            .017514
+                        Largest       Std. dev.      .0940165
+75%            0        .989756
+90%            0              1       Variance       .0088391
+95%     .0156556              1       Skewness        6.51452
+99%     .5154639              1       Kurtosis       50.04506
+[summarize] share_retirement
+
+                      share_retirement
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%            0                      Mean           .0835407
+                        Largest       Std. dev.      .1879665
+75%     .0284373              1
+90%     .3559871              1       Variance       .0353314
+95%     .5434783              1       Skewness       2.593144
+99%     .8604651              1       Kurtosis       9.418244
+[summarize] share_financial
+
+                       share_financial
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0      -.0191205
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%     .0358803                      Mean           .2040242
+                        Largest       Std. dev.      .3159087
+75%     .2674735              1
+90%      .853514              1       Variance       .0997983
+95%            1              1       Skewness        1.62018
+99%            1              1       Kurtosis       4.258071
+[summarize] share_stocks
+
+                        share_stocks
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0      -.0382409
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%            0                      Mean           .0346767
+                        Largest       Std. dev.      .1255314
+75%            0              1
+90%     .0588235              1       Variance       .0157581
+95%     .2760524              1       Skewness       4.498616
+99%     .6877579              1       Kurtosis       24.77959
+[summarize] share_safe
+
+                         share_safe
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               9,102
+25%            0              0       Sum of wgt.       9,102
+
+50%     .0243902                      Mean           .1693475
+                        Largest       Std. dev.      .2992045
+75%     .1629213              1
+90%     .7391304              1       Variance       .0895233
+95%            1              1       Skewness       1.995918
+99%            1              1       Kurtosis       5.623089
+
+. 
+. * Missing counts for each share
+. foreach s in share_residential share_realestate share_business share_retirement share_fi
+> nancial share_stocks share_safe {
+  2.     quietly count if missing(`s')
+  3.     di as txt "  Missing `s': " r(N)
+  4. }
+  Missing share_residential: 5340
+  Missing share_realestate: 5340
+  Missing share_business: 5340
+  Missing share_retirement: 5340
+  Missing share_financial: 5340
+  Missing share_stocks: 5340
+  Missing share_safe: 5340
+
+. 
+. * Drop intermediate numerators used to compute shares
+. capture drop num_residential_2020 num_re_2020 num_bus_2020 num_ira_2020 num_fin_2020 num
+> _stocks_2020 num_safe_2020
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute wealth percentiles (percentile rank of networth_A2020)
+. * Continuous 0-100 scale across non-missing net worth
+. * ---------------------------------------------------------------------
+. capture drop wealth_rank wealth_pct
+
+. quietly count if !missing(networth_A2020)
+
+. local N_wealth = r(N)
+
+. egen double wealth_rank = rank(networth_A2020) if !missing(networth_A2020)
+(5,233 missing values generated)
+
+. gen double wealth_pct = .
+(14,442 missing values generated)
+
+. replace wealth_pct = 100 * (wealth_rank - 1) / (`N_wealth' - 1) if `N_wealth' > 1 & !mis
+> sing(wealth_rank)
+(9,209 real changes made)
+
+. replace wealth_pct = 50 if `N_wealth' == 1 & !missing(wealth_rank)
+(0 real changes made)
+
+. label variable wealth_pct "Wealth percentile (based on networth_A2020)"
+
+. 
+. di as txt "Wealth percentile diagnostics:"
+Wealth percentile diagnostics:
+
+. quietly count if !missing(wealth_pct)
+
+. di as txt "  Non-missing wealth_pct: " r(N)
+  Non-missing wealth_pct: 9209
+
+. tabstat wealth_pct, stats(n mean sd p50 min max) format(%12.4f)
+
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  wealth_pct |    9209.0000      50.0000      28.8721      49.9620       0.0000
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  wealth_pct |     100.0000
+---------------------------
+
+. di as txt "[summarize] wealth_pct"
+[summarize] wealth_pct
+
+. capture noisily summarize wealth_pct, detail
+
+         Wealth percentile (based on networth_A2020)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     1.004561              0
+ 5%     5.006516       .0108601
+10%     9.871851       .0217202       Obs               9,209
+25%     24.95113       .0325804       Sum of wgt.       9,209
+
+50%     49.96199                      Mean                 50
+                        Largest       Std. dev.       28.8721
+75%     75.02172       99.96742
+90%     90.00326       99.97828       Variance       833.5979
+95%     95.00434       99.98914       Skewness       .0000226
+99%     99.00087            100       Kurtosis       1.799973
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. * ---------------------------------------------------------------------
+. * Create wealth decile dummies from wealth_pct (10 bins of width 10)
+. * wealth_decile: 1=0-<10th, ..., 10=90th-100th; missing if wealth_pct missing
+. * Dummies: wealth_d1 ... wealth_d10 (simple names, mutually exclusive)
+. * ---------------------------------------------------------------------
+. capture drop wealth_decile
+
+. gen byte wealth_decile = .
+(14,442 missing values generated)
+
+. replace wealth_decile = floor(wealth_pct/10) + 1 if !missing(wealth_pct)
+(9,209 real changes made)
+
+. replace wealth_decile = 10 if wealth_decile == 11
+(1 real change made)
+
+. label define wdec 1 "P0-P10" 2 "P10-P20" 3 "P20-P30" 4 "P30-P40" 5 "P40-P50" 6 "P50-P60"
+>  7 "P60-P70" 8 "P70-P80" 9 "P80-P90" 10 "P90-P100"
+
+. label values wealth_decile wdec
+
+. label variable wealth_decile "Wealth decile (from wealth_pct)"
+
+. 
+. * Generate 10 dummy variables
+. forvalues d = 1/10 {
+  2.         capture drop wealth_d`d'
+  3.         gen byte wealth_d`d' = .
+  4.         replace wealth_d`d' = 1 if wealth_decile == `d'
+  5.         replace wealth_d`d' = 0 if !missing(wealth_decile) & wealth_decile != `d'
+  6.         label variable wealth_d`d' "Wealth decile `d' dummy"
+  7. }
+(14,442 missing values generated)
+(934 real changes made)
+(8,275 real changes made)
+(14,442 missing values generated)
+(905 real changes made)
+(8,304 real changes made)
+(14,442 missing values generated)
+(924 real changes made)
+(8,285 real changes made)
+(14,442 missing values generated)
+(924 real changes made)
+(8,285 real changes made)
+(14,442 missing values generated)
+(918 real changes made)
+(8,291 real changes made)
+(14,442 missing values generated)
+(919 real changes made)
+(8,290 real changes made)
+(14,442 missing values generated)
+(922 real changes made)
+(8,287 real changes made)
+(14,442 missing values generated)
+(920 real changes made)
+(8,289 real changes made)
+(14,442 missing values generated)
+(921 real changes made)
+(8,288 real changes made)
+(14,442 missing values generated)
+(922 real changes made)
+(8,287 real changes made)
+
+. 
+. di as txt "Wealth decile diagnostics:"
+Wealth decile diagnostics:
+
+. tab wealth_decile, missing
+
+     Wealth |
+     decile |
+      (from |
+wealth_pct) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+     P0-P10 |        934        6.47        6.47
+    P10-P20 |        905        6.27       12.73
+    P20-P30 |        924        6.40       19.13
+    P30-P40 |        924        6.40       25.53
+    P40-P50 |        918        6.36       31.89
+    P50-P60 |        919        6.36       38.25
+    P60-P70 |        922        6.38       44.63
+    P70-P80 |        920        6.37       51.00
+    P80-P90 |        921        6.38       57.38
+   P90-P100 |        922        6.38       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. tabstat wealth_d1 wealth_d2 wealth_d3 wealth_d4 wealth_d5 wealth_d6 wealth_d7 wealth_d8 
+> wealth_d9 wealth_d10, stats(n mean) format(%9.0g)
+
+   Stats |  wealth~1  wealth~2  wealth~3  wealth~4  wealth~5  wealth~6  wealth~7  wealth~8
+---------+--------------------------------------------------------------------------------
+       N |      9209      9209      9209      9209      9209      9209      9209      9209
+    Mean |  .1014225  .0982734  .1003366  .1003366  .0996851  .0997937  .1001194  .0999023
+------------------------------------------------------------------------------------------
+
+   Stats |  wealth~9  wealt~10
+---------+--------------------
+       N |      9209      9209
+    Mean |  .1000109  .1001194
+------------------------------
+
+. 
+. * Tabulate each wealth decile dummy with missing to inspect coverage
+. forvalues d = 1/10 {
+  2.     di as txt "Wealth dummy coverage: wealth_d`d'"
+  3.     capture noisily tab wealth_d`d', missing
+  4. }
+Wealth dummy coverage: wealth_d1
+
+     Wealth |
+   decile 1 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,275       57.30       57.30
+          1 |        934        6.47       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d2
+
+     Wealth |
+   decile 2 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,304       57.50       57.50
+          1 |        905        6.27       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d3
+
+     Wealth |
+   decile 3 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,285       57.37       57.37
+          1 |        924        6.40       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d4
+
+     Wealth |
+   decile 4 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,285       57.37       57.37
+          1 |        924        6.40       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d5
+
+     Wealth |
+   decile 5 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,291       57.41       57.41
+          1 |        918        6.36       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d6
+
+     Wealth |
+   decile 6 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,290       57.40       57.40
+          1 |        919        6.36       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d7
+
+     Wealth |
+   decile 7 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,287       57.38       57.38
+          1 |        922        6.38       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d8
+
+     Wealth |
+   decile 8 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,289       57.40       57.40
+          1 |        920        6.37       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d9
+
+     Wealth |
+   decile 9 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,288       57.39       57.39
+          1 |        921        6.38       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+Wealth dummy coverage: wealth_d10
+
+     Wealth |
+  decile 10 |
+      dummy |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,287       57.38       57.38
+          1 |        922        6.38       63.77
+          . |      5,233       36.23      100.00
+------------+-----------------------------------
+      Total |     14,442      100.00
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. * ---------------------------------------------------------------------
+. * Construct standardized controls: Immigration (rz230 - US born)
+. * immigration = 1 if not US-born (rz230==5); 0 if US-born (rz230==1); else missing
+. * ---------------------------------------------------------------------
+. capture drop immigration
+
+. gen byte immigration = .
+(14,442 missing values generated)
+
+. replace immigration = 1 if rz230 == 5
+(1,338 real changes made)
+
+. replace immigration = 0 if rz230 == 1
+(7,336 real changes made)
+
+. label variable immigration "Immigrant (1=not US-born, 0=US-born)"
+
+. label define immigr01 0 "US-born" 1 "Immigrant"
+
+. label values immigration immigr01
+
+. di as txt "US born (rz230) -> immigration mapping (1=immigrant,0=US-born):"
+US born (rz230) -> immigration mapping (1=immigrant,0=US-born):
+
+. tab rz230 immigration, missing
+
+           |    Immigrant (1=not US-born,
+           |            0=US-born)
+ r us born |   US-born  Immigrant          . |     Total
+-----------+---------------------------------+----------
+         1 |     7,336          0          0 |     7,336 
+         5 |         0      1,338          0 |     1,338 
+         . |         0          0      5,768 |     5,768 
+-----------+---------------------------------+----------
+     Total |     7,336      1,338      5,768 |    14,442 
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. * ---------------------------------------------------------------------
+. * Construct standardized controls: Marital status (rz080, prev wave)
+. * Coupled=1 for married or married-spouse-absent (codes 1,2,3)
+. * Not coupled=0 for divorced/separated, widowed, never married (4,5,6)
+. * Unknown/blank (0, .) -> missing
+. * ---------------------------------------------------------------------
+. capture drop coupled
+
+. gen byte coupled = .
+(14,442 missing values generated)
+
+. replace coupled = 1 if inlist(rz080,1,2,3)
+(5,049 real changes made)
+
+. replace coupled = 0 if inlist(rz080,4,5,6)
+(6,270 real changes made)
+
+. label variable coupled "Coupled (1=married/married-spouse-absent, 0=not coupled)"
+
+. label define couple01 0 "Not coupled" 1 "Coupled"
+
+. label values coupled couple01
+
+. di as txt "Marital status (rz080) -> coupled mapping (1=coupled,0=not):"
+Marital status (rz080) -> coupled mapping (1=coupled,0=not):
+
+. tab rz080 coupled, missing
+
+           |             Coupled
+ prev wave | (1=married/married-spouse-absent
+ r marital |         , 0=not coupled)
+    status | Not coupl    Coupled          . |     Total
+-----------+---------------------------------+----------
+         0 |         0          0        164 |       164 
+         1 |         0      5,007          0 |     5,007 
+         2 |         0         15          0 |        15 
+         3 |         0         27          0 |        27 
+         4 |     2,772          0          0 |     2,772 
+         5 |     2,395          0          0 |     2,395 
+         6 |     1,103          0          0 |     1,103 
+         . |         0          0      2,959 |     2,959 
+-----------+---------------------------------+----------
+     Total |     6,270      5,049      3,123 |    14,442 
+
+. 
+. save "`master'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
+
+. use "`master'", clear
+
+. 
+. 
+end of do-file
+
+. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/reg_re
+> t_trust_2020_2022.do"
+
+. *----------------------------------------------------------------------
+. * reg_ret_trust_2020_2022.do
+. * Cross-sectional OLS of 2022 returns on 2020 trust variables
+. * Runs each return measure on each trust variable, with and without controls
+. *----------------------------------------------------------------------
+. 
+. clear all
+
+. capture log close

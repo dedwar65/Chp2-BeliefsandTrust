@@ -1,0 +1,979 @@
+------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
+> 1992_2022v1_STATA/compute_tot_ret_2022.log
+  log type:  text
+ opened on:   2 Oct 2025, 13:35:37
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. local input_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/
+> randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long
+> /randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. 
+. * ---------------------------------------------------------------------
+. * Load data
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading merged longitudinal file ==="
+=== Loading merged longitudinal file ===
+
+. 
+. capture confirm file "`input_file'"
+
+. if _rc {
+.     di as error "ERROR: Input file not found -> `input_file'"
+.     di as error "Please run long_merge_in.do first"
+.     exit 198
+. }
+
+. 
+. use "`input_file'", clear
+
+. 
+. di as txt "File loaded successfully"
+File loaded successfully
+
+. quietly describe
+
+. local n_vars = r(k)
+
+. local n_obs = r(N)
+
+. di as txt "Variables: `n_vars', Observations: `n_obs'"
+Variables: 19911, Observations: 12168
+
+. 
+. * ---------------------------------------------------------------------
+. * Clean missing value codes
+. * ---------------------------------------------------------------------
+. di as txt "=== Cleaning missing value codes ==="
+=== Cleaning missing value codes ===
+
+. 
+. local misscodes 999999998 999999999 -8 -9
+
+. foreach v of varlist _all {
+  2.     capture confirm numeric variable `v'
+  3.     if !_rc {
+  4.         foreach mc of local misscodes {
+  5.             quietly replace `v' = . if `v' == `mc'
+  6.         }
+  7.     }
+  8. }
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 1: Check for imported flow_total_2022 variable
+. * ---------------------------------------------------------------------
+. di as txt "=== Checking for imported flow_total_2022 variable ==="
+=== Checking for imported flow_total_2022 variable ===
+
+. 
+. capture confirm variable flow_total_2022
+
+. if _rc {
+.     di as error "ERROR: flow_total_2022 not found - this should have been imported by lo
+> ng_merge_in.do"
+.     exit 198
+. }
+
+. 
+. di as txt "flow_total_2022 found - using imported flows from HRS_RAND data"
+flow_total_2022 found - using imported flows from HRS_RAND data
+
+. di as txt "Total net investment flows (flow_total_2022) summary:"
+Total net investment flows (flow_total_2022) summary:
+
+. summarize flow_total_2022, detail
+
+                       flow_total_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -650000       -6400000
+ 5%      -207000       -6400000
+10%       -92000       -2660000       Obs               3,802
+25%       -20000       -2660000       Sum of wgt.       3,802
+
+50%            0                      Mean           10848.11
+                        Largest       Std. dev.      287999.9
+75%        25000        3450000
+90%       139000        3474000       Variance       8.29e+10
+95%       266000        3474000       Skewness      -3.548606
+99%       800000        3500000       Kurtosis       169.2705
+
+. 
+. * Safe flows: treat missing as zero for computations
+. capture drop flow_total_2022_safe
+
+. gen double flow_total_2022_safe = cond(missing(flow_total_2022), 0, flow_total_2022)
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 2: Beginning net worth (A_{2020})
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing beginning net worth (A_2020) ==="
+=== Computing beginning net worth (A_2020) ===
+
+. 
+. * Use H15ATOTB (Total of all assets net of debt, Wave 15 = 2020)
+. capture confirm variable h15atotb
+
+. if _rc {
+.     di as error "ERROR: h15atotb not found - this is required for beginning net worth"
+.     exit 198
+. }
+
+. 
+. gen double a_2020 = h15atotb
+
+. di as txt "Beginning net worth (A_2020) summary:"
+Beginning net worth (A_2020) summary:
+
+. summarize a_2020, detail
+
+                           a_2020
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%       -32800       -2442000
+ 5%        -1500        -999400
+10%            0      -404128.2       Obs              12,168
+25%        23500      -379210.8       Sum of wgt.      12,168
+
+50%       187000                      Mean           573864.8
+                        Largest       Std. dev.       1238477
+75%       594000       2.65e+07
+90%      1437072       2.65e+07       Variance       1.53e+12
+95%      2399000       2.74e+07       Skewness       7.136759
+99%      5853500       2.74e+07       Kurtosis       97.03008
+
+. quietly count if !missing(a_2020)
+
+. di as txt "Non-missing A_2020: " r(N)
+Non-missing A_2020: 12168
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 3: Capital income (y^c_t)
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing capital income (y^c_t) ==="
+=== Computing capital income (y^c_t) ===
+
+. 
+. * Use H16ICAP (Household capital income, Wave 16 = 2022)
+. capture confirm variable h16icap
+
+. if _rc {
+.     di as error "ERROR: h16icap not found - this is required for capital income"
+.     exit 198
+. }
+
+. 
+. gen double y_c_2022 = h16icap
+
+. di as txt "Capital income (y_c_2022) summary:"
+Capital income (y_c_2022) summary:
+
+. summarize y_c_2022, detail
+
+                          y_c_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs              12,168
+25%            0              0       Sum of wgt.      12,168
+
+50%            0                      Mean            15367.3
+                        Largest       Std. dev.      78470.83
+75%         2608        1360000
+90%        31500        1360000       Variance       6.16e+09
+95%        80000        4089364       Skewness       26.97135
+99%       270000        4089364       Kurtosis       1239.019
+
+. 
+. * Safe capital income: treat missing as zero
+. capture drop y_c_2022_safe
+
+. gen double y_c_2022_safe = cond(missing(y_c_2022), 0, y_c_2022)
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 4: Compute capital gains by asset class (V_2022 - V_2020)
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing capital gains by asset class ==="
+=== Computing capital gains by asset class ===
+
+. 
+. * Primary residence (net)
+. capture confirm variable h16atoth h15atoth
+
+. if _rc {
+.     di as txt "WARNING: Primary residence variables (h16atoth, h15atoth) not found"
+.     gen double cg_res_2022 = .
+. }
+
+. else {
+.     gen double cg_res_2022 = h16atoth - h15atoth
+.     di as txt "Primary residence capital gains summary:"
+Primary residence capital gains summary:
+.     summarize cg_res_2022, detail
+
+                         cg_res_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -322000       -3300000
+ 5%      -100000       -2700000
+10%       -30000       -2200000       Obs              12,168
+25%            0       -2200000       Sum of wgt.      12,168
+
+50%        10000                      Mean           54718.53
+                        Largest       Std. dev.      175725.3
+75%        92000        2000000
+90%       200000        2500000       Variance       3.09e+10
+95%       300000        2700000       Skewness       1.998127
+99%       663631        4464487       Kurtosis        77.6864
+. }
+
+. 
+. * Secondary residence (net)
+. capture confirm variable h16anethb h15anethb
+
+. if _rc {
+.     di as txt "WARNING: Secondary residence variables (h16anethb, h15anethb) not found"
+.     gen double cg_res2_2022 = .
+. }
+
+. else {
+.     gen double cg_res2_2022 = h16anethb - h15anethb
+.     di as txt "Secondary residence capital gains summary:"
+Secondary residence capital gains summary:
+.     summarize cg_res2_2022, detail
+
+                        cg_res2_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -300000       -2550000
+ 5%       -20000       -1600000
+10%            0       -1600000       Obs              12,168
+25%            0       -1500000       Sum of wgt.      12,168
+
+50%            0                      Mean           4731.702
+                        Largest       Std. dev.      129958.3
+75%            0        2687000
+90%            0        2800000       Variance       1.69e+10
+95%        51000        2800000       Skewness       6.848787
+99%       400000        4800000       Kurtosis       259.6893
+. }
+
+. 
+. * Other real estate
+. capture confirm variable h16arles h15arles
+
+. if _rc {
+.     di as txt "WARNING: Other real estate variables (h16arles, h15arles) not found"
+.     gen double cg_re_2022 = .
+. }
+
+. else {
+.     gen double cg_re_2022 = h16arles - h15arles
+.     di as txt "Other real estate capital gains summary:"
+Other real estate capital gains summary:
+.     summarize cg_re_2022, detail
+
+                         cg_re_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -600000       -9000000
+ 5%       -40000       -7000000
+10%            0       -7000000       Obs              12,168
+25%            0       -7000000       Sum of wgt.      12,168
+
+50%            0                      Mean           7355.592
+                        Largest       Std. dev.      336412.7
+75%            0        7000000
+90%            0        7800000       Variance       1.13e+11
+95%       100000       1.08e+07       Skewness       5.617334
+99%       700000       1.08e+07       Kurtosis       386.2045
+. }
+
+. 
+. * Private business
+. capture confirm variable h16absns h15absns
+
+. if _rc {
+.     di as txt "WARNING: Private business variables (h16absns, h15absns) not found"
+.     gen double cg_bus_2022 = .
+. }
+
+. else {
+.     gen double cg_bus_2022 = h16absns - h15absns
+.     di as txt "Private business capital gains summary:"
+Private business capital gains summary:
+.     summarize cg_bus_2022, detail
+
+                         cg_bus_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -300000       -7994000
+ 5%            0       -7994000
+10%            0       -6300000       Obs              12,168
+25%            0       -3500000       Sum of wgt.      12,168
+
+50%            0                      Mean           9980.116
+                        Largest       Std. dev.      291907.6
+75%            0        5000000
+90%            0        8255182       Variance       8.52e+10
+95%            0        8255182       Skewness       9.656212
+99%       600000       1.30e+07       Kurtosis       592.2097
+. }
+
+. 
+. * IRA / Keogh
+. capture confirm variable h16aira h15aira
+
+. if _rc {
+.     di as txt "WARNING: IRA/Keogh variables (h16aira, h15aira) not found"
+.     gen double cg_ira_2022 = .
+. }
+
+. else {
+.     gen double cg_ira_2022 = h16aira - h15aira
+.     di as txt "IRA/Keogh capital gains summary:"
+IRA/Keogh capital gains summary:
+.     summarize cg_ira_2022, detail
+
+                         cg_ira_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -478756.2       -2196217
+ 5%       -95000       -2196217
+10%       -25000       -2176354       Obs              12,168
+25%            0       -2176354       Sum of wgt.      12,168
+
+50%            0                      Mean           25744.14
+                        Largest       Std. dev.      229334.7
+75%            0        2800000
+90%       100000        3399824       Variance       5.26e+10
+95%       270000        3980000       Skewness       9.128092
+99%     934229.2        9779851       Kurtosis       309.5037
+. }
+
+. 
+. * Stocks / mutual funds
+. capture confirm variable h16astck h15astck
+
+. if _rc {
+.     di as txt "WARNING: Stock variables (h16astck, h15astck) not found"
+.     gen double cg_stk_2022 = .
+. }
+
+. else {
+.     gen double cg_stk_2022 = h16astck - h15astck
+.     di as txt "Stock capital gains summary:"
+Stock capital gains summary:
+.     summarize cg_stk_2022, detail
+
+                         cg_stk_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -625000       -7000000
+ 5%       -63000       -7000000
+10%        -1000       -7000000       Obs              12,168
+25%            0       -5361791       Sum of wgt.      12,168
+
+50%            0                      Mean            9332.86
+                        Largest       Std. dev.        319365
+75%            0        4000000
+90%        15000        6424489       Variance       1.02e+11
+95%       130000        7583000       Skewness       .2846811
+99%       800000        7583000       Kurtosis       180.0707
+. }
+
+. 
+. * Bonds
+. capture confirm variable h16abond h15abond
+
+. if _rc {
+.     di as txt "WARNING: Bond variables (h16abond, h15abond) not found"
+.     gen double cg_bnd_2022 = .
+. }
+
+. else {
+.     gen double cg_bnd_2022 = h16abond - h15abond
+.     di as txt "Bond capital gains summary:"
+Bond capital gains summary:
+.     summarize cg_bnd_2022, detail
+
+                         cg_bnd_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -102253       -2200000
+ 5%            0       -2130000
+10%            0       -2064853       Obs              12,168
+25%            0       -1798591       Sum of wgt.      12,168
+
+50%            0                      Mean          -292.1479
+                        Largest       Std. dev.      78079.76
+75%            0        1574468
+90%            0        1614436       Variance       6.10e+09
+95%            0        2000000       Skewness      -.9652946
+99%       100000        2000000       Kurtosis       326.0922
+. }
+
+. 
+. * Checking / savings / money market
+. capture confirm variable h16achck h15achck
+
+. if _rc {
+.     di as txt "WARNING: Checking/savings variables (h16achck, h15achck) not found"
+.     gen double cg_chk_2022 = .
+. }
+
+. else {
+.     gen double cg_chk_2022 = h16achck - h15achck
+.     di as txt "Checking/savings capital gains summary:"
+Checking/savings capital gains summary:
+.     summarize cg_chk_2022, detail
+
+                         cg_chk_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -210000       -4973000
+ 5%       -50000       -2360000
+10%       -20000       -2360000       Obs              12,168
+25%        -2000       -2000000       Sum of wgt.      12,168
+
+50%            0                      Mean           8988.859
+                        Largest       Std. dev.      114023.6
+75%         9000        1935000
+90%        50000        1996454       Variance       1.30e+10
+95%       100000        2200000       Skewness      -4.771637
+99%       300000        2200000       Kurtosis       424.5165
+. }
+
+. 
+. * CDs / T-bills
+. capture confirm variable h16acd h15acd
+
+. if _rc {
+.     di as txt "WARNING: CD/T-bill variables (h16acd, h15acd) not found"
+.     gen double cg_cd_2022 = .
+. }
+
+. else {
+.     gen double cg_cd_2022 = h16acd - h15acd
+.     di as txt "CD/T-bill capital gains summary:"
+CD/T-bill capital gains summary:
+.     summarize cg_cd_2022, detail
+
+                         cg_cd_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -100000       -3000000
+ 5%        -2500       -1000000
+10%            0       -1000000       Obs              12,168
+25%            0        -700000       Sum of wgt.      12,168
+
+50%            0                      Mean           1413.315
+                        Largest       Std. dev.      66440.24
+75%            0       798701.8
+90%            0        1127046       Variance       4.41e+09
+95%         3000        2000000       Skewness        7.66829
+99%       140000        3500000       Kurtosis       1079.749
+. }
+
+. 
+. * Vehicles
+. capture confirm variable h16atran h15atran
+
+. if _rc {
+.     di as txt "WARNING: Vehicle variables (h16atran, h15atran) not found"
+.     gen double cg_veh_2022 = .
+. }
+
+. else {
+.     gen double cg_veh_2022 = h16atran - h15atran
+.     di as txt "Vehicle capital gains summary:"
+Vehicle capital gains summary:
+.     summarize cg_veh_2022, detail
+
+                         cg_veh_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%       -60000        -350000
+ 5%       -22000        -350000
+10%       -12000      -249953.4       Obs              12,168
+25%        -3000        -233544       Sum of wgt.      12,168
+
+50%            0                      Mean           4036.507
+                        Largest       Std. dev.      49994.72
+75%         8000       748419.7
+90%        23000         750000       Variance       2.50e+09
+95%        35000        2880000       Skewness       43.85497
+99%        90000        3460000       Kurtosis        2790.87
+. }
+
+. 
+. * Other assets
+. capture confirm variable h16aothr h15aothr
+
+. if _rc {
+.     di as txt "WARNING: Other asset variables (h16aothr, h15aothr) not found"
+.     gen double cg_oth_2022 = .
+. }
+
+. else {
+.     gen double cg_oth_2022 = h16aothr - h15aothr
+.     di as txt "Other asset capital gains summary:"
+Other asset capital gains summary:
+.     summarize cg_oth_2022, detail
+
+                         cg_oth_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -200000       -7433104
+ 5%       -15000       -5471017
+10%            0       -4000000       Obs              12,168
+25%            0       -3200000       Sum of wgt.      12,168
+
+50%            0                      Mean          -385.0057
+                        Largest       Std. dev.      162661.6
+75%            0        2000000
+90%            0        3963000       Variance       2.65e+10
+95%        20000        3963000       Skewness      -8.882589
+99%       250000        5995000       Kurtosis       775.7602
+. }
+
+. 
+. * Total capital gains (sum; treat missing components as zero)
+. capture drop cg_total_2022
+
+. gen double cg_total_2022 = cond(missing(cg_res_2022), 0, cg_res_2022) + ///
+>                           cond(missing(cg_res2_2022), 0, cg_res2_2022) + ///
+>                           cond(missing(cg_re_2022), 0, cg_re_2022) + ///
+>                           cond(missing(cg_bus_2022), 0, cg_bus_2022) + ///
+>                           cond(missing(cg_ira_2022), 0, cg_ira_2022) + ///
+>                           cond(missing(cg_stk_2022), 0, cg_stk_2022) + ///
+>                           cond(missing(cg_bnd_2022), 0, cg_bnd_2022) + ///
+>                           cond(missing(cg_chk_2022), 0, cg_chk_2022) + ///
+>                           cond(missing(cg_cd_2022), 0, cg_cd_2022) + ///
+>                           cond(missing(cg_veh_2022), 0, cg_veh_2022) + ///
+>                           cond(missing(cg_oth_2022), 0, cg_oth_2022)
+
+. 
+. * Safe CG (already zero when all components missing)
+. capture drop cg_total_2022_safe
+
+. gen double cg_total_2022_safe = cond(missing(cg_total_2022), 0, cg_total_2022)
+
+. 
+. di as txt "Total capital gains (cg_total_2022) summary:"
+Total capital gains (cg_total_2022) summary:
+
+. summarize cg_total_2022, detail
+
+                        cg_total_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     -1334000      -1.35e+07
+ 5%      -336897       -9243731
+10%      -139700       -8299500       Obs              12,168
+25%        -7000       -8230851       Sum of wgt.      12,168
+
+50%        20000                      Mean           125624.5
+                        Largest       Std. dev.      711506.2
+75%       158000       1.22e+07
+90%     498248.3       1.33e+07       Variance       5.06e+11
+95%       913000       1.33e+07       Skewness       4.341353
+99%      2253884       1.78e+07       Kurtosis       115.2076
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 5: Compute debt payments (if needed)
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing debt payments ==="
+=== Computing debt payments ===
+
+. 
+. * For now, set debt payments to zero as they may not be needed in this formulation
+. * This can be added later if specific debt payment variables are identified
+. gen double debt_payments_2022 = 0
+
+. 
+. di as txt "Debt payments set to zero for now"
+Debt payments set to zero for now
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 6: Compute period returns
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing period returns ==="
+=== Computing period returns ===
+
+. 
+. * Numerator (safe): y^c_2022 + sum_c(cg_class) - F_total_period - debt_payments_2022
+. capture drop num_period
+
+. gen double num_period = y_c_2022_safe + cg_total_2022_safe - flow_total_2022_safe - debt
+> _payments_2022
+
+. 
+. * Base (safe flows): A_{2020} + 0.5 * F_total_period
+. capture drop base
+
+. gen double base = a_2020 + 0.5 * flow_total_2022_safe
+
+. 
+. * Period return: R_period = num_period / base
+. gen double r_period = num_period / base
+(790 missing values generated)
+
+. 
+. * Set to missing if base is below threshold 10,000
+. replace r_period = . if base < 10000
+(1,784 real changes made, 1,784 to missing)
+
+. 
+. di as txt "Period returns (r_period) summary:"
+Period returns (r_period) summary:
+
+. summarize r_period, detail
+
+                          r_period
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     -1.08658      -8.192117
+ 5%    -.8287671      -8.192117
+10%    -.5396446      -5.285358       Obs               9,594
+25%    -.1509262      -2.993902       Sum of wgt.       9,594
+
+50%     .2156863                      Mean           .6994905
+                        Largest       Std. dev.      4.125735
+75%     .6838898             57
+90%     1.730769       73.76744       Variance       17.02169
+95%     3.076923       128.8929       Skewness        43.2147
+99%     10.09333       294.5683       Kurtosis       2807.299
+
+. 
+. * Stage counts for sample attrition and component presence
+. quietly count
+
+. local n_total = r(N)
+
+. quietly count if !missing(a_2020)
+
+. local n_has_a = r(N)
+
+. quietly count if !missing(base)
+
+. local n_has_base = r(N)
+
+. quietly count if base >= 0 & !missing(base)
+
+. local n_base_nonneg = r(N)
+
+. quietly count if base >= 10000 & !missing(base)
+
+. local n_basepos = r(N)
+
+. quietly count if !missing(r_period)
+
+. local n_r = r(N)
+
+. di as txt "Stage counts -> total=`n_total' | has A_2020=`n_has_a' | has base=`n_has_base
+> ' | base>=0=`n_base_nonneg' | base>=10k=`n_basepos' | r_period non-missing=`n_r'"
+Stage counts -> total=12168 | has A_2020=12168 | has base=12168 | base>=0=11398 | base>=10
+> k=9594 | r_period non-missing=9594
+
+. 
+. * Denominator diagnostics
+. di as txt "Denominator (base) diagnostics:"
+Denominator (base) diagnostics:
+
+. di as txt "  A_2020 non-missing (potential denominators): `n_has_a'"
+  A_2020 non-missing (potential denominators): 12168
+
+. di as txt "  Base non-missing: `n_has_base'"
+  Base non-missing: 12168
+
+. di as txt "  Base >= 0: `n_base_nonneg'"
+  Base >= 0: 11398
+
+. di as txt "  Base >= 10,000: `n_basepos'"
+  Base >= 10,000: 9594
+
+. di as txt "  Base summary (all non-missing):"
+  Base summary (all non-missing):
+
+. summarize base if !missing(base), detail
+
+                            base
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -53283.91       -2442000
+ 5%        -2977       -1020000
+10%            0       -1020000       Obs              12,168
+25%        22000        -999400       Sum of wgt.      12,168
+
+50%       187500                      Mean           575559.6
+                        Largest       Std. dev.       1245026
+75%       596700       2.60e+07
+90%      1443500       2.60e+07       Variance       1.55e+12
+95%      2415500       2.68e+07       Skewness       6.989479
+99%      5910000       2.68e+07       Kurtosis       91.46555
+
+. 
+. * Diagnostics: which numerator components are present (non-missing pre-safe)
+. gen byte has_yc   = !missing(y_c_2022)
+
+. gen byte has_cg   = !missing(cg_total_2022)
+
+. gen byte has_flow = !missing(flow_total_2022)
+
+. egen byte num_comp_nonmiss = rownonmiss(y_c_2022 cg_total_2022 flow_total_2022)
+
+. di as txt "Numerator components (pre-safe) presence counts among A_2020 non-missing:"
+Numerator components (pre-safe) presence counts among A_2020 non-missing:
+
+. quietly count if has_yc   == 1 & !missing(a_2020)
+
+. di as txt "  y_c_2022 present: " r(N)
+  y_c_2022 present: 12168
+
+. quietly count if has_cg   == 1 & !missing(a_2020)
+
+. di as txt "  cg_total_2022 present: " r(N)
+  cg_total_2022 present: 12168
+
+. quietly count if has_flow == 1 & !missing(a_2020)
+
+. di as txt "  flow_total_2022 present: " r(N)
+  flow_total_2022 present: 3802
+
+. quietly count if num_comp_nonmiss == 0 & !missing(a_2020)
+
+. di as txt "  none present (numerator will be 0 via safe): " r(N)
+  none present (numerator will be 0 via safe): 0
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 7: Annualize returns
+. * ---------------------------------------------------------------------
+. di as txt "=== Annualizing returns ==="
+=== Annualizing returns ===
+
+. 
+. * Annual return: r_annual = (1 + R_period)^(1/2) - 1
+. gen double r_annual_2022 = (1 + r_period)^(1/2) - 1
+(2,712 missing values generated)
+
+. 
+. * Set to missing if period return is missing
+. replace r_annual_2022 = . if missing(r_period)
+(0 real changes made)
+
+. 
+. di as txt "Annual returns (r_annual_2022) summary:"
+Annual returns (r_annual_2022) summary:
+
+. summarize r_annual_2022, detail
+
+                        r_annual_2022
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           -1             -1
+ 5%    -.4887734             -1
+10%    -.2920106             -1       Obs               9,456
+25%    -.0667751             -1       Sum of wgt.       9,456
+
+50%     .1068461                      Mean           .1787831
+                        Largest       Std. dev.      .5840571
+75%     .3012814       6.615773
+90%     .6641006       7.646817       Variance       .3411227
+95%     1.031901       10.39705       Skewness       5.353046
+99%     2.346707        16.1921       Kurtosis       89.22363
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 8: Apply 5% trimming
+. * ---------------------------------------------------------------------
+. di as txt "=== Applying 5% trimming ==="
+=== Applying 5% trimming ===
+
+. 
+. * Calculate trimming thresholds
+. quietly _pctile r_annual_2022, p(5 95)
+
+. scalar p5 = r(r1)
+
+. scalar p95 = r(r2)
+
+. 
+. di as txt "5th percentile: " %12.4f p5
+5th percentile:      -0.4888
+
+. di as txt "95th percentile: " %12.4f p95
+95th percentile:       1.0319
+
+. 
+. * Create trimmed returns
+. gen double r_annual_2022_trimmed = r_annual_2022
+(2,712 missing values generated)
+
+. replace r_annual_2022_trimmed = . if r_annual_2022 < p5 | r_annual_2022 > p95
+(944 real changes made, 944 to missing)
+
+. 
+. quietly count if !missing(r_annual_2022_trimmed)
+
+. local n_trimmed = r(N)
+
+. quietly count if !missing(r_annual_2022)
+
+. local n_original = r(N)
+
+. 
+. di as txt "Original sample size: `n_original'"
+Original sample size: 9456
+
+. di as txt "Trimmed sample size: `n_trimmed'"
+Trimmed sample size: 8512
+
+. di as txt "Trimmed sample size: " %4.1f 100*`n_trimmed'/`n_original' "% of original"
+Trimmed sample size: 90.0% of original
+
+. 
+. di as txt "Trimmed returns summary:"
+Trimmed returns summary:
+
+. summarize r_annual_2022_trimmed, detail
+
+                    r_annual_2022_trimmed
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -.4386904      -.4887734
+ 5%    -.3041895      -.4873854
+10%    -.1992826      -.4870108       Obs               8,512
+25%    -.0436873      -.4858313       Sum of wgt.       8,512
+
+50%     .1068461                      Mean           .1327859
+                        Largest       Std. dev.      .2795436
+75%     .2772829       1.024617
+90%      .502468       1.026992       Variance       .0781446
+95%     .6841814       1.031901       Skewness       .5716386
+99%     .9259471       1.031901       Kurtosis       3.517152
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 9: Comprehensive diagnostics
+. * ---------------------------------------------------------------------
+. di as txt "=== Comprehensive Diagnostics ==="
+=== Comprehensive Diagnostics ===
+
+. 
+. * Sample composition
+. quietly count if !missing(r_annual_2022)
+
+. local n_with_returns = r(N)
+
+. di as txt "Households with computed returns: `n_with_returns'"
+Households with computed returns: 9456
+
+. 
+. * Missing value patterns
+. di as txt "Missing value patterns:"
+Missing value patterns:
+
+. quietly count if missing(y_c_2022)
+
+. di as txt "  Missing capital income: " r(N)
+  Missing capital income: 0
+
+. quietly count if missing(cg_total_2022)
+
+. di as txt "  Missing capital gains: " r(N)
+  Missing capital gains: 0
+
+. quietly count if missing(a_2020)
+
+. di as txt "  Missing beginning net worth: " r(N)
+  Missing beginning net worth: 0
+
+. quietly count if missing(flow_total_2022)
+
+. di as txt "  Missing flows: " r(N)
+  Missing flows: 8366
+
+. 
+. * Extreme values
+. quietly count if r_annual_2022 > 5 & !missing(r_annual_2022)
+
+. di as txt "Returns > 500%: " r(N)
+Returns > 500%: 11
+
+. quietly count if r_annual_2022 < -1 & !missing(r_annual_2022)
+
+. di as txt "Returns < -100%: " r(N)
+Returns < -100%: 0
+
+. 
+. * Component summaries
+. di as txt "Component summaries:"
+Component summaries:
+
+. tabstat y_c_2022 cg_total_2022 flow_total_2022 a_2020 r_period r_annual_2022, stats(n me
+> an sd p50 min max) format(%12.4f)
+
+   Stats |     y_c_2022     cg_tot~2     flow_t~2       a_2020     r_period     r_a~2022
+---------+------------------------------------------------------------------------------
+       N |   12168.0000   12168.0000    3802.0000   12168.0000    9594.0000    9456.0000
+    Mean |   15367.3003  125624.4650   10848.1086  573864.8104       0.6995       0.1788
+      SD |   78470.8310  711506.1550  287999.8900 1238477.0379       4.1257       0.5841
+     p50 |       0.0000   20000.0000       0.0000  187000.0000       0.2157       0.1068
+     Min |       0.0000  -1.3515e+07  -6.4000e+06  -2.4420e+06      -8.1921      -1.0000
+     Max | 4089364.3081   1.7797e+07 3500000.0000   2.7370e+07     294.5683      16.1921
+----------------------------------------------------------------------------------------
+
+. 
+. * ---------------------------------------------------------------------
+. * Save results
+. * ---------------------------------------------------------------------
+. di as txt "=== Saving results ==="
+=== Saving results ===
+
+. 
+. save "`output_file'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_r
+    > andhrs1992_2022v1_analysis.dta saved
+
+. di as txt "Saved results to: `output_file'"
+Saved results to: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ra
+> ndhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+
+. 
+. quietly describe
+
+. local n_vars_final = r(k)
+
+. local n_obs_final = r(N)
+
+. di as txt "Final file: `n_obs_final' observations, `n_vars_final' variables"
+Final file: 12168 observations, 19938 variables
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
+> 1992_2022v1_STATA/compute_tot_ret_2022.log
+  log type:  text
+ closed on:   2 Oct 2025, 13:36:06
+------------------------------------------------------------------------------------------

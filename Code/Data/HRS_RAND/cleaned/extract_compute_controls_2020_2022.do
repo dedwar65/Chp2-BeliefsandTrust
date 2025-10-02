@@ -40,7 +40,7 @@ if _rc exit 198
 *   Marital status: ra034, rz080
 *   Immigration: rb085, rz230 (citizenship)
 * ---------------------------------------------------------------------
-local keepvars "hhid rsubhh rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085 rz230 rv557 rv559 rv560 rv561 rv562 rv563 rv564"
+local keepvars "hhid rsubhh rz216 rb014 ra019 rx060_r rj005m1 rj005m2 rj005m3 rj005m4 rj005m5 rj020 ra034 rz080 rb085 rz230 rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
 
 * ---------------------------------------------------------------------
 * Load 2020 raw, keep requested controls and keys
@@ -160,13 +160,25 @@ foreach v of local controls_only {
 di as txt "Controls present in master (post-merge):"
 di as txt "`found'"
 
-log close
-
 * Keep the updated master loaded and display a brief variables summary
 quietly describe
 local k = r(k)
 di as txt "Variables in memory: `k'"
 capture noisily ds
+
+* ---------------------------------------------------------------------
+* Clean trust variables (rv557-rv564): recode 98/99 to missing; show summaries
+* ---------------------------------------------------------------------
+local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
+foreach v of local trust_vars {
+    capture confirm variable `v'
+    if _rc continue
+    quietly replace `v' = . if inlist(`v',98,99)
+    di as txt "[Trust] summarize `v'"
+    capture noisily summarize `v', detail
+    di as txt "[Trust] tabulate `v' (with missing)"
+    capture noisily tab `v', missing
+}
 
 * ---------------------------------------------------------------------
 * Construct standardized controls for regression: Gender (rx060_r)
@@ -241,17 +253,53 @@ if _rc {
 	di as error "ERROR: networth_A2020 not found in master. Run net worth scripts first."
 }
 
-* Build numerators (2020 values)
+* Redo numerators (2020 values) with strict missing policy tied to assets denominator only
+* Step 1: define total assets denominator
+capture drop assets_ok
+* Mirror compute_net_worth_A2020 approach using rowtotal/rownonmiss
+local assets_vars "rh020 rh162 rq134 rq148 rq317 rq166_1 rq166_2 rq166_3 rq331 rq345 rq357 rq371 rq381"
+capture drop n_assets_2020
+egen n_assets_2020 = rownonmiss(`assets_vars')
+
+capture drop assets_total_2020
+egen assets_total_2020 = rowtotal(`assets_vars')
+recast double assets_total_2020
+replace assets_total_2020 = . if n_assets_2020 == 0
+
+capture confirm variable assets_ok
+if _rc gen byte assets_ok = .
+replace assets_ok = !missing(assets_total_2020) & assets_total_2020 > 0
+
+quietly count if !missing(assets_total_2020)
+di as txt "Non-missing assets_total_2020: " r(N)
+quietly count if assets_total_2020 == 0
+di as txt "Zero total assets: " r(N)
+quietly count if assets_ok
+di as txt "Positive total assets (denominator for shares): " r(N)
+
+* Step 3: construct numerators only when assets_ok; within that, treat missing as 0
 capture drop num_residential_2020 num_re_2020 num_bus_2020 num_ira_2020 num_fin_2020 num_stocks_2020 num_safe_2020
-gen double num_residential_2020 = cond(missing(rh020),0,rh020) + cond(missing(rh162),0,rh162)
-gen double num_re_2020         = cond(missing(rq134),0,rq134)
-gen double num_bus_2020        = cond(missing(rq148),0,rq148)
-* IRA total: construct from raw components for consistency
-gen double num_ira_2020        = cond(missing(rq166_1),0,rq166_1) + cond(missing(rq166_2),0,rq166_2) + cond(missing(rq166_3),0,rq166_3)
-gen double num_fin_2020        = cond(missing(rq317),0,rq317) + cond(missing(rq331),0,rq331) + cond(missing(rq345),0,rq345) + cond(missing(rq357),0,rq357)
+gen double num_residential_2020 = .
+replace num_residential_2020 = cond(missing(rh020),0,rh020) + cond(missing(rh162),0,rh162) if assets_ok
+
+gen double num_re_2020 = .
+replace num_re_2020 = cond(missing(rq134),0,rq134) if assets_ok
+
+gen double num_bus_2020 = .
+replace num_bus_2020 = cond(missing(rq148),0,rq148) if assets_ok
+
+gen double num_ira_2020 = .
+replace num_ira_2020 = cond(missing(rq166_1),0,rq166_1) + cond(missing(rq166_2),0,rq166_2) + cond(missing(rq166_3),0,rq166_3) if assets_ok
+
+gen double num_fin_2020 = .
+replace num_fin_2020 = cond(missing(rq317),0,rq317) + cond(missing(rq331),0,rq331) + cond(missing(rq345),0,rq345) + cond(missing(rq357),0,rq357) if assets_ok
+
 * Split financial into stocks vs safe (bonds+cash+CDs)
-gen double num_stocks_2020     = cond(missing(rq317),0,rq317)
-gen double num_safe_2020       = cond(missing(rq331),0,rq331) + cond(missing(rq345),0,rq345) + cond(missing(rq357),0,rq357)
+gen double num_stocks_2020 = .
+replace num_stocks_2020 = cond(missing(rq317),0,rq317) if assets_ok
+
+gen double num_safe_2020 = .
+replace num_safe_2020 = cond(missing(rq331),0,rq331) + cond(missing(rq345),0,rq345) + cond(missing(rq357),0,rq357) if assets_ok
 
 * Shares: numerator / networth_A2020 when denom > 0
 capture drop share_residential share_realestate share_business share_retirement share_financial share_stocks share_safe
@@ -263,30 +311,44 @@ gen double share_financial  = .
 gen double share_stocks     = .
 gen double share_safe       = .
 
-replace share_residential = num_residential_2020 / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
-replace share_realestate = num_re_2020        / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
-replace share_business   = num_bus_2020       / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
-replace share_retirement = num_ira_2020       / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
-replace share_financial  = num_fin_2020       / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
-replace share_stocks     = num_stocks_2020    / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
-replace share_safe       = num_safe_2020      / networth_A2020 if !missing(networth_A2020) & networth_A2020 > 0
+replace share_residential = num_residential_2020 / assets_total_2020 if assets_ok
+replace share_realestate  = num_re_2020         / assets_total_2020 if assets_ok
+replace share_business    = num_bus_2020        / assets_total_2020 if assets_ok
+replace share_retirement  = num_ira_2020        / assets_total_2020 if assets_ok
+replace share_financial   = num_fin_2020        / assets_total_2020 if assets_ok
+replace share_stocks      = num_stocks_2020     / assets_total_2020 if assets_ok
+replace share_safe        = num_safe_2020       / assets_total_2020 if assets_ok
 
-label variable share_residential "Share of net worth: residential (2020)"
-label variable share_realestate "Share of net worth: real estate (2020)"
-label variable share_business   "Share of net worth: business (2020)"
-label variable share_retirement "Share of net worth: retirement (2020)"
-label variable share_financial  "Share of net worth: financial (2020)"
-label variable share_stocks     "Share of net worth: stocks (2020)"
-label variable share_safe       "Share of net worth: safe assets (bonds+cash+CDs, 2020)"
+* Minimal diagnostics requested
+quietly count if missing(rq317)
+di as txt "Missing rq317: " r(N)
+quietly count if missing(rq331)
+di as txt "Missing rq331: " r(N)
+quietly count if missing(rq345)
+di as txt "Missing rq345: " r(N)
+quietly count if missing(rq357)
+di as txt "Missing rq357: " r(N)
 
-* Diagnostics
-di as txt "Asset-class share diagnostics (denominator networth_A2020>0)"
-quietly count if missing(networth_A2020)
-di as txt "  Missing networth_A2020: " r(N)
-quietly count if !missing(networth_A2020) & networth_A2020 <= 0
-di as txt "  Non-positive networth_A2020: " r(N)
+quietly count if !missing(num_stocks_2020)
+di as txt "N numerator_stocks (defined): " r(N)
+quietly count if !missing(num_safe_2020)
+di as txt "N numerator_safe (defined): " r(N)
+
+* Clarify why share Ns match: they are only defined where denom_ok
 
 tabstat share_residential share_realestate share_business share_retirement share_financial share_stocks share_safe, stats(n mean sd p50 min max) format(%12.4f)
+
+di as txt "-- Share variables: summarize, detail --"
+foreach s in share_residential share_realestate share_business share_retirement share_financial share_stocks share_safe {
+    di as txt "[summarize] `s'"
+    capture noisily summarize `s', detail
+}
+
+* Missing counts for each share
+foreach s in share_residential share_realestate share_business share_retirement share_financial share_stocks share_safe {
+    quietly count if missing(`s')
+    di as txt "  Missing `s': " r(N)
+}
 
 * Drop intermediate numerators used to compute shares
 capture drop num_residential_2020 num_re_2020 num_bus_2020 num_ira_2020 num_fin_2020 num_stocks_2020 num_safe_2020
@@ -311,6 +373,8 @@ di as txt "Wealth percentile diagnostics:"
 quietly count if !missing(wealth_pct)
 di as txt "  Non-missing wealth_pct: " r(N)
 tabstat wealth_pct, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "[summarize] wealth_pct"
+capture noisily summarize wealth_pct, detail
 
 save "`master'", replace
 use "`master'", clear
@@ -340,6 +404,12 @@ forvalues d = 1/10 {
 di as txt "Wealth decile diagnostics:"
 tab wealth_decile, missing
 tabstat wealth_d1 wealth_d2 wealth_d3 wealth_d4 wealth_d5 wealth_d6 wealth_d7 wealth_d8 wealth_d9 wealth_d10, stats(n mean) format(%9.0g)
+
+* Tabulate each wealth decile dummy with missing to inspect coverage
+forvalues d = 1/10 {
+    di as txt "Wealth dummy coverage: wealth_d`d'"
+    capture noisily tab wealth_d`d', missing
+}
 
 save "`master'", replace
 use "`master'", clear

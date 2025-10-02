@@ -20,9 +20,9 @@ local tempR    "`path2022'/hrs_2022_R_selected.dta"
 local tempH    "`path2022'/hrs_2022_H_selected.dta"
 
 * --- lists of variables to keep (lowercase versions)
-local varsQ "hhid ssubhh sq139 sq141 sq153 sq155 sq190 sq194 sq322 sq324 sq336 sq338 sq350 sq352 sq362 sq364 sq171_1 sq171_2 sq171_3 sq148 sq134 sq317 sq166_1 sq166_2 sq166_3 sq331"
-local varsR "hhid ssubhh sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sr007 sr013 sr024"
-local varsH "hhid ssubhh sh020 sh162 sh025 sh029 sh036 sh040 sh175 sh179"
+local varsQ "hhidpn hhid ssubhh sq139 sq141 sq153 sq155 sq190 sq194 sq322 sq324 sq336 sq338 sq350 sq352 sq362 sq364 sq171_1 sq171_2 sq171_3 sq148 sq134 sq317 sq166_1 sq166_2 sq166_3 sq331"
+local varsR "hhidpn hhid ssubhh sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sr007 sr013 sr024"
+local varsH "hhidpn hhid ssubhh sh020 sh162 sh025 sh029 sh036 sh040 sh175 sh179"
 
 * --- Safety: check files exist
 capture confirm file "`qfile'"

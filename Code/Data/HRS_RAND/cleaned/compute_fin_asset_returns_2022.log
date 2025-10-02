@@ -1,9 +1,9 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_fin_asset_returns_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_fin_asset_returns_2022.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:43
+ opened on:   2 Oct 2025, 12:34:13
 
 . 
 . set more off
@@ -21,8 +21,8 @@
 . * - compute_beg_per_net_worth_2020_2022
 . * ---------------------------------------------------------------------
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
-> hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clea
+> ned/hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -35,8 +35,8 @@
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
-> ed/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -122,8 +122,8 @@ Sample definition results:
 
 . local n_total = r(N)
 
-. di as txt "Households in financial asset sample: `n_fin_sample' out of `n_total' (" %4.1f 10
-> 0*`n_fin_sample'/`n_total' "%)"
+. di as txt "Households in financial asset sample: `n_fin_sample' out of `n_total' (" %4.1
+> f 100*`n_fin_sample'/`n_total' "%)"
 Households in financial asset sample: 2491 out of 14442 (17.2%)
 
 . 
@@ -224,10 +224,15 @@ Financial asset flows (F_fin_2022) summary:
 
 . tabstat F_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  F_fin_2022 |      2491.00      4996.34     68491.88         0.00  -2000000.00   1600000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  F_fin_2022 |      2491.00      4996.34     68491.88         0.00  -2000000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  F_fin_2022 |   1600000.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -270,10 +275,15 @@ Total flows (F_2022) summary:
 
 . tabstat F_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-      F_2022 |      2491.00     18473.19    238186.87         0.00  -6400000.00   3474000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+      F_2022 |      2491.00     18473.19    238186.87         0.00  -6400000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+      F_2022 |   3474000.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -289,8 +299,8 @@ Total flows (F_2022) summary:
 . gen double yc_fin_2022 = .
 (14,442 missing values generated)
 
-. * Sum interest income from financial assets, treat missing as 0 if they have financial asset
-> s
+. * Sum interest income from financial assets, treat missing as 0 if they have financial a
+> ssets
 . replace yc_fin_2022 = cond(missing(int_stk_2022),0,int_stk_2022) + ///
 >                      cond(missing(int_bnd_2022),0,int_bnd_2022) + ///
 >                      cond(missing(int_cash_2022),0,int_cash_2022) + ///
@@ -320,10 +330,15 @@ Financial asset interest income (yc_fin_2022) summary:
 
 . tabstat yc_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
- yc_fin_2022 |      2491.00      4840.35     47626.88        36.00         0.00   1800012.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+ yc_fin_2022 |      2491.00      4840.35     47626.88        36.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+ yc_fin_2022 |   1800012.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -339,7 +354,8 @@ Financial asset interest income (yc_fin_2022) summary:
 . gen double cg_fin_2022 = .
 (14,442 missing values generated)
 
-. * Sum capital gains from financial assets, treat missing as 0 if they have financial assets
+. * Sum capital gains from financial assets, treat missing as 0 if they have financial ass
+> ets
 . replace cg_fin_2022 = cond(missing(cg_stk_2022),0,cg_stk_2022) + ///
 >                      cond(missing(cg_bnd_2022),0,cg_bnd_2022) if fin_sample
 (2,491 real changes made)
@@ -367,10 +383,15 @@ Financial asset capital gains (cg_fin_2022) summary:
 
 . tabstat cg_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
- cg_fin_2022 |      2491.00     31719.53    365954.30         0.00  -4100000.00   7553000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+ cg_fin_2022 |      2491.00     31719.53    365954.30         0.00  -4100000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+ cg_fin_2022 |   7553000.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -395,8 +416,8 @@ Financial asset capital gains (cg_fin_2022) summary:
 (11,951 missing values generated)
 
 . 
-. di as txt "Financial asset denominator (A_2020 + 0.5*F_2022) summary BEFORE final threshold:
-> "
+. di as txt "Financial asset denominator (A_2020 + 0.5*F_2022) summary BEFORE final thresh
+> old:"
 Financial asset denominator (A_2020 + 0.5*F_2022) summary BEFORE final threshold:
 
 . summarize denom_fin_2022 if fin_sample, detail
@@ -418,10 +439,15 @@ Financial asset denominator (A_2020 + 0.5*F_2022) summary BEFORE final threshold
 
 . tabstat denom_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-denom_f~2022 |      2044.00    899101.02   1497683.44    440500.00   -296000.00  22671500.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+denom_f~2022 |      2044.00    899101.02   1497683.44    440500.00   -296000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+denom_f~2022 |  22671500.00
+---------------------------
 
 . 
 . * Count before applying denominator threshold
@@ -448,12 +474,13 @@ Final sample restriction results:
 . di as txt "Final sample size after denominator threshold (≥$10k): `n_final_sample'"
 Final sample size after denominator threshold (≥$10k): 2334
 
-. di as txt "Observations dropped due to negative/small denominators: `=`n_initial_sample'-`n_
-> final_sample''"
+. di as txt "Observations dropped due to negative/small denominators: `=`n_initial_sample'
+> -`n_final_sample''"
 Observations dropped due to negative/small denominators: 157
 
 . 
-. di as txt "Financial asset denominator (A_2020 + 0.5*F_2022) summary AFTER final threshold:"
+. di as txt "Financial asset denominator (A_2020 + 0.5*F_2022) summary AFTER final thresho
+> ld:"
 Financial asset denominator (A_2020 + 0.5*F_2022) summary AFTER final threshold:
 
 . summarize denom_fin_2022 if fin_sample, detail
@@ -475,10 +502,15 @@ Financial asset denominator (A_2020 + 0.5*F_2022) summary AFTER final threshold:
 
 . tabstat denom_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-denom_f~2022 |      1887.00    975327.33   1534259.40    495000.00     10000.00  22671500.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+denom_f~2022 |      1887.00    975327.33   1534259.40    495000.00     10000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+denom_f~2022 |  22671500.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -652,7 +684,8 @@ Component presence patterns:
 . gen double r_fin_2022 = .
 (14,442 missing values generated)
 
-. replace r_fin_2022 = (yc_fin_2022 + cg_fin_2022 - F_fin_2022) / denom_fin_2022 if fin_sample
+. replace r_fin_2022 = (yc_fin_2022 + cg_fin_2022 - F_fin_2022) / denom_fin_2022 if fin_sa
+> mple
 (1,887 real changes made)
 
 . 
@@ -685,10 +718,15 @@ Summary stats for financial asset returns (r_fin_2022):
 
 . tabstat r_fin_2022 if fin_sample, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  r_fin_2022 |    1887.0000       0.0319       0.3335       0.0002      -2.6333       9.7143
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  r_fin_2022 |    1887.0000       0.0319       0.3335       0.0002      -2.6333
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  r_fin_2022 |       9.7143
+---------------------------
 
 . 
 . * Count valid returns
@@ -696,8 +734,8 @@ Summary stats for financial asset returns (r_fin_2022):
 
 . local n_valid_returns = r(N)
 
-. di as txt "Records with valid r_fin_2022 computed = `n_valid_returns' out of `n_fin_sample' 
-> in financial sample"
+. di as txt "Records with valid r_fin_2022 computed = `n_valid_returns' out of `n_fin_samp
+> le' in financial sample"
 Records with valid r_fin_2022 computed = 1887 out of 2491 in financial sample
 
 . 
@@ -723,8 +761,8 @@ Trim thresholds: -.1603162055335969 to .2814498933901919
 . * Create trimmed returns
 . capture drop r_fin_2022_trim
 
-. gen double r_fin_2022_trim = r_fin_2022 if fin_sample & !missing(r_fin_2022) & inrange(r_fin
-> _2022, trim_low, trim_high)
+. gen double r_fin_2022_trim = r_fin_2022 if fin_sample & !missing(r_fin_2022) & inrange(r
+> _fin_2022, trim_low, trim_high)
 (12,743 missing values generated)
 
 . 
@@ -764,10 +802,15 @@ Trimmed financial asset returns summary:
 
 . tabstat r_fin_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_fin_2022~m |    1699.0000       0.0123       0.0562       0.0002      -0.1603       0.2814
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_fin_2022~m |    1699.0000       0.0123       0.0562       0.0002      -0.1603
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_fin_2022~m |       0.2814
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -890,8 +933,8 @@ F_fin_2022 equals 0 in sample: 2070
 . * Return and trimming
 . capture drop r_stk_2022
 
-. gen double r_stk_2022 = (yc_stk_2022 + cg_stk_used_2022 - F_stk_2022) / denom_stk_2022 if st
-> k_sample
+. gen double r_stk_2022 = (yc_stk_2022 + cg_stk_used_2022 - F_stk_2022) / denom_stk_2022 i
+> f stk_sample
 (13,540 missing values generated)
 
 . quietly _pctile r_stk_2022 if stk_sample & !missing(r_stk_2022), p(5 95)
@@ -902,8 +945,8 @@ F_fin_2022 equals 0 in sample: 2070
 
 . capture drop r_stk_2022_trim
 
-. gen double r_stk_2022_trim = r_stk_2022 if stk_sample & !missing(r_stk_2022) & inrange(r_stk
-> _2022, stk_p5, stk_p95)
+. gen double r_stk_2022_trim = r_stk_2022 if stk_sample & !missing(r_stk_2022) & inrange(r
+> _stk_2022, stk_p5, stk_p95)
 (13,630 missing values generated)
 
 . 
@@ -930,10 +973,15 @@ Stock returns summary (raw):
 
 . tabstat r_stk_2022 if stk_sample, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  r_stk_2022 |     902.0000       0.0492       0.3524       0.0025      -2.6333       3.4643
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  r_stk_2022 |     902.0000       0.0492       0.3524       0.0025      -2.6333
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  r_stk_2022 |       3.4643
+---------------------------
 
 . di as txt "Stock returns summary (trimmed):"
 Stock returns summary (trimmed):
@@ -957,10 +1005,15 @@ Stock returns summary (trimmed):
 
 . tabstat r_stk_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_stk_2022~m |     812.0000       0.0274       0.1247       0.0025      -0.3221       0.4690
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_stk_2022~m |     812.0000       0.0274       0.1247       0.0025      -0.3221
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_stk_2022~m |       0.4690
+---------------------------
 
 . 
 . * ---------------------------
@@ -1041,8 +1094,8 @@ r_stk_2022~m |     812.0000       0.0274       0.1247       0.0025      -0.3221 
 . * Return and trimming
 . capture drop r_bnd_2022
 
-. gen double r_bnd_2022 = (yc_bnd_2022 + cg_bnd_used_2022 - F_bnd_2022) / denom_bnd_2022 if bn
-> d_sample
+. gen double r_bnd_2022 = (yc_bnd_2022 + cg_bnd_used_2022 - F_bnd_2022) / denom_bnd_2022 i
+> f bnd_sample
 (14,356 missing values generated)
 
 . quietly _pctile r_bnd_2022 if bnd_sample & !missing(r_bnd_2022), p(5 95)
@@ -1053,8 +1106,8 @@ r_stk_2022~m |     812.0000       0.0274       0.1247       0.0025      -0.3221 
 
 . capture drop r_bnd_2022_trim
 
-. gen double r_bnd_2022_trim = r_bnd_2022 if bnd_sample & !missing(r_bnd_2022) & inrange(r_bnd
-> _2022, bnd_p5, bnd_p95)
+. gen double r_bnd_2022_trim = r_bnd_2022 if bnd_sample & !missing(r_bnd_2022) & inrange(r
+> _bnd_2022, bnd_p5, bnd_p95)
 (14,364 missing values generated)
 
 . 
@@ -1081,10 +1134,15 @@ Bond returns summary (raw):
 
 . tabstat r_bnd_2022 if bnd_sample, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  r_bnd_2022 |      86.0000       0.1236       1.0522       0.0011      -0.3738       9.7143
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  r_bnd_2022 |      86.0000       0.1236       1.0522       0.0011      -0.3738
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  r_bnd_2022 |       9.7143
+---------------------------
 
 . di as txt "Bond returns summary (trimmed):"
 Bond returns summary (trimmed):
@@ -1108,10 +1166,15 @@ Bond returns summary (trimmed):
 
 . tabstat r_bnd_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_bnd_2022~m |      78.0000       0.0081       0.0602       0.0011      -0.1379       0.2648
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_bnd_2022~m |      78.0000       0.0081       0.0602       0.0011      -0.1379
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_bnd_2022~m |       0.2648
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -1119,12 +1182,12 @@ r_bnd_2022~m |      78.0000       0.0081       0.0602       0.0011      -0.1379 
 . * ---------------------------------------------------------------------
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . di as txt "Saved financial asset return variables to master: `master'"
-Saved financial asset return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-Beliefsan
-> dTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved financial asset return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-Belie
+> fsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . di as txt "Done. Financial asset returns computed with 5% trimming."
@@ -1133,8 +1196,8 @@ Done. Financial asset returns computed with 5% trimming.
 . 
 end of do-file
 
-. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/compute_bu
-> s_returns_2020_2022.do"
+. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/comput
+> e_bus_returns_2020_2022.do"
 
 . *----------------------------------------------------------------------
 . * RAND: compute_bus_returns.do

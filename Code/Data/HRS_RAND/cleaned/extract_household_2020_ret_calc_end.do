@@ -14,7 +14,7 @@ local infile  "`path2020'/h20f1a.dta"
 local out     "`path2020'/hrs_2020_selected.dta"
 
 * --- list variables to keep (lowercase versions of original HRS vars)
-local vars_keep "hhid rsubhh rq148 rq134 rq317 rq166_1 rq166_2 rq166_3 rq331 rq345 rq357 rq371 rq381 rq478 rh020 rh162 rh032 rh171"
+local vars_keep "hhidpn hhid rsubhh rq148 rq134 rq317 rq166_1 rq166_2 rq166_3 rq331 rq345 rq357 rq371 rq381 rq478 rh020 rh162 rh032 rh171"
 
 * --- Safety: check file exists
 capture confirm file "`infile'"

@@ -1,16 +1,16 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_net_flows_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_net_flows_2022.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:42
+ opened on:   2 Oct 2025, 12:34:13
 
 . 
 . set more off
 
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
-> hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clea
+> ned/hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -24,8 +24,8 @@
 
 . 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
-> ed/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -53,8 +53,8 @@ Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/
 . * - primary/secondary residence(s): SR007 (buy), SR013 (sell), SR024 (improvement costs)
 . * ---------------------------------------------------------------------
 . 
-. local vars_to_check "sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sq171_1 sq171_2 sq171_3
->  sr007 sr013 sr024"
+. local vars_to_check "sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sq171_1 sq171_2 sq1
+> 71_3 sr007 sr013 sr024"
 
 . di as txt "Checking existence of required 2022 variables..."
 Checking existence of required 2022 variables...
@@ -178,7 +178,8 @@ Private business flow summary:
 . capture confirm variable sr064
 
 . if _rc {
-.     di as txt "sr064 (stock magnitude) missing -> setting flow_stk_private_2022 to missing"
+.     di as txt "sr064 (stock magnitude) missing -> setting flow_stk_private_2022 to missi
+> ng"
 .     gen double flow_stk_private_2022 = .
 . }
 
@@ -186,8 +187,8 @@ Private business flow summary:
 .     capture drop flow_stk_private_2022
 .     gen double flow_stk_private_2022 = .
 (14,442 missing values generated)
-.     replace flow_stk_private_2022 = sr063_dir * sr064 if !missing(sr063_dir) & !missing(sr06
-> 4)
+.     replace flow_stk_private_2022 = sr063_dir * sr064 if !missing(sr063_dir) & !missing(
+> sr064)
 (116 real changes made)
 .     di as txt "Private stock flow summary (sr063_dir * sr064):"
 Private stock flow summary (sr063_dir * sr064):
@@ -246,11 +247,13 @@ Public stock (sold) flow summary (sr073):
 . * Combine private + public stocks into total stocks flow
 . capture drop flow_stk_2022
 
-. gen double flow_stk_2022 = cond(!missing(flow_stk_private_2022), flow_stk_private_2022, 0) +
->  ///
->                             cond(!missing(flow_stk_public_2022),  flow_stk_public_2022,  0)
+. gen double flow_stk_2022 = cond(!missing(flow_stk_private_2022), flow_stk_private_2022, 
+> 0) + ///
+>                             cond(!missing(flow_stk_public_2022),  flow_stk_public_2022, 
+>  0)
 
-. replace flow_stk_2022 = . if missing(flow_stk_private_2022) & missing(flow_stk_public_2022)
+. replace flow_stk_2022 = . if missing(flow_stk_private_2022) & missing(flow_stk_public_20
+> 22)
 (14,164 real changes made, 14,164 to missing)
 
 . di as txt "TOTAL stocks flow (2022) summary (missing when both components missing):"
@@ -275,8 +278,8 @@ TOTAL stocks flow (2022) summary (missing when both components missing):
 
 . 
 . * Quick check: households with BOTH public (sr073) and private magnitude (sr064) present
-. di as txt "Checking overlap: sr073 (public sells) AND sr064 (private magnitude) both non-mis
-> sing"
+. di as txt "Checking overlap: sr073 (public sells) AND sr064 (private magnitude) both non
+> -missing"
 Checking overlap: sr073 (public sells) AND sr064 (private magnitude) both non-missing
 
 . quietly count if !missing(sr073) & !missing(sr064)
@@ -284,19 +287,19 @@ Checking overlap: sr073 (public sells) AND sr064 (private magnitude) both non-mi
 . di as txt "Count with sr073 & sr064 both present = " r(N)
 Count with sr073 & sr064 both present = 0
 
-. quietly list hhid rsubhh sr073 sr064 flow_stk_public_2022 flow_stk_private_2022 in 1/10 if !
-> missing(sr073) & !missing(sr064)
+. quietly list hhid rsubhh sr073 sr064 flow_stk_public_2022 flow_stk_private_2022 in 1/10 
+> if !missing(sr073) & !missing(sr064)
 
 . 
-. * --- Real estate: sr035 (sold, inflow) - sr030 (buy, outflow) - sr045 (improvement costs, o
-> utflow)
+. * --- Real estate: sr035 (sold, inflow) - sr030 (buy, outflow) - sr045 (improvement cost
+> s, outflow)
 . capture drop flow_re_2022
 
 . gen double flow_re_2022 = .
 (14,442 missing values generated)
 
-. replace flow_re_2022 = cond(missing(sr035),0,sr035) - ( cond(missing(sr030),0,sr030) + cond(
-> missing(sr045),0,sr045) ) if !missing(sr035) | !missing(sr030) | !missing(sr045)
+. replace flow_re_2022 = cond(missing(sr035),0,sr035) - ( cond(missing(sr030),0,sr030) + c
+> ond(missing(sr045),0,sr045) ) if !missing(sr035) | !missing(sr030) | !missing(sr045)
 (269 real changes made)
 
 . di as txt "Real estate flow summary:"
@@ -329,8 +332,8 @@ Real estate flow summary:
 
 . gen byte re_pattern = ok_sell*4 + ok_buy*2 + ok_impr
 
-. label define rePat 0 "none" 1 "impr only" 2 "buy only" 3 "buy+impr" 4 "sell only" 5 "sell+im
-> pr" 6 "sell+buy" 7 "sell+buy+impr"
+. label define rePat 0 "none" 1 "impr only" 2 "buy only" 3 "buy+impr" 4 "sell only" 5 "sel
+> l+impr" 6 "sell+buy" 7 "sell+buy+impr"
 
 . label values re_pattern rePat
 
@@ -387,10 +390,15 @@ IRA flow summary (row-sum of sq171_1/2/3; missing when all three missing):
 
 . tabstat flow_ira_2022, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-flow_ir~2022 |      1288.00     33867.53     66722.69     14000.00         0.00   1060000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+flow_ir~2022 |      1288.00     33867.53     66722.69     14000.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+flow_ir~2022 |   1060000.00
+---------------------------
 
 . 
 . * Overlap diagnostics for IRA components
@@ -402,8 +410,8 @@ flow_ir~2022 |      1288.00     33867.53     66722.69     14000.00         0.00 
 
 . gen byte ira_pattern = ok_ira1*4 + ok_ira2*2 + ok_ira3
 
-. label define iraPat 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+2" 7 "1+2
-> +3"
+. label define iraPat 0 "none" 1 "3 only" 2 "2 only" 3 "2+3" 4 "1 only" 5 "1+3" 6 "1+2" 7 
+> "1+2+3"
 
 . label values ira_pattern iraPat
 
@@ -426,15 +434,16 @@ ira_pattern |      Freq.     Percent        Cum.
       Total |     14,442      100.00
 
 . 
-. * --- Primary/secondary residence(s): sr013 (sell, inflow) - sr007 (buy, outflow) - sr024 (i
-> mprovements, outflow)
+. * --- Primary/secondary residence(s): sr013 (sell, inflow) - sr007 (buy, outflow) - sr02
+> 4 (improvements, outflow)
 . capture drop flow_residences_2022
 
 . gen double flow_residences_2022 = .
 (14,442 missing values generated)
 
-. replace flow_residences_2022 = cond(missing(sr013),0,sr013) - ( cond(missing(sr007),0,sr007)
->  + cond(missing(sr024),0,sr024) ) if !missing(sr013) | !missing(sr007) | !missing(sr024)
+. replace flow_residences_2022 = cond(missing(sr013),0,sr013) - ( cond(missing(sr007),0,sr
+> 007) + cond(missing(sr024),0,sr024) ) if !missing(sr013) | !missing(sr007) | !missing(sr
+> 024)
 (1,684 real changes made)
 
 . di as txt "Primary/secondary residences flow summary:"
@@ -472,8 +481,8 @@ Primary/secondary residences flow summary:
 
 . gen byte res_pattern = ok_res_sell*4 + ok_res_buy*2 + ok_res_impr
 
-. label define resPat 0 "none" 1 "impr only" 2 "buy only" 3 "buy+impr" 4 "sell only" 5 "sell+i
-> mpr" 6 "sell+buy" 7 "sell+buy+impr", replace
+. label define resPat 0 "none" 1 "impr only" 2 "buy only" 3 "buy+impr" 4 "sell only" 5 "se
+> ll+impr" 6 "sell+buy" 7 "sell+buy+impr", replace
 
 . label values res_pattern resPat
 
@@ -511,8 +520,8 @@ Households with ALL THREE residence components present = 88
 (14,442 missing values generated)
 
 . * Check if at least one asset class has non-missing flow
-. egen byte any_flow_present = rownonmiss(flow_bus_2022 flow_re_2022 flow_stk_2022 flow_ira_20
-> 22 flow_residences_2022)
+. egen byte any_flow_present = rownonmiss(flow_bus_2022 flow_re_2022 flow_stk_2022 flow_ir
+> a_2022 flow_residences_2022)
 
 . * Compute total only if at least one flow is present
 . replace flow_total_2022 = cond(missing(flow_bus_2022),0,flow_bus_2022) + ///
@@ -559,18 +568,18 @@ Records with flow_total_2022 computed = 2901
 . 
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . di as txt "Saved 2022 net-flow vars back to master: `master'"
-Saved 2022 net-flow vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Co
-> de/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved 2022 net-flow vars back to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrus
+> t/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_net_flows_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_net_flows_2022.log
   log type:  text
- closed on:  29 Sep 2025, 11:57:42
-----------------------------------------------------------------------------------------------
+ closed on:   2 Oct 2025, 12:34:13
+------------------------------------------------------------------------------------------

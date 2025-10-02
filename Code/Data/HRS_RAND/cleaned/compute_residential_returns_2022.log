@@ -1,9 +1,9 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_residential_returns_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_residential_returns_2022.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:43
+ opened on:   2 Oct 2025, 12:34:13
 
 . 
 . set more off
@@ -21,8 +21,8 @@
 . * - compute_beg_per_net_worth_2020_2022
 . * ---------------------------------------------------------------------
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
-> hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clea
+> ned/hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -35,8 +35,8 @@
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
-> ed/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -85,8 +85,8 @@ Sample definition results:
 
 . local n_total = r(N)
 
-. di as txt "Households in residential housing sample: `n_res_sample' out of `n_total' (" %4.1
-> f 100*`n_res_sample'/`n_total' "%)"
+. di as txt "Households in residential housing sample: `n_res_sample' out of `n_total' (" 
+> %4.1f 100*`n_res_sample'/`n_total' "%)"
 Households in residential housing sample: 4891 out of 14442 (33.9%)
 
 . 
@@ -171,8 +171,8 @@ Final sample restriction results:
 . di as txt "Final sample size after denominator threshold (≥$10k): `n_final_sample'"
 Final sample size after denominator threshold (≥$10k): 4706
 
-. di as txt "Observations dropped due to negative/small denominators: `=`n_res_sample'-`n_fina
-> l_sample''"
+. di as txt "Observations dropped due to negative/small denominators: `=`n_res_sample'-`n_
+> final_sample''"
 Observations dropped due to negative/small denominators: 185
 
 . 
@@ -187,16 +187,16 @@ Observations dropped due to negative/small denominators: 185
 . capture confirm variable cg_res_total_2022
 
 . if _rc {
-.     di as error "ERROR: cg_res_total_2022 not found. Run compute_cap_gains_2020_2022.do firs
-> t."
+.     di as error "ERROR: cg_res_total_2022 not found. Run compute_cap_gains_2020_2022.do 
+> first."
 .     exit 198
 . }
 
 . capture confirm variable flow_residences_2022
 
 . if _rc {
-.     di as error "ERROR: flow_residences_2022 not found. Run compute_net_inv_flows_2020_2022.
-> do first."
+.     di as error "ERROR: flow_residences_2022 not found. Run compute_net_inv_flows_2020_2
+> 022.do first."
 .     exit 198
 . }
 
@@ -208,7 +208,8 @@ Observations dropped due to negative/small denominators: 185
 (9,736 missing values generated)
 
 . 
-. * 2) Capital gains (cg_res_2022) - use existing variable, treat missing as 0 within sample
+. * 2) Capital gains (cg_res_2022) - use existing variable, treat missing as 0 within samp
+> le
 . capture drop cg_res_2022
 
 . gen double cg_res_2022 = cg_res_total_2022 if res_sample
@@ -257,10 +258,15 @@ Interest income (yc_res_2022) summary:
 
 . tabstat yc_res_2022 if res_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
- yc_res_2022 |      4706.00         0.00         0.00         0.00         0.00         0.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+ yc_res_2022 |      4706.00         0.00         0.00         0.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+ yc_res_2022 |         0.00
+---------------------------
 
 . 
 . di as txt "Capital gains (cg_res_2022) summary:"
@@ -285,10 +291,15 @@ Capital gains (cg_res_2022) summary:
 
 . tabstat cg_res_2022 if res_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
- cg_res_2022 |      4706.00   -558364.07  43689755.39     49000.00    -3.00e+09   9090000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+ cg_res_2022 |      4706.00   -558364.07  43689755.39     49000.00    -3.00e+09
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+ cg_res_2022 |   9090000.00
+---------------------------
 
 . 
 . di as txt "Residential flows (F_res_2022) summary:"
@@ -313,10 +324,15 @@ Residential flows (F_res_2022) summary:
 
 . tabstat F_res_2022 if res_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  F_res_2022 |      4706.00      1174.50    128706.34         0.00  -2660000.00   3500000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  F_res_2022 |      4706.00      1174.50    128706.34         0.00  -2660000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  F_res_2022 |   3500000.00
+---------------------------
 
 . 
 . di as txt "Final denominator (A_2020 + 0.5*F_2022) summary:"
@@ -380,8 +396,8 @@ Component presence patterns:
 . * Raw return calculation
 . capture drop r_res_2022
 
-. gen double r_res_2022 = (yc_res_2022 + cg_res_2022 - F_res_2022) / denom_res_2022 if res_sam
-> ple
+. gen double r_res_2022 = (yc_res_2022 + cg_res_2022 - F_res_2022) / denom_res_2022 if res
+> _sample
 (9,994 missing values generated)
 
 . 
@@ -486,8 +502,8 @@ Top 20 positive residential housing returns:
 
 . gsort -r_res_2022
 
-. list hhid rsubhh r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 
-> in 1/20 if res_sample
+. list hhid rsubhh r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2
+> 022 in 1/20 if res_sample
 
      +---------------------------------------------------------------------------------+
   1. |   hhid | rsubhh | r_res_2~2 | yc_res~2 | cg_res.. | F_res_~2 | A_2020 |  F_2022 |
@@ -655,8 +671,8 @@ Top 20 negative residential housing returns:
 
 . gsort r_res_2022
 
-. list hhid rsubhh r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2022 
-> in 1/20 if res_sample
+. list hhid rsubhh r_res_2022 yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_res_2
+> 022 in 1/20 if res_sample
 
      +----------------------------------------------------------------------------------+
   1. |   hhid | rsubhh | r_res_2022 | yc_res~2 | cg_res.. | F_res_~2 | A_2020 |  F_2022 |
@@ -824,15 +840,15 @@ Top 20 trimmed residential housing returns:
 
 . gsort -r_res_2022_trimmed
 
-. list hhid rsubhh r_res_2022_trimmed yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 denom_r
-> es_2022 in 1/20 if !missing(r_res_2022_trimmed)
+. list hhid rsubhh r_res_2022_trimmed yc_res_2022 cg_res_2022 F_res_2022 A_2020 F_2022 den
+> om_res_2022 in 1/20 if !missing(r_res_2022_trimmed)
 
      +----------------------------------------------------------------------------------+
   1. |   hhid | rsubhh | r_res_2~d | yc_res~2 | cg_res.. | F_res_~2 |  A_2020 |  F_2022 |
-     | 543659 |      0 |       1.5 |        0 |   150000 |        0 |  100000 |       0 |
+     | 500631 |      0 |       1.5 |        0 |   115000 |   -20000 |  100000 |  -20000 |
      |----------------------------------------------------------------------------------|
      |                                     denom_..                                     |
-     |                                       100000                                     |
+     |                                        90000                                     |
      +----------------------------------------------------------------------------------+
 
      +----------------------------------------------------------------------------------+
@@ -845,10 +861,10 @@ Top 20 trimmed residential housing returns:
 
      +----------------------------------------------------------------------------------+
   3. |   hhid | rsubhh | r_res_2~d | yc_res~2 | cg_res.. | F_res_~2 |  A_2020 |  F_2022 |
-     | 500631 |      0 |       1.5 |        0 |   115000 |   -20000 |  100000 |  -20000 |
+     | 543659 |      0 |       1.5 |        0 |   150000 |        0 |  100000 |       0 |
      |----------------------------------------------------------------------------------|
      |                                     denom_..                                     |
-     |                                        90000                                     |
+     |                                       100000                                     |
      +----------------------------------------------------------------------------------+
 
      +----------------------------------------------------------------------------------+
@@ -973,18 +989,18 @@ Top 20 trimmed residential housing returns:
 
      +----------------------------------------------------------------------------------+
  19. |   hhid | rsubhh | r_res_2~d | yc_res~2 | cg_res.. | F_res_~2 |  A_2020 |  F_2022 |
-     | 546043 |      0 |      1.44 |        0 |    90000 |        0 |   62500 |       0 |
-     |----------------------------------------------------------------------------------|
-     |                                     denom_..                                     |
-     |                                        62500                                     |
-     +----------------------------------------------------------------------------------+
-
-     +----------------------------------------------------------------------------------+
- 20. |   hhid | rsubhh | r_res_2~d | yc_res~2 | cg_res.. | F_res_~2 |  A_2020 |  F_2022 |
      | 915367 |      0 |      1.44 |        0 |  1070000 |  -550000 | 1400000 | -550000 |
      |----------------------------------------------------------------------------------|
      |                                     denom_..                                     |
      |                                      1125000                                     |
+     +----------------------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------------------+
+ 20. |   hhid | rsubhh | r_res_2~d | yc_res~2 | cg_res.. | F_res_~2 |  A_2020 |  F_2022 |
+     | 546043 |      0 |      1.44 |        0 |    90000 |        0 |   62500 |       0 |
+     |----------------------------------------------------------------------------------|
+     |                                     denom_..                                     |
+     |                                        62500                                     |
      +----------------------------------------------------------------------------------+
 
 . 
@@ -1020,12 +1036,12 @@ Households with zero residential flows: 3168
 . 
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . di as txt "Saved residential housing return variables to master: `master'"
-Saved residential housing return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-Belie
-> fsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved residential housing return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-B
+> eliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * List of variables created
@@ -1062,8 +1078,8 @@ Variables created:
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_residential_returns_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_residential_returns_2022.log
   log type:  text
- closed on:  29 Sep 2025, 11:57:43
-----------------------------------------------------------------------------------------------
+ closed on:   2 Oct 2025, 12:34:13
+------------------------------------------------------------------------------------------

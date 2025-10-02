@@ -1,0 +1,343 @@
+------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
+> 1992_2022v1_STATA/prep_controls_income_2020.log
+  log type:  text
+ opened on:   2 Oct 2025, 13:36:09
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. local inout "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randh
+> rs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. local fallback "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ra
+> ndhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
+
+. 
+. * ---------------------------------------------------------------------
+. * Load unified dataset (fallback to flows file if needed)
+. * ---------------------------------------------------------------------
+. capture confirm file "`inout'"
+
+. if _rc {
+.     di as txt "Analysis dataset not found; falling back to flows dataset and will write 
+> unified file."
+.     capture confirm file "`fallback'"
+.     if _rc {
+.         di as error "ERROR: Neither analysis nor flows dataset found. Run long_merge_in.
+> do first."
+.         exit 198
+.     }
+.     use "`fallback'", clear
+. }
+
+. else {
+.     use "`inout'", clear
+. }
+
+. 
+. quietly describe
+
+. di as txt "Observations: " %9.0f r(N)
+Observations:     12168
+
+. di as txt "Variables:    " %9.0f r(k)
+Variables:        19938
+
+. 
+. * ---------------------------------------------------------------------
+. * Marital status: married vs not married
+. * ---------------------------------------------------------------------
+. di as txt "=== Constructing marital status dummy from r15mstat ==="
+=== Constructing marital status dummy from r15mstat ===
+
+. capture confirm variable r15mstat
+
+. if _rc {
+.     di as error "ERROR: r15mstat not found"
+.     exit 198
+. }
+
+. 
+. capture drop married_2020
+
+. gen byte married_2020 = .
+(12,168 missing values generated)
+
+. replace married_2020 = 1 if inlist(r15mstat, 1, 2)
+(6,768 real changes made)
+
+. replace married_2020 = 0 if inlist(r15mstat, 3, 4, 5, 6, 7, 8)
+(5,374 real changes made)
+
+. label define yesno 0 "not married" 1 "married", replace
+
+. label values married_2020 yesno
+
+. label var married_2020 "Married (r15mstat: 1 or 2) vs not married (3-8)"
+
+. 
+. di as txt "Marital status (r15mstat) distribution:"
+Marital status (r15mstat) distribution:
+
+. tab r15mstat, missing
+
+   r15mstat:w15 r marital |
+                   status |      Freq.     Percent        Cum.
+--------------------------+-----------------------------------
+                1.married |      6,671       54.82       54.82
+  2.married,spouse absent |         97        0.80       55.62
+              3.partnered |        754        6.20       61.82
+              4.separated |        263        2.16       63.98
+               5.divorced |      1,648       13.54       77.52
+                7.widowed |      1,908       15.68       93.20
+          8.never married |        801        6.58       99.79
+.j=web interview, missing |          8        0.07       99.85
+               .m=missing |         18        0.15      100.00
+--------------------------+-----------------------------------
+                    Total |     12,168      100.00
+
+. 
+. di as txt "Married_2020 dummy summary:"
+Married_2020 dummy summary:
+
+. tab married_2020, missing
+
+    Married |
+ (r15mstat: |
+ 1 or 2) vs |
+not married |
+      (3-8) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+not married |      5,374       44.17       44.17
+    married |      6,768       55.62       99.79
+          . |         26        0.21      100.00
+------------+-----------------------------------
+      Total |     12,168      100.00
+
+. 
+. * ---------------------------------------------------------------------
+. * Immigration status: born in US dummy from rabplace only
+. * ---------------------------------------------------------------------
+. di as txt "=== Constructing born-in-US dummy from rabplace ==="
+=== Constructing born-in-US dummy from rabplace ===
+
+. capture confirm variable rabplace
+
+. if _rc {
+.     di as error "ERROR: rabplace not found"
+.     exit 198
+. }
+
+. 
+. * Ensure we have a numeric version to compare against codes 1..13
+. capture drop rabplace_num
+
+. capture confirm numeric variable rabplace
+
+. if _rc {
+.     quietly destring rabplace, generate(rabplace_num) force
+. } 
+
+. else {
+.     generate double rabplace_num = rabplace
+(3 missing values generated)
+. }
+
+. 
+. capture drop born_us
+
+. gen byte born_us = .
+(12,168 missing values generated)
+
+. * 1-10 are US Census divisions; 12=US territory => treat as US-born
+. replace born_us = 1 if inrange(rabplace_num,1,10) | rabplace_num == 12
+(10,079 real changes made)
+
+. * 11=Not US or US territory; 13=Not US => not US-born
+. replace born_us = 0 if inlist(rabplace_num,11,13)
+(2,086 real changes made)
+
+. label values born_us yesno
+
+. label var born_us "Born in US (1) vs not US (0)"
+
+. 
+. di as txt "Immigration raw distribution (rabplace or numeric copy):"
+Immigration raw distribution (rabplace or numeric copy):
+
+. tab rabplace_num, missing
+
+rabplace_nu |
+          m |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        418        3.44        3.44
+          2 |      1,519       12.48       15.92
+          3 |      1,946       15.99       31.91
+          4 |        896        7.36       39.28
+          5 |      1,653       13.58       52.86
+          6 |        881        7.24       60.10
+          7 |      1,014        8.33       68.43
+          8 |        413        3.39       71.83
+          9 |        957        7.86       79.69
+         10 |        343        2.82       82.51
+         11 |         32        0.26       82.77
+         12 |         39        0.32       83.10
+         13 |      2,054       16.88       99.98
+         .m |          3        0.02      100.00
+------------+-----------------------------------
+      Total |     12,168      100.00
+
+. quietly count if !missing(born_us)
+
+. di as txt "Non-missing born_us count: " r(N)
+Non-missing born_us count: 12165
+
+. di as txt "Born-in-US dummy summary:"
+Born-in-US dummy summary:
+
+. tab born_us, missing
+
+ Born in US |
+ (1) vs not |
+     US (0) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+not married |      2,086       17.14       17.14
+    married |     10,079       82.83       99.98
+          . |          3        0.02      100.00
+------------+-----------------------------------
+      Total |     12,168      100.00
+
+. 
+. * ---------------------------------------------------------------------
+. * Respondent income aggregates (2020)
+. * ---------------------------------------------------------------------
+. di as txt "=== Constructing respondent income aggregates for 2020 ==="
+=== Constructing respondent income aggregates for 2020 ===
+
+. 
+. * Labor income components
+. local lab_vars "r15iearn r15ipena r15issdi r15isret r15iunwc r15igxfr"
+
+. 
+. * Check presence
+. foreach v of local lab_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  WARNING: `v' not found"
+  5.     }
+  6. }
+
+. 
+. * Sum with rule: missing only if all components missing
+. capture drop resp_lab_inc
+
+. egen double resp_lab_inc = rowtotal(`lab_vars')
+
+. replace resp_lab_inc = . if missing(r15iearn) & missing(r15ipena) & missing(r15issdi) & 
+> missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
+(0 real changes made)
+
+. label var resp_lab_inc "Respondent labor income (sum of 6 components; missing if all mis
+> sing)"
+
+. 
+. di as txt "resp_lab_inc summary:"
+resp_lab_inc summary:
+
+. summarize resp_lab_inc, detail
+
+        Respondent labor income (sum of 6 components;
+                   missing if all missing)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%         1752              0       Obs              12,168
+25%        11148              0       Sum of wgt.      12,168
+
+50%        22000                      Mean           36374.04
+                        Largest       Std. dev.      55980.01
+75%        45190         905880
+90%        80580         925000       Variance       3.13e+09
+95%       112000        1010000       Skewness       18.02706
+99%       211000        3150400       Kurtosis       829.0084
+
+. 
+. * Total income = labor income + household capital income + other household income
+. local tot_add "h15icap h15iothr"
+
+. foreach v of local tot_add {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  WARNING: `v' not found"
+  5.     }
+  6. }
+
+. 
+. capture drop resp_tot_inc
+
+. gen double resp_tot_inc = resp_lab_inc ///
+>     + cond(missing(h15icap), 0, h15icap) ///
+>     + cond(missing(h15iothr), 0, h15iothr)
+
+. * If labor income is missing AND both additions are missing, set total to missing as wel
+> l
+. replace resp_tot_inc = . if missing(resp_lab_inc) & missing(h15icap) & missing(h15iothr)
+(0 real changes made)
+
+. label var resp_tot_inc "Respondent total income (labor + hwicap + hwiother; missing if a
+> ll missing)"
+
+. 
+. di as txt "resp_tot_inc summary:"
+resp_tot_inc summary:
+
+. summarize resp_tot_inc, detail
+
+          Respondent total income (labor + hwicap +
+              hwiother; missing if all missing)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%          960              0
+10%         6312              0       Obs              12,168
+25%        13968              0       Sum of wgt.      12,168
+
+50%        28870                      Mean           54161.62
+                        Largest       Std. dev.      107148.6
+75%        60634        2445000
+90%       116600        2581200       Variance       1.15e+10
+95%     174889.2        3271600       Skewness       19.58575
+99%     405646.2        5731600       Kurtosis       789.5889
+
+. 
+. * ---------------------------------------------------------------------
+. * Save back to unified analysis dataset
+. * ---------------------------------------------------------------------
+. di as txt "=== Saving unified analysis dataset (includes flows, trust, controls, income)
+>  ==="
+=== Saving unified analysis dataset (includes flows, trust, controls, income) ===
+
+. save "`inout'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_r
+    > andhrs1992_2022v1_analysis.dta saved
+
+. di as txt "Saved unified dataset: `inout'"
+Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lo
+> ng/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
+> 1992_2022v1_STATA/prep_controls_income_2020.log
+  log type:  text
+ closed on:   2 Oct 2025, 13:36:10
+------------------------------------------------------------------------------------------

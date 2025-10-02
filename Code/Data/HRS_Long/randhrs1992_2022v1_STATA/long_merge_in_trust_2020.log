@@ -1,0 +1,466 @@
+------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
+> 1992_2022v1_STATA/long_merge_in_trust_2020.log
+  log type:  text
+ opened on:   2 Oct 2025, 13:35:30
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. * Prefer starting from the flows-merged file if available so we build a unified dataset
+. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/r
+> andhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
+
+. local raw_2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_r
+> aw/2020/h20f1a_STATA/h20f1a.dta"
+
+. local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long
+> /randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. 
+. * ---------------------------------------------------------------------
+. * Check if files exist
+. * ---------------------------------------------------------------------
+. di as txt "=== Checking file existence ==="
+=== Checking file existence ===
+
+. 
+. capture confirm file "`long_file'"
+
+. if _rc {
+.     * Fallback to base longitudinal file if flows file is not yet created
+.     local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lo
+> ng/randhrs1992_2022v1_STATA/_randhrs1992_2022v1.dta"
+.     capture confirm file "`long_file'"
+.     if _rc {
+.         di as error "ERROR: Longitudinal file not found -> `long_file'"
+.         exit 198
+.     }
+. }
+
+. di as txt "OK: Input longitudinal file found -> `long_file'"
+OK: Input longitudinal file found -> /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Co
+> de/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta
+
+. 
+. capture confirm file "`raw_2020'"
+
+. if _rc {
+.     di as error "ERROR: Raw 2020 file not found -> `raw_2020'"
+.     exit 198
+. }
+
+. di as txt "OK: Raw 2020 file found"
+OK: Raw 2020 file found
+
+. 
+. * ---------------------------------------------------------------------
+. * Load longitudinal file
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading longitudinal file ==="
+=== Loading longitudinal file ===
+
+. use "`long_file'", clear
+
+. 
+. di as txt "Longitudinal file loaded successfully"
+Longitudinal file loaded successfully
+
+. quietly describe
+
+. local n_vars_long = r(k)
+
+. local n_obs_long = r(N)
+
+. di as txt "Variables in longitudinal file: `n_vars_long'"
+Variables in longitudinal file: 19903
+
+. di as txt "Observations in longitudinal file: `n_obs_long'"
+Observations in longitudinal file: 15856
+
+. 
+. * Check for hhidpn
+. capture confirm variable hhidpn
+
+. if _rc {
+.     di as error "ERROR: hhidpn not found in longitudinal file"
+.     exit 198
+. }
+
+. di as txt "OK: hhidpn found in longitudinal file"
+OK: hhidpn found in longitudinal file
+
+. 
+. * Check for duplicates in longitudinal file
+. quietly duplicates report hhidpn
+
+. local n_dups_long = r(unique_value)
+
+. if `n_dups_long' != `n_obs_long' {
+.     di as error "ERROR: Duplicate hhidpn found in longitudinal file"
+.     di as error "Unique hhidpn: `n_dups_long', Total observations: `n_obs_long'"
+.     exit 198
+. }
+
+. di as txt "OK: No duplicate hhidpn in longitudinal file"
+OK: No duplicate hhidpn in longitudinal file
+
+. 
+. * ---------------------------------------------------------------------
+. * Load raw 2020 file and extract needed variables
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading raw 2020 file and extracting trust variables ==="
+=== Loading raw 2020 file and extracting trust variables ===
+
+. preserve
+
+. use "`raw_2020'", clear
+
+. 
+. di as txt "Raw 2020 file loaded successfully"
+Raw 2020 file loaded successfully
+
+. quietly describe
+
+. local n_vars_raw = r(k)
+
+. local n_obs_raw = r(N)
+
+. di as txt "Variables in raw 2020 file: `n_vars_raw'"
+Variables in raw 2020 file: 7687
+
+. di as txt "Observations in raw 2020 file: `n_obs_raw'"
+Observations in raw 2020 file: 15723
+
+. 
+. * Check for hhidpn
+. capture confirm variable hhidpn
+
+. if _rc {
+.     di as error "ERROR: hhidpn not found in raw 2020 file"
+.     exit 198
+. }
+
+. di as txt "OK: hhidpn found in raw 2020 file"
+OK: hhidpn found in raw 2020 file
+
+. 
+. * Check for trust variables
+. local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
+
+. di as txt "Checking for trust variables..."
+Checking for trust variables...
+
+. foreach v of local trust_vars {
+  2.     capture confirm variable `v'
+  3.     if _rc {
+  4.         di as txt "  WARNING: `v' not found in raw 2020 file"
+  5.     }
+  6.     else {
+  7.         di as txt "  OK: `v' found"
+  8.     }
+  9. }
+  OK: rv557 found
+  OK: rv558 found
+  OK: rv559 found
+  OK: rv560 found
+  OK: rv561 found
+  OK: rv562 found
+  OK: rv563 found
+  OK: rv564 found
+
+. 
+. * Keep only hhidpn and trust variables
+. keep hhidpn `trust_vars'
+
+. 
+. * Check for duplicates in raw file
+. quietly duplicates report hhidpn
+
+. local n_dups_raw = r(unique_value)
+
+. if `n_dups_raw' != `n_obs_raw' {
+.     di as error "ERROR: Duplicate hhidpn found in raw 2020 file"
+.     di as error "Unique hhidpn: `n_dups_raw', Total observations: `n_obs_raw'"
+.     di as error "The raw file should have unique hhidpn values (one per person)"
+.     exit 198
+. }
+
+. else {
+.     di as txt "OK: No duplicate hhidpn in raw 2020 file"
+OK: No duplicate hhidpn in raw 2020 file
+. }
+
+. 
+. * Save temporary file
+. tempfile raw_trust
+
+. save "`raw_trust'", replace
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000005 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000005 saved as .dta
+    format
+
+. restore
+
+. 
+. * ---------------------------------------------------------------------
+. * Merge trust variables into longitudinal data
+. * ---------------------------------------------------------------------
+. di as txt "=== Merging trust variables into longitudinal data ==="
+=== Merging trust variables into longitudinal data ===
+
+. 
+. merge 1:1 hhidpn using "`raw_trust'"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         7,243
+        from master                     3,688  (_merge==1)
+        from using                      3,555  (_merge==2)
+
+    Matched                            12,168  (_merge==3)
+    -----------------------------------------
+
+. 
+. * Report merge results
+. di as txt "Merge results:"
+Merge results:
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |      3,688       19.00       19.00
+         Using only (2) |      3,555       18.31       37.31
+            Matched (3) |     12,168       62.69      100.00
+------------------------+-----------------------------------
+                  Total |     19,411      100.00
+
+. 
+. quietly count if _merge == 3
+
+. local n_matched = r(N)
+
+. quietly count if _merge == 1
+
+. local n_long_only = r(N)
+
+. quietly count if _merge == 2
+
+. local n_raw_only = r(N)
+
+. 
+. di as txt "Matched observations: `n_matched'"
+Matched observations: 12168
+
+. di as txt "Longitudinal only: `n_long_only'"
+Longitudinal only: 3688
+
+. di as txt "Raw 2020 only: `n_raw_only'"
+Raw 2020 only: 3555
+
+. 
+. * Keep only matched observations
+. keep if _merge == 3
+(7,243 observations deleted)
+
+. drop _merge
+
+. 
+. di as txt "Kept `n_matched' matched observations"
+Kept 12168 matched observations
+
+. 
+. * ---------------------------------------------------------------------
+. * Clean miscodes and summarize merged trust variables
+. * ---------------------------------------------------------------------
+. di as txt "=== Cleaning miscodes for trust variables (set 98/99 to missing) ==="
+=== Cleaning miscodes for trust variables (set 98/99 to missing) ===
+
+. foreach v of local trust_vars {
+  2.     capture confirm numeric variable `v'
+  3.     if !_rc {
+  4.         quietly replace `v' = . if inlist(`v', 98, 99, -8)
+  5.     }
+  6. }
+
+. 
+. di as txt "=== Summaries of merged trust variables (2020) ==="
+=== Summaries of merged trust variables (2020) ===
+
+. foreach v of local trust_vars {
+  2.     capture confirm variable `v'
+  3.     if !_rc {
+  4.         di as txt "Summary for `v':"
+  5.         summarize `v', detail
+  6.     }
+  7. }
+Summary for rv557:
+
+                  trust: people in general
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            3              0       Obs               1,059
+25%            5              0       Sum of wgt.       1,059
+
+50%            7                      Mean           6.383381
+                        Largest       Std. dev.      2.467242
+75%            8             10
+90%            9             10       Variance       6.087285
+95%           10             10       Skewness      -.9171782
+99%           10             10       Kurtosis       3.551243
+Summary for rv558:
+
+                   trust: social security
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            1              0
+10%            3              0       Obs               1,052
+25%            5              0       Sum of wgt.       1,052
+
+50%            7                      Mean           6.452471
+                        Largest       Std. dev.      2.618936
+75%            8             10
+90%           10             10       Variance       6.858824
+95%           10             10       Skewness      -.5582709
+99%           10             10       Kurtosis       2.822418
+Summary for rv559:
+
+                 trust: medicare or medicaid
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            2              0
+10%            3              0       Obs               1,050
+25%            5              0       Sum of wgt.       1,050
+
+50%            7                      Mean           6.449524
+                        Largest       Std. dev.      2.515884
+75%            8             10
+90%           10             10       Variance       6.329671
+95%           10             10       Skewness      -.4828186
+99%           10             10       Kurtosis       2.853548
+Summary for rv560:
+
+                        trust: banks
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            2              0       Obs               1,050
+25%            5              0       Sum of wgt.       1,050
+
+50%            7                      Mean           6.229524
+                        Largest       Std. dev.      2.766007
+75%            8             10
+90%           10             10       Variance       7.650796
+95%           10             10       Skewness      -.6157215
+99%           10             10       Kurtosis       2.749008
+Summary for rv561:
+
+                  trust: financial advisors
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               1,032
+25%            3              0       Sum of wgt.       1,032
+
+50%            5                      Mean           5.083333
+                        Largest       Std. dev.       2.96485
+75%            8             10
+90%            9             10       Variance       8.790333
+95%           10             10       Skewness      -.2357793
+99%           10             10       Kurtosis       2.173931
+Summary for rv562:
+
+                     trust: mutual funds
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               1,002
+25%            3              0       Sum of wgt.       1,002
+
+50%            5                      Mean           4.969062
+                        Largest       Std. dev.      2.862141
+75%            7             10
+90%            8             10       Variance       8.191849
+95%           10             10       Skewness       -.298572
+99%           10             10       Kurtosis       2.310406
+Summary for rv563:
+
+                 trust: insurance companies
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               1,046
+25%            3              0       Sum of wgt.       1,046
+
+50%            5                      Mean           4.908222
+                        Largest       Std. dev.      2.742051
+75%            7             10
+90%            8             10       Variance       7.518841
+95%           10             10       Skewness      -.1028969
+99%           10             10       Kurtosis       2.395226
+Summary for rv564:
+
+                      trust: mass media
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs               1,037
+25%            0              0       Sum of wgt.       1,037
+
+50%            3                      Mean           3.351013
+                        Largest       Std. dev.      2.775415
+75%            5             10
+90%            7             10       Variance       7.702926
+95%            8             10       Skewness       .3834021
+99%           10             10       Kurtosis       2.223214
+
+. 
+. * ---------------------------------------------------------------------
+. * Save results
+. * ---------------------------------------------------------------------
+. di as txt "=== Saving results ==="
+=== Saving results ===
+
+. save "`output_file'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_r
+    > andhrs1992_2022v1_analysis.dta saved
+
+. di as txt "Saved merged file to: `output_file'"
+Saved merged file to: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lon
+> g/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+
+. 
+. quietly describe
+
+. local n_vars_final = r(k)
+
+. local n_obs_final = r(N)
+
+. di as txt "Final file: `n_obs_final' observations, `n_vars_final' variables"
+Final file: 12168 observations, 19911 variables
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
+> 1992_2022v1_STATA/long_merge_in_trust_2020.log
+  log type:  text
+ closed on:   2 Oct 2025, 13:35:33
+------------------------------------------------------------------------------------------

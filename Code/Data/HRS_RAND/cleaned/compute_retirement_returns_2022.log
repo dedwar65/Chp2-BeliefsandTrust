@@ -1,9 +1,9 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_retirement_returns_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_retirement_returns_2022.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:43
+ opened on:   2 Oct 2025, 12:34:13
 
 . 
 . set more off
@@ -21,8 +21,8 @@
 . * - compute_beg_per_net_worth_2020_2022
 . * ---------------------------------------------------------------------
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
-> hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clea
+> ned/hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -35,8 +35,8 @@
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
-> ed/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -105,8 +105,8 @@ Sample definition results:
 
 . local n_total = r(N)
 
-. di as txt "Households in IRA asset sample: `n_ira_sample' out of `n_total' (" %4.1f 100*`n_i
-> ra_sample'/`n_total' "%)"
+. di as txt "Households in IRA asset sample: `n_ira_sample' out of `n_total' (" %4.1f 100*
+> `n_ira_sample'/`n_total' "%)"
 Households in IRA asset sample: 2065 out of 14442 (14.3%)
 
 . 
@@ -151,10 +151,15 @@ A_2020 summary (before final denominator threshold):
 
 . tabstat A_2020 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-      A_2020 |      1900.00   1036122.08   1449200.40    595000.00   -336000.00  18465000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+      A_2020 |      1900.00   1036122.08   1449200.40    595000.00   -336000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+      A_2020 |  18465000.00
+---------------------------
 
 . 
 . di as txt "F_2022 summary:"
@@ -179,10 +184,15 @@ F_2022 summary:
 
 . tabstat F_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-      F_2022 |      2065.00     29335.93    259559.93      2700.00  -6400000.00   3474000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+      F_2022 |      2065.00     29335.93    259559.93      2700.00  -6400000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+      F_2022 |   3474000.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -195,22 +205,24 @@ F_2022 summary:
 . capture confirm variable int_ira_2022
 
 . if _rc {
-.     di as error "ERROR: int_ira_2022 not found. Run compute_int_inc_div_2020_2022.do first."
+.     di as error "ERROR: int_ira_2022 not found. Run compute_int_inc_div_2020_2022.do fir
+> st."
 .     exit 198
 . }
 
 . capture confirm variable cg_ira_2022
 
 . if _rc {
-.     di as error "ERROR: cg_ira_2022 not found. Run compute_cap_gains_2020_2022.do first."
+.     di as error "ERROR: cg_ira_2022 not found. Run compute_cap_gains_2020_2022.do first.
+> "
 .     exit 198
 . }
 
 . capture confirm variable flow_ira_2022
 
 . if _rc {
-.     di as error "ERROR: flow_ira_2022 not found. Run compute_net_inv_flows_2020_2022.do firs
-> t."
+.     di as error "ERROR: flow_ira_2022 not found. Run compute_net_inv_flows_2020_2022.do 
+> first."
 .     exit 198
 . }
 
@@ -252,10 +264,15 @@ IRA income (yc_ira_2022) summary:
 
 . tabstat yc_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
- yc_ira_2022 |      2065.00       176.97      4450.12         0.00         0.00    192000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+ yc_ira_2022 |      2065.00       176.97      4450.12         0.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+ yc_ira_2022 |    192000.00
+---------------------------
 
 . 
 . di as txt "IRA flows (F_ira_2022) summary:"
@@ -280,10 +297,15 @@ IRA flows (F_ira_2022) summary:
 
 . tabstat F_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  F_ira_2022 |      2065.00     21124.15     55184.24      3000.00         0.00   1060000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  F_ira_2022 |      2065.00     21124.15     55184.24      3000.00         0.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  F_ira_2022 |   1060000.00
+---------------------------
 
 . 
 . di as txt "IRA capital gains (cg_ira_2022) summary:"
@@ -308,10 +330,15 @@ IRA capital gains (cg_ira_2022) summary:
 
 . tabstat cg_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
- cg_ira_2022 |      1599.00     64484.53    520242.76      2200.00  -2760000.00  15553116.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+ cg_ira_2022 |      1599.00     64484.53    520242.76      2200.00  -2760000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+ cg_ira_2022 |  15553116.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -356,10 +383,15 @@ IRA denominator summary BEFORE final threshold:
 
 . tabstat denom_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-denom_i~2022 |      1900.00   1049991.80   1468299.89    601875.00   -326000.00  18780000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+denom_i~2022 |      1900.00   1049991.80   1468299.89    601875.00   -326000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+denom_i~2022 |  18780000.00
+---------------------------
 
 . 
 . di as txt "IRA denominator thresholds:"
@@ -420,10 +452,15 @@ IRA denominator summary AFTER final threshold:
 
 . tabstat denom_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-denom_i~2022 |      1869.00   1068046.61   1473629.66    615000.00     10000.00  18780000.00
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+denom_i~2022 |      1869.00   1068046.61   1473629.66    615000.00     10000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+denom_i~2022 |  18780000.00
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -438,8 +475,8 @@ denom_i~2022 |      1869.00   1068046.61   1473629.66    615000.00     10000.00 
 . gen double r_ira_2022 = .
 (14,442 missing values generated)
 
-. replace r_ira_2022 = (yc_ira_2022 + cond(missing(cg_ira_2022),0,cg_ira_2022) - F_ira_2022) /
->  denom_ira_2022 if ira_sample
+. replace r_ira_2022 = (yc_ira_2022 + cond(missing(cg_ira_2022),0,cg_ira_2022) - F_ira_202
+> 2) / denom_ira_2022 if ira_sample
 (1,869 real changes made)
 
 . 
@@ -465,18 +502,23 @@ IRA returns summary:
 
 . tabstat r_ira_2022 if ira_sample, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-  r_ira_2022 |    1869.0000       0.0207       0.4165      -0.0072      -2.8571       7.5385
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+  r_ira_2022 |    1869.0000       0.0207       0.4165      -0.0072      -2.8571
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+  r_ira_2022 |       7.5385
+---------------------------
 
 . 
 . quietly count if !missing(r_ira_2022) & ira_sample
 
 . local n_valid_returns = r(N)
 
-. di as txt "Records with valid r_ira_2022 computed = `n_valid_returns' out of `n_final_sample
-> ' in IRA sample"
+. di as txt "Records with valid r_ira_2022 computed = `n_valid_returns' out of `n_final_sa
+> mple' in IRA sample"
 Records with valid r_ira_2022 computed = 1869 out of 2034 in IRA sample
 
 . 
@@ -495,8 +537,8 @@ Trim thresholds: -.3929594760540319 to .4639334155363748
 . 
 . capture drop r_ira_2022_trim
 
-. gen double r_ira_2022_trim = r_ira_2022 if ira_sample & !missing(r_ira_2022) & inrange(r_ira
-> _2022, trim_low, trim_high)
+. gen double r_ira_2022_trim = r_ira_2022 if ira_sample & !missing(r_ira_2022) & inrange(r
+> _ira_2022, trim_low, trim_high)
 (12,759 missing values generated)
 
 . 
@@ -534,10 +576,15 @@ Trimmed IRA returns summary:
 
 . tabstat r_ira_2022_trim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_ira_2022~m |    1683.0000      -0.0013       0.1439      -0.0072      -0.3930       0.4639
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_ira_2022~m |    1683.0000      -0.0013       0.1439      -0.0072      -0.3930
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_ira_2022~m |       0.4639
+---------------------------
 
 . 
 . * ---------------------------------------------------------------------
@@ -655,8 +702,8 @@ Top 20 positive IRA returns:
 
 . gsort -r_ira_2022
 
-. list hhid rsubhh r_ira_2022 yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_2022 
-> in 1/20 if ira_sample
+. list hhid rsubhh r_ira_2022 yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_2
+> 022 in 1/20 if ira_sample
 
      +----------------------------------------------------------------------------------+
   1. |   hhid | rsubhh | r_ir~2022 | yc_ira~2 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
@@ -824,8 +871,8 @@ Top 20 negative IRA returns:
 
 . gsort r_ira_2022
 
-. list hhid rsubhh r_ira_2022 yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_2022 
-> in 1/20 if ira_sample
+. list hhid rsubhh r_ira_2022 yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_2
+> 022 in 1/20 if ira_sample
 
      +-----------------------------------------------------------------------------------+
   1. |   hhid | rsubhh | r_ira_2022 | yc_ira~2 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
@@ -993,8 +1040,8 @@ Top 20 trimmed IRA returns:
 
 . gsort -r_ira_2022_trim
 
-. list hhid rsubhh r_ira_2022_trim yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_ira_
-> 2022 in 1/20 if !missing(r_ira_2022_trim)
+. list hhid rsubhh r_ira_2022_trim yc_ira_2022 cg_ira_2022 F_ira_2022 A_2020 F_2022 denom_
+> ira_2022 in 1/20 if !missing(r_ira_2022_trim)
 
      +----------------------------------------------------------------------------------+
   1. |   hhid | rsubhh | r_ira_2~m | yc_ira~2 | cg_ira~2 | F_i~2022 |  A_2020 |  F_2022 |
@@ -1181,12 +1228,12 @@ F_ira_2022 equals 0 in sample: 772
 . * ---------------------------------------------------------------------
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . di as txt "Saved IRA return variables to master: `master'"
-Saved IRA return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/
-> Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved IRA return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/C
+> ode/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . di as txt "Done. IRA returns computed with 5% trimming."
@@ -1197,8 +1244,8 @@ Done. IRA returns computed with 5% trimming.
 . 
 end of do-file
 
-. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/compute_re
-> al_estate_returns_2020_2022.do"
+. do "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/comput
+> e_real_estate_returns_2020_2022.do"
 
 . *----------------------------------------------------------------------
 . * compute_real_estate_returns_2020_2022.do

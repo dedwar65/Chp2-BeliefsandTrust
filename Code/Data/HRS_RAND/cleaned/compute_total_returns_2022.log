@@ -1,9 +1,9 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_total_returns_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_total_returns_2022.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:43
+ opened on:   2 Oct 2025, 12:34:13
 
 . 
 . di as txt "=== COMPUTING TOTAL RETURNS TO NET WORTH ==="
@@ -23,8 +23,8 @@ All prerequisite scripts have been run successfully
 === Loading master dataset ===
 
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
-> hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clea
+> ned/hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -37,8 +37,8 @@ All prerequisite scripts have been run successfully
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
-> ed/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * ---------------------------------------------------------------------
@@ -138,14 +138,14 @@ All required asset class return variables found!
 
 . local n_total = r(N)
 
-. di as txt "Households with at least one asset class return: `n_sample' out of `n_total' (" %
-> 4.1f 100*`n_sample'/`n_total' "%)"
+. di as txt "Households with at least one asset class return: `n_sample' out of `n_total' 
+> (" %4.1f 100*`n_sample'/`n_total' "%)"
 Households with at least one asset class return: 4880 out of 14442 (33.8%)
 
 . 
 . * Breakdown by number of asset classes with returns
-. egen byte n_asset_returns = rownonmiss(r_fin_2022 r_bus_2022 r_ira_2022 r_re_2022 r_res_2022
-> )
+. egen byte n_asset_returns = rownonmiss(r_fin_2022 r_bus_2022 r_ira_2022 r_re_2022 r_res_
+> 2022)
 
 . tab n_asset_returns if has_any_returns, missing
 
@@ -241,14 +241,16 @@ Individual asset class return counts:
 . replace r_total_2022_trimmed = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) + ///
 >                               cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) + ///
 >                               cond(missing(r_ira_2022_trim), 0, r_ira_2022_trim) + ///
->                               cond(missing(r_re_2022_trimmed), 0, r_re_2022_trimmed) + ///
->                               cond(missing(r_res_2022_trimmed), 0, r_res_2022_trimmed) ///
+>                               cond(missing(r_re_2022_trimmed), 0, r_re_2022_trimmed) + /
+> //
+>                               cond(missing(r_res_2022_trimmed), 0, r_res_2022_trimmed) /
+> //
 >                               if has_any_returns
 (4,880 real changes made)
 
 . 
-. * Final trimmed total returns: apply additional 5% trimming to the sum of trimmed asset clas
-> s returns
+. * Final trimmed total returns: apply additional 5% trimming to the sum of trimmed asset 
+> class returns
 . capture drop r_total_2022_final_trim
 
 . gen double r_total_2022_final_trim = .
@@ -288,8 +290,8 @@ Final trimming thresholds for sum of trimmed returns:
 
 . local n_trimmed_total = r(N)
 
-. di as txt "Final trimmed sample: `n_final_trim' out of `n_trimmed_total' trimmed total retur
-> ns (" %4.1f 100*`n_final_trim'/`n_trimmed_total' "%)"
+. di as txt "Final trimmed sample: `n_final_trim' out of `n_trimmed_total' trimmed total r
+> eturns (" %4.1f 100*`n_final_trim'/`n_trimmed_total' "%)"
 Final trimmed sample: 4392 out of 4880 trimmed total returns (90.0%)
 
 . 
@@ -334,14 +336,14 @@ Final trimmed sample: 4392 out of 4880 trimmed total returns (90.0%)
 . gen double r_total_2022_excl_res_trim = .
 (14,442 missing values generated)
 
-. replace r_total_2022_excl_res_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) + //
-> /
->                                      cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) + //
-> /
->                                      cond(missing(r_ira_2022_trim), 0, r_ira_2022_trim) + //
-> /
->                                      cond(missing(r_re_2022_trimmed), 0, r_re_2022_trimmed) 
-> ///
+. replace r_total_2022_excl_res_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) 
+> + ///
+>                                      cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) 
+> + ///
+>                                      cond(missing(r_ira_2022_trim), 0, r_ira_2022_trim) 
+> + ///
+>                                      cond(missing(r_re_2022_trimmed), 0, r_re_2022_trimm
+> ed) ///
 >                                      if has_returns_excl_res
 (2,998 real changes made)
 
@@ -357,8 +359,8 @@ Final trimmed sample: 4392 out of 4880 trimmed total returns (90.0%)
 
 . scalar p95_excl_res = r(r2)
 
-. replace r_total_2022_excl_res_ftrim = r_total_2022_excl_res_trim if has_returns_excl_res & /
-> //
+. replace r_total_2022_excl_res_ftrim = r_total_2022_excl_res_trim if has_returns_excl_res
+>  & ///
 >                                       r_total_2022_excl_res_trim >= p5_excl_res & ///
 >                                       r_total_2022_excl_res_trim <= p95_excl_res
 (2,700 real changes made)
@@ -408,12 +410,12 @@ Variant A (exclude residential) sample sizes:
 . gen double r_total_2022_excl_housing_trim = .
 (14,442 missing values generated)
 
-. replace r_total_2022_excl_housing_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) 
-> + ///
->                                          cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim) 
-> + ///
->                                          cond(missing(r_ira_2022_trim), 0, r_ira_2022_trim) 
-> ///
+. replace r_total_2022_excl_housing_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_tr
+> im) + ///
+>                                          cond(missing(r_bus_2022_trim), 0, r_bus_2022_tr
+> im) + ///
+>                                          cond(missing(r_ira_2022_trim), 0, r_ira_2022_tr
+> im) ///
 >                                          if has_returns_excl_housing
 (2,829 real changes made)
 
@@ -429,11 +431,12 @@ Variant A (exclude residential) sample sizes:
 
 . scalar p95_excl_housing = r(r2)
 
-. replace r_total_2022_excl_housing_ftrim = r_total_2022_excl_housing_trim if has_returns_excl
-> _housing & ///
->                                           r_total_2022_excl_housing_trim >= p5_excl_housing 
-> & ///
->                                           r_total_2022_excl_housing_trim <= p95_excl_housing
+. replace r_total_2022_excl_housing_ftrim = r_total_2022_excl_housing_trim if has_returns_
+> excl_housing & ///
+>                                           r_total_2022_excl_housing_trim >= p5_excl_hous
+> ing & ///
+>                                           r_total_2022_excl_housing_trim <= p95_excl_hou
+> sing
 (2,547 real changes made)
 
 . 
@@ -477,10 +480,10 @@ Variant B (exclude residential + real estate) sample sizes:
 . gen double r_total_2022_excl_hsg_ira_trim = .
 (14,442 missing values generated)
 
-. replace r_total_2022_excl_hsg_ira_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_trim) 
-> + ///
->                                           cond(missing(r_bus_2022_trim), 0, r_bus_2022_trim)
->  ///
+. replace r_total_2022_excl_hsg_ira_trim = cond(missing(r_fin_2022_trim), 0, r_fin_2022_tr
+> im) + ///
+>                                           cond(missing(r_bus_2022_trim), 0, r_bus_2022_t
+> rim) ///
 >                                           if has_returns_excl_hsg_ira
 (2,062 real changes made)
 
@@ -496,11 +499,12 @@ Variant B (exclude residential + real estate) sample sizes:
 
 . scalar p95_excl_hsg_ira = r(r2)
 
-. replace r_total_2022_excl_hsg_ira_ftrim = r_total_2022_excl_hsg_ira_trim if has_returns_excl
-> _hsg_ira & ///
->                                           r_total_2022_excl_hsg_ira_trim >= p5_excl_hsg_ira 
-> & ///
->                                           r_total_2022_excl_hsg_ira_trim <= p95_excl_hsg_ira
+. replace r_total_2022_excl_hsg_ira_ftrim = r_total_2022_excl_hsg_ira_trim if has_returns_
+> excl_hsg_ira & ///
+>                                           r_total_2022_excl_hsg_ira_trim >= p5_excl_hsg_
+> ira & ///
+>                                           r_total_2022_excl_hsg_ira_trim <= p95_excl_hsg
+> _ira
 (1,856 real changes made)
 
 . 
@@ -547,10 +551,15 @@ Raw total returns (r_total_2022) summary:
 
 . tabstat r_total_2022 if has_any_returns, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_total_2022 |    4880.0000       0.4221       1.8739       0.1642      -3.9112      74.0000
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_total_2022 |    4880.0000       0.4221       1.8739       0.1642      -3.9112
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_total_2022 |      74.0000
+---------------------------
 
 . 
 . di as txt "Trimmed total returns (r_total_2022_trimmed) summary:"
@@ -573,12 +582,18 @@ Trimmed total returns (r_total_2022_trimmed) summary:
 95%     .9458991       1.833333       Skewness       1.350605
 99%     1.358366       2.443967       Kurtosis       5.303375
 
-. tabstat r_total_2022_trimmed if has_any_returns, stats(n mean sd p50 min max) format(%12.4f)
+. tabstat r_total_2022_trimmed if has_any_returns, stats(n mean sd p50 min max) format(%12
+> .4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_total_20~d |    4880.0000       0.2172       0.3423       0.1215      -0.5815       2.4440
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_total_20~d |    4880.0000       0.2172       0.3423       0.1215      -0.5815
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_total_20~d |       2.4440
+---------------------------
 
 . 
 . di as txt "Final trimmed total returns (r_total_2022_final_trim) summary:"
@@ -603,10 +618,15 @@ Final trimmed total returns (r_total_2022_final_trim) summary:
 
 . tabstat r_total_2022_final_trim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_tot~l_trim |    4392.0000       0.1913       0.2449       0.1215      -0.1921       0.9457
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_tot~l_trim |    4392.0000       0.1913       0.2449       0.1215      -0.1921
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_tot~l_trim |       0.9457
+---------------------------
 
 . 
 . di as txt "--- Robustness variant summaries ---"
@@ -615,24 +635,34 @@ r_tot~l_trim |    4392.0000       0.1913       0.2449       0.1215      -0.1921 
 . di as txt "Exclude residential: raw"
 Exclude residential: raw
 
-. tabstat r_total_2022_excl_res if has_returns_excl_res, stats(n mean sd p50 min max) format(%
-> 12.4f)
+. tabstat r_total_2022_excl_res if has_returns_excl_res, stats(n mean sd p50 min max) form
+> at(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_total_20~s |    2998.0000       0.1059       0.7493       0.0004      -2.8571      15.3416
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_total_20~s |    2998.0000       0.1059       0.7493       0.0004      -2.8571
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_total_20~s |      15.3416
+---------------------------
 
 . di as txt "Exclude residential: trimmed"
 Exclude residential: trimmed
 
-. tabstat r_total_2022_excl_res_trim if has_returns_excl_res, stats(n mean sd p50 min max) for
-> mat(%12.4f)
+. tabstat r_total_2022_excl_res_trim if has_returns_excl_res, stats(n mean sd p50 min max)
+>  format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_tot~s_trim |    2998.0000       0.0362       0.1815       0.0001      -0.5783       1.6975
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_tot~s_trim |    2998.0000       0.0362       0.1815       0.0001      -0.5783
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_tot~s_trim |       1.6975
+---------------------------
 
 . di as txt "Exclude residential: final trimmed"
 Exclude residential: final trimmed
@@ -656,33 +686,48 @@ Exclude residential: final trimmed
 
 . tabstat r_total_2022_excl_res_ftrim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_to~s_ftrim |    2700.0000       0.0235       0.1069       0.0001      -0.2091       0.3784
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_to~s_ftrim |    2700.0000       0.0235       0.1069       0.0001      -0.2091
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_to~s_ftrim |       0.3784
+---------------------------
 
 . 
 . di as txt "Exclude res + re: raw"
 Exclude res + re: raw
 
-. tabstat r_total_2022_excl_housing if has_returns_excl_housing, stats(n mean sd p50 min max) 
-> format(%12.4f)
+. tabstat r_total_2022_excl_housing if has_returns_excl_housing, stats(n mean sd p50 min m
+> ax) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_total_20~g |    2829.0000       0.0636       0.5306       0.0001      -2.8571      12.5500
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_total_20~g |    2829.0000       0.0636       0.5306       0.0001      -2.8571
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_total_20~g |      12.5500
+---------------------------
 
 . di as txt "Exclude res + re: trimmed"
 Exclude res + re: trimmed
 
-. tabstat r_total_2022_excl_housing_trim if has_returns_excl_housing, stats(n mean sd p50 min 
-> max) format(%12.4f)
+. tabstat r_total_2022_excl_housing_trim if has_returns_excl_housing, stats(n mean sd p50 
+> min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_tot~g_trim |    2829.0000       0.0209       0.1480       0.0001      -0.4033       1.0520
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_tot~g_trim |    2829.0000       0.0209       0.1480       0.0001      -0.4033
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_tot~g_trim |       1.0520
+---------------------------
 
 . di as txt "Exclude res + re: final trimmed"
 Exclude res + re: final trimmed
@@ -706,33 +751,48 @@ Exclude res + re: final trimmed
 
 . tabstat r_total_2022_excl_housing_ftrim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_to~g_ftrim |    2547.0000       0.0128       0.0886       0.0001      -0.2000       0.2936
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_to~g_ftrim |    2547.0000       0.0128       0.0886       0.0001      -0.2000
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_to~g_ftrim |       0.2936
+---------------------------
 
 . 
 . di as txt "Exclude res + re + ira: raw"
 Exclude res + re + ira: raw
 
-. tabstat r_total_2022_excl_hsg_ira if has_returns_excl_hsg_ira, stats(n mean sd p50 min max) 
-> format(%12.4f)
+. tabstat r_total_2022_excl_hsg_ira if has_returns_excl_hsg_ira, stats(n mean sd p50 min m
+> ax) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_total_20~a |    2062.0000       0.0684       0.4796       0.0004      -2.6333      12.5500
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_total_20~a |    2062.0000       0.0684       0.4796       0.0004      -2.6333
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_total_20~a |      12.5500
+---------------------------
 
 . di as txt "Exclude res + re + ira: trimmed"
 Exclude res + re + ira: trimmed
 
-. tabstat r_total_2022_excl_hsg_ira_trim if has_returns_excl_hsg_ira, stats(n mean sd p50 min 
-> max) format(%12.4f)
+. tabstat r_total_2022_excl_hsg_ira_trim if has_returns_excl_hsg_ira, stats(n mean sd p50 
+> min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_tot~a_trim |    2062.0000       0.0297       0.1140       0.0002      -0.3120       1.0520
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_tot~a_trim |    2062.0000       0.0297       0.1140       0.0002      -0.3120
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_tot~a_trim |       1.0520
+---------------------------
 
 . di as txt "Exclude res + re + ira: final trimmed"
 Exclude res + re + ira: final trimmed
@@ -756,10 +816,15 @@ Exclude res + re + ira: final trimmed
 
 . tabstat r_total_2022_excl_hsg_ira_ftrim, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-r_to~a_ftrim |    1856.0000       0.0161       0.0447       0.0002      -0.0618       0.2090
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+r_to~a_ftrim |    1856.0000       0.0161       0.0447       0.0002      -0.0618
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+r_to~a_ftrim |       0.2090
+---------------------------
 
 . 
 . * Check for extreme values
@@ -807,12 +872,12 @@ Final trimmed total returns < -100%: 0
 . 
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . di as txt "Saved total return variables to master: `master'"
-Saved total return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Cod
-> e/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved total return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . * Reload the updated master so all variables are in memory for inspection
@@ -823,9 +888,10 @@ Saved total return variables to master: /Volumes/SSD PRO/Github-forks/Chp2-Belie
 . local k = r(k)
 
 . di as txt "Variables in memory after total returns: `k'"
-Variables in memory after total returns: 233
+Variables in memory after total returns: 234
 
 . capture noisily ds
+hhidpn        sq350         flow~te_2022  res22_patt~n  yc_stk_2022   has_re_both
 hhid          sq352         flow_~c_2022  ok_res20_p    cg_stk_use~2  re_exposure
 rsubhh        sq362         flow_stk_2~2  ok_res20_s    F_stk_2022    re_sample
 rh020         sq364         flow_re_2022  res20_patt~n  r_stk_2022    denom_re_2~2
@@ -864,7 +930,6 @@ sq324         int_cas~2022  v_res_2022    A_2020_stk    r_ira_2022    has_return
 sq331         int_cds_2022  v_res_2020    F_2022_stk    r_ira_2022~m  r_total_20~a
 sq336         sr063_dir     ok_res22_p    denom_s~2022  ira_withdr~l  r_tot~a_trim
 sq338         flow_bu~2022  ok_res22_s    denom_st~10k  ira_no_wit~l  r_to~a_ftrim
-sq350         flow~te_2022  res22_patt~n  yc_stk_2022   has_re_both
 
 . 
 . * List of variables created
@@ -880,14 +945,14 @@ Variables created:
 . di as txt "  r_total_2022: raw total returns (sum of raw asset class returns)"
   r_total_2022: raw total returns (sum of raw asset class returns)
 
-. di as txt "  r_total_2022_trimmed: trimmed total returns (sum of trimmed asset class returns
-> )"
+. di as txt "  r_total_2022_trimmed: trimmed total returns (sum of trimmed asset class ret
+> urns)"
   r_total_2022_trimmed: trimmed total returns (sum of trimmed asset class returns)
 
-. di as txt "  r_total_2022_final_trim: final trimmed total returns (additional 5% trimming ap
-> plied to sum of trimmed returns)"
-  r_total_2022_final_trim: final trimmed total returns (additional 5% trimming applied to sum 
-> of trimmed returns)
+. di as txt "  r_total_2022_final_trim: final trimmed total returns (additional 5% trimmin
+> g applied to sum of trimmed returns)"
+  r_total_2022_final_trim: final trimmed total returns (additional 5% trimming applied to 
+> sum of trimmed returns)
 
 . di as txt "  r_total_2022_excl_res: raw total returns excluding residential"
   r_total_2022_excl_res: raw total returns excluding residential
@@ -895,36 +960,38 @@ Variables created:
 . di as txt "  r_total_2022_excl_res_trim: trimmed total returns excluding residential"
   r_total_2022_excl_res_trim: trimmed total returns excluding residential
 
-. di as txt "  r_total_2022_excl_res_ftrim: final trimmed total returns excluding residential"
+. di as txt "  r_total_2022_excl_res_ftrim: final trimmed total returns excluding resident
+> ial"
   r_total_2022_excl_res_ftrim: final trimmed total returns excluding residential
 
-. di as txt "  r_total_2022_excl_housing: raw total returns excluding residential and real est
-> ate"
+. di as txt "  r_total_2022_excl_housing: raw total returns excluding residential and real
+>  estate"
   r_total_2022_excl_housing: raw total returns excluding residential and real estate
 
-. di as txt "  r_total_2022_excl_housing_trim: trimmed total returns excluding residential and
->  real estate"
-  r_total_2022_excl_housing_trim: trimmed total returns excluding residential and real estate
+. di as txt "  r_total_2022_excl_housing_trim: trimmed total returns excluding residential
+>  and real estate"
+  r_total_2022_excl_housing_trim: trimmed total returns excluding residential and real est
+> ate
 
-. di as txt "  r_total_2022_excl_housing_ftrim: final trimmed total returns excluding resident
-> ial and real estate"
-  r_total_2022_excl_housing_ftrim: final trimmed total returns excluding residential and real 
-> estate
+. di as txt "  r_total_2022_excl_housing_ftrim: final trimmed total returns excluding resi
+> dential and real estate"
+  r_total_2022_excl_housing_ftrim: final trimmed total returns excluding residential and r
+> eal estate
 
-. di as txt "  r_total_2022_excl_hsg_ira: raw total returns excluding residential, real estate
-> , and retirement"
-  r_total_2022_excl_hsg_ira: raw total returns excluding residential, real estate, and retirem
-> ent
+. di as txt "  r_total_2022_excl_hsg_ira: raw total returns excluding residential, real es
+> tate, and retirement"
+  r_total_2022_excl_hsg_ira: raw total returns excluding residential, real estate, and ret
+> irement
 
-. di as txt "  r_total_2022_excl_hsg_ira_trim: trimmed total returns excluding residential, re
-> al estate, and retirement"
-  r_total_2022_excl_hsg_ira_trim: trimmed total returns excluding residential, real estate, an
-> d retirement
+. di as txt "  r_total_2022_excl_hsg_ira_trim: trimmed total returns excluding residential
+> , real estate, and retirement"
+  r_total_2022_excl_hsg_ira_trim: trimmed total returns excluding residential, real estate
+> , and retirement
 
-. di as txt "  r_total_2022_excl_hsg_ira_ftrim: final trimmed total returns excluding resident
-> ial, real estate, and retirement"
-  r_total_2022_excl_hsg_ira_ftrim: final trimmed total returns excluding residential, real est
-> ate, and retirement
+. di as txt "  r_total_2022_excl_hsg_ira_ftrim: final trimmed total returns excluding resi
+> dential, real estate, and retirement"
+  r_total_2022_excl_hsg_ira_ftrim: final trimmed total returns excluding residential, real
+>  estate, and retirement
 
 . 
 . di as txt ""
@@ -936,8 +1003,8 @@ Total returns computation completed successfully!
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_total_returns_2022.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_total_returns_2022.log
   log type:  text
- closed on:  29 Sep 2025, 11:57:43
-----------------------------------------------------------------------------------------------
+ closed on:   2 Oct 2025, 12:34:14
+------------------------------------------------------------------------------------------

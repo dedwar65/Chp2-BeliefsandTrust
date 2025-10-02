@@ -1,16 +1,16 @@
-----------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_net_worth_A2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_net_worth_A2020.log
   log type:  text
- opened on:  29 Sep 2025, 11:57:42
+ opened on:   2 Oct 2025, 12:34:13
 
 . 
 . set more off
 
 . 
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/
-> hrs_rand_2020_2022_master.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clea
+> ned/hrs_rand_2020_2022_master.dta"
 
 . capture confirm file "`master'"
 
@@ -23,12 +23,12 @@
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/clean
-> ed/hrs_rand_2020_2022_master.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/c
+> leaned/hrs_rand_2020_2022_master.dta
 
 . 
-. local assets_vars "rh020 rh162 rq134 rq148 rq317 rq166_1 rq166_2 rq166_3 rq331 rq345 rq357 r
-> q371 rq381"
+. local assets_vars "rh020 rh162 rq134 rq148 rq317 rq166_1 rq166_2 rq166_3 rq331 rq345 rq3
+> 57 rq371 rq381"
 
 . local liab_vars   "rh032 rh171 rq478"
 
@@ -81,7 +81,8 @@ Checking presence of required 2020 variables...
 . replace assets_total_2020 = . if n_assets_2020 == 0
 (5,233 real changes made, 5,233 to missing)
 
-. di as txt "Summary: assets_total_2020 (post-rowtotal / set to missing when no components):"
+. di as txt "Summary: assets_total_2020 (post-rowtotal / set to missing when no components
+> ):"
 Summary: assets_total_2020 (post-rowtotal / set to missing when no components):
 
 . summarize assets_total_2020, detail
@@ -114,7 +115,8 @@ Records with non-missing assets_total_2020 = 9209
 . replace liab_total_2020 = . if n_liab_2020 == 0
 (9,851 real changes made, 9,851 to missing)
 
-. di as txt "Summary: liab_total_2020 (post-rowtotal / set to missing when no components):"
+. di as txt "Summary: liab_total_2020 (post-rowtotal / set to missing when no components):
+> "
 Summary: liab_total_2020 (post-rowtotal / set to missing when no components):
 
 . summarize liab_total_2020, detail
@@ -145,8 +147,8 @@ Records with non-missing liab_total_2020 = 4591
 . gen double networth_A2020 = .
 (14,442 missing values generated)
 
-. replace networth_A2020 = (cond(missing(assets_total_2020),0,assets_total_2020) - cond(missin
-> g(liab_total_2020),0,liab_total_2020)) if n_assets_2020 > 0
+. replace networth_A2020 = (cond(missing(assets_total_2020),0,assets_total_2020) - cond(mi
+> ssing(liab_total_2020),0,liab_total_2020)) if n_assets_2020 > 0
 (9,209 real changes made)
 
 . 
@@ -172,10 +174,15 @@ Summary: networth_A2020 (assets_total_2020 - liab_total_2020):
 
 . tabstat networth_A2020, stats(n mean sd p50 min max) format(%12.2f)
 
-    Variable |            N         Mean           SD          p50          Min          Max
--------------+------------------------------------------------------------------------------
-networt~2020 |      9209.00    887303.71  34444564.39    152000.00  -2442000.00     3.15e+09
---------------------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50          Min
+-------------+-----------------------------------------------------------------
+networt~2020 |      9209.00    887303.71  34444564.39    152000.00  -2442000.00
+-------------------------------------------------------------------------------
+
+    Variable |          Max
+-------------+-------------
+networt~2020 |     3.15e+09
+---------------------------
 
 . 
 . quietly count if !missing(networth_A2020)
@@ -189,8 +196,8 @@ Extremes: top 20 highest networth_A2020:
 
 . gsort -networth_A2020
 
-. list hhid rsubhh networth_A2020 assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 
-> in 1/20
+. list hhid rsubhh networth_A2020 assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2
+> 020 in 1/20
 
      +-------------------------------------------------------------------------+
      |   hhid   rsubhh   netw~2020   ass~2020   lia~2020   n_a~2020   n_l~2020 |
@@ -226,8 +233,8 @@ Extremes: top 20 lowest networth_A2020:
 
 . gsort networth_A2020
 
-. list hhid rsubhh networth_A2020 assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 
-> in 1/20
+. list hhid rsubhh networth_A2020 assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2
+> 020 in 1/20
 
      +------------------------------------------------------------------------+
      |   hhid   rsubhh   net~2020   ass~2020   lia~2020   n_a~2020   n_l~2020 |
@@ -258,8 +265,8 @@ Extremes: top 20 lowest networth_A2020:
      +------------------------------------------------------------------------+
 
 . 
-. di as txt "Cases where assets missing but liabilities present (networth computed treating as
-> sets=0):"
+. di as txt "Cases where assets missing but liabilities present (networth computed treatin
+> g assets=0):"
 Cases where assets missing but liabilities present (networth computed treating assets=0):
 
 . quietly count if n_assets_2020==0 & n_liab_2020>0
@@ -267,12 +274,12 @@ Cases where assets missing but liabilities present (networth computed treating a
 . di as txt "  count = " r(N)
   count = 274
 
-. quietly list hhid rsubhh assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 in 1/20
->  if n_assets_2020==0 & n_liab_2020>0
+. quietly list hhid rsubhh assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 in 
+> 1/20 if n_assets_2020==0 & n_liab_2020>0
 
 . 
-. di as txt "Cases where liabilities missing but assets present (networth computed treating li
-> ab=0):"
+. di as txt "Cases where liabilities missing but assets present (networth computed treatin
+> g liab=0):"
 Cases where liabilities missing but assets present (networth computed treating liab=0):
 
 . quietly count if n_liab_2020==0 & n_assets_2020>0
@@ -280,24 +287,24 @@ Cases where liabilities missing but assets present (networth computed treating l
 . di as txt "  count = " r(N)
   count = 4892
 
-. quietly list hhid rsubhh assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 in 1/20
->  if n_liab_2020==0 & n_assets_2020>0
+. quietly list hhid rsubhh assets_total_2020 liab_total_2020 n_assets_2020 n_liab_2020 in 
+> 1/20 if n_liab_2020==0 & n_assets_2020>0
 
 . 
 . save "`master'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_mast
-    > er.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_
+    > master.dta saved
 
 . di as txt "Saved A2020 net worth back to master: `master'"
-Saved A2020 net worth back to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/
-> Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
+Saved A2020 net worth back to master: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/C
+> ode/Data/HRS_RAND/cleaned/hrs_rand_2020_2022_master.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned/com
-> pute_net_worth_A2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/cleaned
+> /compute_net_worth_A2020.log
   log type:  text
- closed on:  29 Sep 2025, 11:57:43
-----------------------------------------------------------------------------------------------
+ closed on:   2 Oct 2025, 12:34:13
+------------------------------------------------------------------------------------------
