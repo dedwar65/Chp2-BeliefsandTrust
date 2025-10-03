@@ -149,6 +149,48 @@ di as txt "resp_tot_inc summary:"
 summarize resp_tot_inc, detail
 
 * ---------------------------------------------------------------------
+* Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net worth (h15atotb)
+* ---------------------------------------------------------------------
+di as txt "=== Constructing wealth percentile and deciles from h15atotb (A_2020) ==="
+capture confirm variable h15atotb
+if _rc {
+    di as error "ERROR: h15atotb (A_2020) not found"
+    exit 198
+}
+
+* Wealth percentile (continuous 0-100 across non-missing)
+capture drop wealth_rank wealth_pct
+quietly count if !missing(h15atotb)
+local N_wealth = r(N)
+egen double wealth_rank = rank(h15atotb) if !missing(h15atotb)
+gen double wealth_pct = .
+replace wealth_pct = 100 * (wealth_rank - 1) / (`N_wealth' - 1) if `N_wealth' > 1 & !missing(wealth_rank)
+replace wealth_pct = 50 if `N_wealth' == 1 & !missing(wealth_rank)
+label variable wealth_pct "Wealth percentile (based on h15atotb)"
+
+di as txt "Wealth percentile diagnostics:"
+quietly count if !missing(wealth_pct)
+di as txt "  Non-missing wealth_pct: " r(N)
+tabstat wealth_pct, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "[summarize] wealth_pct"
+capture noisily summarize wealth_pct, detail
+
+* Wealth deciles (1-10) across non-missing h15atotb
+capture drop wealth_decile
+xtile wealth_decile = h15atotb if !missing(h15atotb), n(10)
+label var wealth_decile "Wealth decile (1=lowest,10=highest)"
+di as txt "Wealth decile distribution:"
+tab wealth_decile, missing
+
+* Create decile dummies wealth_d1-wealth_d10
+forvalues d = 1/10 {
+    capture drop wealth_d`d'
+    gen byte wealth_d`d' = wealth_decile == `d' if !missing(wealth_decile)
+    label values wealth_d`d' yesno
+    label var wealth_d`d' "Wealth decile `d'"
+}
+
+* ---------------------------------------------------------------------
 * Save back to unified analysis dataset
 * ---------------------------------------------------------------------
 di as txt "=== Saving unified analysis dataset (includes flows, trust, controls, income) ==="

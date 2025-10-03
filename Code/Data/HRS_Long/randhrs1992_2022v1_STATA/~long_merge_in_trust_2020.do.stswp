@@ -17,9 +17,9 @@ set more off
 * File paths
 * ---------------------------------------------------------------------
 * Prefer starting from the flows-merged file if available so we build a unified dataset
-local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
+local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/randhrs1992_2022v1_with_flows.dta"
 local raw_2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw/2020/h20f1a_STATA/h20f1a.dta"
-local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/randhrs1992_2022v1_analysis.dta"
 
 * ---------------------------------------------------------------------
 * Check if files exist
@@ -29,7 +29,7 @@ di as txt "=== Checking file existence ==="
 capture confirm file "`long_file'"
 if _rc {
     * Fallback to base longitudinal file if flows file is not yet created
-    local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1.dta"
+    local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/randhrs1992_2022v1.dta"
     capture confirm file "`long_file'"
     if _rc {
         di as error "ERROR: Longitudinal file not found -> `long_file'"
