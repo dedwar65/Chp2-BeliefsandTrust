@@ -271,6 +271,50 @@ di as txt "Total capital gains (cg_total_2022) summary:"
 summarize cg_total_2022, detail
 
 * ---------------------------------------------------------------------
+* Variant: Exclude residential housing from numerator (keep denominator same)
+* - Remove primary and secondary residence components from CG and flows
+* - Follow same missing/zero rules as current calculation
+* ---------------------------------------------------------------------
+di as txt "=== Building EXCL-RESIDENTIAL components (numerator only) ==="
+
+* Capital gains excluding residences: sum all non-residential components (treat missing as zero)
+capture drop cg_total_2022_excl_res
+gen double cg_total_2022_excl_res = ///
+      cond(missing(cg_re_2022),   0, cg_re_2022)   + /// other real estate
+      cond(missing(cg_bus_2022),  0, cg_bus_2022)  + /// business
+      cond(missing(cg_ira_2022),  0, cg_ira_2022)  + /// ira/keogh
+      cond(missing(cg_stk_2022),  0, cg_stk_2022)  + /// stocks
+      cond(missing(cg_bnd_2022),  0, cg_bnd_2022)  + /// bonds
+      cond(missing(cg_chk_2022),  0, cg_chk_2022)  + /// checking/savings
+      cond(missing(cg_cd_2022),   0, cg_cd_2022)   + /// cds/t-bills
+      cond(missing(cg_veh_2022),  0, cg_veh_2022)  + /// vehicles
+      cond(missing(cg_oth_2022),  0, cg_oth_2022)    /// other assets
+
+* Safe version (zero already when all components missing)
+capture drop cg_total_2022_excl_res_safe
+gen double cg_total_2022_excl_res_safe = cond(missing(cg_total_2022_excl_res), 0, cg_total_2022_excl_res)
+
+* Flows excluding residences: sum non-residential asset-class flows
+* Requires component flows from long_merge_in.do
+capture drop flow_total_2022_excl_res
+gen double flow_total_2022_excl_res = .
+egen byte any_flow_present_nonres = rownonmiss(flow_bus_2022 flow_re_2022 flow_stk_2022 flow_ira_2022)
+replace flow_total_2022_excl_res = ///
+      cond(missing(flow_bus_2022),0,flow_bus_2022) + /// business
+      cond(missing(flow_re_2022), 0,flow_re_2022)  + /// other real estate
+      cond(missing(flow_stk_2022),0,flow_stk_2022) + /// stocks
+      cond(missing(flow_ira_2022),0,flow_ira_2022)   /// ira
+      if any_flow_present_nonres > 0
+drop any_flow_present_nonres
+
+* Safe version of non-residential flows
+capture drop flow_total_2022_excl_res_safe
+gen double flow_total_2022_excl_res_safe = cond(missing(flow_total_2022_excl_res), 0, flow_total_2022_excl_res)
+
+di as txt "EXCL-RES: cg_total_2022_excl_res and flow_total_2022_excl_res summaries:"
+summarize cg_total_2022_excl_res flow_total_2022_excl_res
+
+* ---------------------------------------------------------------------
 * Step 5: Compute debt payments (if needed)
 * ---------------------------------------------------------------------
 di as txt "=== Computing debt payments ==="
@@ -286,13 +330,43 @@ di as txt "Debt payments set to zero for now"
 * ---------------------------------------------------------------------
 di as txt "=== Computing period returns ==="
 
-* Numerator (safe): y^c_2022 + sum_c(cg_class) - F_total_period - debt_payments_2022
+* Numerator (safe): y^c_2022 + sum_c(cg_class) - F_total_period (exclude debt payments)
 capture drop num_period
-gen double num_period = y_c_2022_safe + cg_total_2022_safe - flow_total_2022_safe - debt_payments_2022
+gen double num_period = y_c_2022_safe + cg_total_2022_safe - flow_total_2022_safe
 
 * Base (safe flows): A_{2020} + 0.5 * F_total_period
 capture drop base
 gen double base = a_2020 + 0.5 * flow_total_2022_safe
+
+* --- EXCLUDE RESIDENTIAL: compute returns using same base ---
+capture drop num_period_excl_res
+gen double num_period_excl_res = y_c_2022_safe + cg_total_2022_excl_res_safe - flow_total_2022_excl_res_safe
+
+capture drop r_period_excl_res
+gen double r_period_excl_res = num_period_excl_res / base
+replace r_period_excl_res = . if base < 10000
+
+di as txt "Period returns excl-res (r_period_excl_res) summary:"
+summarize r_period_excl_res, detail
+
+* Annualize excl-res
+capture drop r_annual_2022_excl_res
+gen double r_annual_2022_excl_res = (1 + r_period_excl_res)^(1/2) - 1
+replace r_annual_2022_excl_res = . if missing(r_period_excl_res)
+
+di as txt "Annual returns excl-res (r_annual_2022_excl_res) summary:"
+summarize r_annual_2022_excl_res, detail
+
+* 5% trimming excl-res
+capture drop r_annual_2022_excl_res_trim
+gen double r_annual_2022_excl_res_trim = r_annual_2022_excl_res
+quietly _pctile r_annual_2022_excl_res, p(5 95)
+scalar p5_ex = r(r1)
+scalar p95_ex = r(r2)
+replace r_annual_2022_excl_res_trim = . if r_annual_2022_excl_res < p5_ex | r_annual_2022_excl_res > p95_ex
+
+di as txt "Trimmed returns excl-res (r_annual_2022_excl_res_trim) summary:"
+summarize r_annual_2022_excl_res_trim, detail
 
 * Period return: R_period = num_period / base
 gen double r_period = num_period / base
