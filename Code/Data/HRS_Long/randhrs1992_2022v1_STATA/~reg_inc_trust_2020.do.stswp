@@ -63,11 +63,19 @@ di as txt "  `ctrl_vars'"
 
 * Check which controls are actually present
 local ctrl_in ""
+local age_quad ""
 foreach c of local ctrl_vars {
     capture confirm variable `c'
-    if !_rc local ctrl_in "`ctrl_in' `c'"
+    if !_rc {
+        if "`c'" == "r15agey_b" {
+            local age_quad "c.r15agey_b c.r15agey_b#c.r15agey_b"
+        }
+        else {
+            local ctrl_in "`ctrl_in' `c'"
+        }
+    }
 }
-di as txt "Controls actually included: `ctrl_in'"
+di as txt "Controls actually included: `ctrl_in' with age quad if available"
 
 * Loop over trust variables and income measures
 di as txt "=== BEGIN REGRESSIONS: INCOME on TRUST (no controls) ==="
@@ -96,8 +104,8 @@ foreach t of local trust_vars {
         if _rc continue
         quietly count if !missing(`y') & !missing(`t')
         if r(N)==0 continue
-        di as txt "[RAW+C] `y' on `t' + `t'^2 with controls (robust)"
-        regress `y' c.`t' c.`t'#c.`t' `ctrl_in' if !missing(`y') & !missing(`t'), vce(robust)
+        di as txt "[RAW+C] `y' on `t' + `t'^2 + age quad + controls (robust)"
+        regress `y' c.`t' c.`t'#c.`t' `age_quad' `ctrl_in' if !missing(`y') & !missing(`t'), vce(robust)
     }
 }
 
@@ -137,8 +145,8 @@ if _rc==0 {
         if _rc continue
         quietly count if !missing(`y') & !missing(trust_pca1_z)
         if r(N)==0 continue
-        di as txt "[RAW+C] `y' on trust_pca1_z + trust_pca1_z^2 with controls (robust)"
-        regress `y' c.trust_pca1_z c.trust_pca1_z#c.trust_pca1_z `ctrl_in' if !missing(`y') & !missing(trust_pca1_z), vce(robust)
+        di as txt "[RAW+C] `y' on trust_pca1_z + trust_pca1_z^2 + age quad + controls (robust)"
+        regress `y' c.trust_pca1_z c.trust_pca1_z#c.trust_pca1_z `age_quad' `ctrl_in' if !missing(`y') & !missing(trust_pca1_z), vce(robust)
     }
 }
 else {

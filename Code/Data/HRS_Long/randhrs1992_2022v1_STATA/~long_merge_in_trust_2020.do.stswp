@@ -16,10 +16,10 @@ set more off
 * ---------------------------------------------------------------------
 * File paths
 * ---------------------------------------------------------------------
-* Prefer starting from the flows-merged file if available so we build a unified dataset
-local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/randhrs1992_2022v1_with_flows.dta"
+* Always start from the unified analysis dataset produced by long_merge_in.do
+local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 local raw_2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw/2020/h20f1a_STATA/h20f1a.dta"
-local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/randhrs1992_2022v1_analysis.dta"
+local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
 * ---------------------------------------------------------------------
 * Check if files exist
@@ -28,15 +28,10 @@ di as txt "=== Checking file existence ==="
 
 capture confirm file "`long_file'"
 if _rc {
-    * Fallback to base longitudinal file if flows file is not yet created
-    local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/randhrs1992_2022v1.dta"
-    capture confirm file "`long_file'"
-    if _rc {
-        di as error "ERROR: Longitudinal file not found -> `long_file'"
-        exit 198
-    }
+    di as error "ERROR: Unified analysis dataset not found -> `long_file' (run long_merge_in.do first)"
+    exit 198
 }
-di as txt "OK: Input longitudinal file found -> `long_file'"
+di as txt "OK: Input longitudinal (analysis) file found -> `long_file'"
 
 capture confirm file "`raw_2020'"
 if _rc {
@@ -137,7 +132,7 @@ restore
 * ---------------------------------------------------------------------
 di as txt "=== Merging trust variables into longitudinal data ==="
 
-merge 1:1 hhidpn using "`raw_trust'"
+merge 1:1 hhidpn using "`raw_trust'", keep(master match)
 
 * Report merge results
 di as txt "Merge results:"
@@ -154,11 +149,8 @@ di as txt "Matched observations: `n_matched'"
 di as txt "Longitudinal only: `n_long_only'"
 di as txt "Raw 2020 only: `n_raw_only'"
 
-* Keep only matched observations
-keep if _merge == 3
 drop _merge
-
-di as txt "Kept `n_matched' matched observations"
+di as txt "Trust variables merged onto analysis dataset (master rows preserved)"
 
 * ---------------------------------------------------------------------
 * Clean miscodes and summarize merged trust variables

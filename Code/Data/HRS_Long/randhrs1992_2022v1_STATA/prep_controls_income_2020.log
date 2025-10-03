@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
 > 1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- opened on:   3 Oct 2025, 10:03:07
+ opened on:   3 Oct 2025, 10:39:39
 
 . 
 . set more off
@@ -44,10 +44,10 @@
 . quietly describe
 
 . di as txt "Observations: " %9.0f r(N)
-Observations:     12168
+Observations:     15856
 
 . di as txt "Variables:    " %9.0f r(k)
-Variables:        19946
+Variables:        19911
 
 . 
 . * ---------------------------------------------------------------------
@@ -67,7 +67,7 @@ Variables:        19946
 . capture drop married_2020
 
 . gen byte married_2020 = .
-(12,168 missing values generated)
+(15,856 missing values generated)
 
 . replace married_2020 = 1 if inlist(r15mstat, 1, 2)
 (6,768 real changes made)
@@ -90,17 +90,18 @@ Marital status (r15mstat) distribution:
    r15mstat:w15 r marital |
                    status |      Freq.     Percent        Cum.
 --------------------------+-----------------------------------
-                1.married |      6,671       54.82       54.82
-  2.married,spouse absent |         97        0.80       55.62
-              3.partnered |        754        6.20       61.82
-              4.separated |        263        2.16       63.98
-               5.divorced |      1,648       13.54       77.52
-                7.widowed |      1,908       15.68       93.20
-          8.never married |        801        6.58       99.79
-.j=web interview, missing |          8        0.07       99.85
-               .m=missing |         18        0.15      100.00
+                1.married |      6,671       42.07       42.07
+  2.married,spouse absent |         97        0.61       42.68
+              3.partnered |        754        4.76       47.44
+              4.separated |        263        1.66       49.10
+               5.divorced |      1,648       10.39       59.49
+                7.widowed |      1,908       12.03       71.52
+          8.never married |        801        5.05       76.58
+                        . |      3,688       23.26       99.84
+.j=web interview, missing |          8        0.05       99.89
+               .m=missing |         18        0.11      100.00
 --------------------------+-----------------------------------
-                    Total |     12,168      100.00
+                    Total |     15,856      100.00
 
 . 
 . di as txt "Married_2020 dummy summary:"
@@ -114,11 +115,11 @@ Married_2020 dummy summary:
 not married |
       (3-8) |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-not married |      5,374       44.17       44.17
-    married |      6,768       55.62       99.79
-          . |         26        0.21      100.00
+not married |      5,374       33.89       33.89
+    married |      6,768       42.68       76.58
+          . |      3,714       23.42      100.00
 ------------+-----------------------------------
-      Total |     12,168      100.00
+      Total |     15,856      100.00
 
 . 
 . * ---------------------------------------------------------------------
@@ -146,22 +147,22 @@ not married |      5,374       44.17       44.17
 
 . else {
 .     generate double rabplace_num = rabplace
-(3 missing values generated)
+(481 missing values generated)
 . }
 
 . 
 . capture drop born_us
 
 . gen byte born_us = .
-(12,168 missing values generated)
+(15,856 missing values generated)
 
 . * 1-10 are US Census divisions; 12=US territory => treat as US-born
 . replace born_us = 1 if inrange(rabplace_num,1,10) | rabplace_num == 12
-(10,079 real changes made)
+(12,453 real changes made)
 
 . * 11=Not US or US territory; 13=Not US => not US-born
 . replace born_us = 0 if inlist(rabplace_num,11,13)
-(2,086 real changes made)
+(2,922 real changes made)
 
 . label values born_us yesno
 
@@ -176,27 +177,27 @@ Immigration raw distribution (rabplace or numeric copy):
 rabplace_nu |
           m |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |        418        3.44        3.44
-          2 |      1,519       12.48       15.92
-          3 |      1,946       15.99       31.91
-          4 |        896        7.36       39.28
-          5 |      1,653       13.58       52.86
-          6 |        881        7.24       60.10
-          7 |      1,014        8.33       68.43
-          8 |        413        3.39       71.83
-          9 |        957        7.86       79.69
-         10 |        343        2.82       82.51
-         11 |         32        0.26       82.77
-         12 |         39        0.32       83.10
-         13 |      2,054       16.88       99.98
-         .m |          3        0.02      100.00
+          1 |        519        3.27        3.27
+          2 |      1,782       11.24       14.51
+          3 |      2,325       14.66       29.18
+          4 |      1,009        6.36       35.54
+          5 |      2,054       12.95       48.49
+          6 |      1,108        6.99       55.48
+          7 |      1,309        8.26       63.74
+          8 |        530        3.34       67.08
+          9 |      1,194        7.53       74.61
+         10 |        581        3.66       78.27
+         11 |        675        4.26       82.53
+         12 |         42        0.26       82.80
+         13 |      2,247       14.17       96.97
+         .m |        481        3.03      100.00
 ------------+-----------------------------------
-      Total |     12,168      100.00
+      Total |     15,856      100.00
 
 . quietly count if !missing(born_us)
 
 . di as txt "Non-missing born_us count: " r(N)
-Non-missing born_us count: 12165
+Non-missing born_us count: 15375
 
 . di as txt "Born-in-US dummy summary:"
 Born-in-US dummy summary:
@@ -207,11 +208,11 @@ Born-in-US dummy summary:
  (1) vs not |
      US (0) |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-not married |      2,086       17.14       17.14
-    married |     10,079       82.83       99.98
-          . |          3        0.02      100.00
+not married |      2,922       18.43       18.43
+    married |     12,453       78.54       96.97
+          . |        481        3.03      100.00
 ------------+-----------------------------------
-      Total |     12,168      100.00
+      Total |     15,856      100.00
 
 . 
 . * ---------------------------------------------------------------------
@@ -241,7 +242,7 @@ not married |      2,086       17.14       17.14
 
 . replace resp_lab_inc = . if missing(r15iearn) & missing(r15ipena) & missing(r15issdi) & 
 > missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
-(0 real changes made)
+(3,688 real changes made, 3,688 to missing)
 
 . label var resp_lab_inc "Respondent labor income (sum of 6 components; missing if all mis
 > sing)"
@@ -285,6 +286,7 @@ resp_lab_inc summary:
 . gen double resp_tot_inc = resp_lab_inc ///
 >     + cond(missing(h15icap), 0, h15icap) ///
 >     + cond(missing(h15iothr), 0, h15iothr)
+(3,688 missing values generated)
 
 . * If labor income is missing AND both additions are missing, set total to missing as wel
 > l
@@ -339,9 +341,10 @@ resp_tot_inc summary:
 . local N_wealth = r(N)
 
 . egen double wealth_rank = rank(h15atotb) if !missing(h15atotb)
+(3,688 missing values generated)
 
 . gen double wealth_pct = .
-(12,168 missing values generated)
+(15,856 missing values generated)
 
 . replace wealth_pct = 100 * (wealth_rank - 1) / (`N_wealth' - 1) if `N_wealth' > 1 & !mis
 > sing(wealth_rank)
@@ -411,18 +414,19 @@ Wealth decile distribution:
 (1=lowest,1 |
  0=highest) |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |      1,492       12.26       12.26
-          2 |        943        7.75       20.01
-          3 |      1,246       10.24       30.25
-          4 |      1,192        9.80       40.05
-          5 |      1,215        9.99       50.03
-          6 |      1,214        9.98       60.01
-          7 |      1,221       10.03       70.04
-          8 |      1,213        9.97       80.01
-          9 |      1,216        9.99       90.01
-         10 |      1,216        9.99      100.00
+          1 |      1,492        9.41        9.41
+          2 |        943        5.95       15.36
+          3 |      1,246        7.86       23.22
+          4 |      1,192        7.52       30.73
+          5 |      1,215        7.66       38.40
+          6 |      1,214        7.66       46.05
+          7 |      1,221        7.70       53.75
+          8 |      1,213        7.65       61.40
+          9 |      1,216        7.67       69.07
+         10 |      1,216        7.67       76.74
+          . |      3,688       23.26      100.00
 ------------+-----------------------------------
-      Total |     12,168      100.00
+      Total |     15,856      100.00
 
 . 
 . * Create decile dummies wealth_d1-wealth_d10
@@ -432,6 +436,16 @@ Wealth decile distribution:
   4.     label values wealth_d`d' yesno
   5.     label var wealth_d`d' "Wealth decile `d'"
   6. }
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
+(3,688 missing values generated)
 
 . 
 . * ---------------------------------------------------------------------
@@ -456,5 +470,5 @@ Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/D
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
 > 1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- closed on:   3 Oct 2025, 10:03:08
+ closed on:   3 Oct 2025, 10:39:40
 ------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
 > 1992_2022v1_STATA/long_merge_in_trust_2020.log
   log type:  text
- opened on:   3 Oct 2025, 09:52:47
+ opened on:   3 Oct 2025, 10:39:31
 
 . 
 . set more off
@@ -12,9 +12,9 @@
 . * ---------------------------------------------------------------------
 . * File paths
 . * ---------------------------------------------------------------------
-. * Prefer starting from the flows-merged file if available so we build a unified dataset
+. * Always start from the unified analysis dataset produced by long_merge_in.do
 . local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/r
-> andhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
+> andhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
 . local raw_2020 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_r
 > aw/2020/h20f1a_STATA/h20f1a.dta"
@@ -33,19 +33,14 @@
 . capture confirm file "`long_file'"
 
 . if _rc {
-.     * Fallback to base longitudinal file if flows file is not yet created
-.     local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lo
-> ng/randhrs1992_2022v1_STATA/_randhrs1992_2022v1.dta"
-.     capture confirm file "`long_file'"
-.     if _rc {
-.         di as error "ERROR: Longitudinal file not found -> `long_file'"
-.         exit 198
-.     }
+.     di as error "ERROR: Unified analysis dataset not found -> `long_file' (run long_merg
+> e_in.do first)"
+.     exit 198
 . }
 
-. di as txt "OK: Input longitudinal file found -> `long_file'"
-OK: Input longitudinal file found -> /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Co
-> de/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta
+. di as txt "OK: Input longitudinal (analysis) file found -> `long_file'"
+OK: Input longitudinal (analysis) file found -> /Volumes/SSD PRO/Github-forks/Chp2-Beliefs
+> andTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
 
 . 
 . capture confirm file "`raw_2020'"
@@ -215,13 +210,13 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000005 saved as .
 === Merging trust variables into longitudinal data ===
 
 . 
-. merge 1:1 hhidpn using "`raw_trust'"
+. merge 1:1 hhidpn using "`raw_trust'", keep(master match)
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                         7,243
+    Not matched                         3,688
         from master                     3,688  (_merge==1)
-        from using                      3,555  (_merge==2)
+        from using                          0  (_merge==2)
 
     Matched                            12,168  (_merge==3)
     -----------------------------------------
@@ -236,11 +231,10 @@ Merge results:
    Matching result from |
                   merge |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
-        Master only (1) |      3,688       19.00       19.00
-         Using only (2) |      3,555       18.31       37.31
-            Matched (3) |     12,168       62.69      100.00
+        Master only (1) |      3,688       23.26       23.26
+            Matched (3) |     12,168       76.74      100.00
 ------------------------+-----------------------------------
-                  Total |     19,411      100.00
+                  Total |     15,856      100.00
 
 . 
 . quietly count if _merge == 3
@@ -263,18 +257,13 @@ Matched observations: 12168
 Longitudinal only: 3688
 
 . di as txt "Raw 2020 only: `n_raw_only'"
-Raw 2020 only: 3555
+Raw 2020 only: 0
 
 . 
-. * Keep only matched observations
-. keep if _merge == 3
-(7,243 observations deleted)
-
 . drop _merge
 
-. 
-. di as txt "Kept `n_matched' matched observations"
-Kept 12168 matched observations
+. di as txt "Trust variables merged onto analysis dataset (master rows preserved)"
+Trust variables merged onto analysis dataset (master rows preserved)
 
 . 
 . * ---------------------------------------------------------------------
@@ -454,7 +443,7 @@ Saved merged file to: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Da
 . local n_obs_final = r(N)
 
 . di as txt "Final file: `n_obs_final' observations, `n_vars_final' variables"
-Final file: 12168 observations, 19911 variables
+Final file: 15856 observations, 19911 variables
 
 . 
 . log close
@@ -462,5 +451,5 @@ Final file: 12168 observations, 19911 variables
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
 > 1992_2022v1_STATA/long_merge_in_trust_2020.log
   log type:  text
- closed on:   3 Oct 2025, 09:52:50
+ closed on:   3 Oct 2025, 10:39:35
 ------------------------------------------------------------------------------------------
