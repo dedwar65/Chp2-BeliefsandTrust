@@ -92,7 +92,7 @@ if _rc {
 di as txt "OK: hhidpn found in raw 2022 file"
 
 * Check for flow variables
-local flow_vars "sr050 sr055 sr063 sr064 sr072 sr030 sr035 sr045 sq171_1 sq171_2 sq171_3 sr007 sr013 sr024"
+local flow_vars "sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sq171_1 sq171_2 sq171_3 sr007 sr013 sr024"
 di as txt "Checking for flow variables..."
 foreach v of local flow_vars {
     capture confirm variable `v'
@@ -210,16 +210,11 @@ else {
     replace flow_stk_private_2022 = sr063_dir * sr064 if !missing(sr063_dir) & !missing(sr064)
 }
 
-* --- Public stocks: sr073 is reported as sold amount (inflow). Keep positive.
+* --- Public stocks: SR073 is reported as sold amount (inflow). Keep positive.
+capture drop flow_stk_public_2022
+gen double flow_stk_public_2022 = .
 capture confirm variable sr073
-if _rc {
-    di as txt "sr073 not found -> flow_stk_public_2022 missing"
-    gen double flow_stk_public_2022 = .
-}
-else {
-    capture drop flow_stk_public_2022
-    gen double flow_stk_public_2022 = sr073
-}
+if !_rc replace flow_stk_public_2022 = sr073
 
 * Combine private + public stocks into total stocks flow
 capture drop flow_stk_2022

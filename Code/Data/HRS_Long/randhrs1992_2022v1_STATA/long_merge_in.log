@@ -1,9 +1,9 @@
-------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
-> 1992_2022v1_STATA/long_merge_in.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
+> 92_2022v1_STATA/long_merge_in.log
   log type:  text
- opened on:   3 Oct 2025, 10:39:20
+ opened on:   7 Oct 2025, 13:54:41
 
 . 
 . set more off
@@ -12,14 +12,14 @@
 . * ---------------------------------------------------------------------
 . * File paths
 . * ---------------------------------------------------------------------
-. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/r
-> andhrs1992_2022v1_STATA/_randhrs1992_2022v1.dta"
+. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
+> dhrs1992_2022v1_STATA/_randhrs1992_2022v1.dta"
 
-. local raw_2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_r
-> aw/2022/h22e3a_STATA/h22e3a.dta"
+. local raw_2022 "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_raw
+> /2022/h22e3a_STATA/h22e3a.dta"
 
-. local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long
-> /randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+. local output_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/r
+> andhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
 . 
 . * ---------------------------------------------------------------------
@@ -143,8 +143,8 @@ OK: hhidpn found in raw 2022 file
 
 . 
 . * Check for flow variables
-. local flow_vars "sr050 sr055 sr063 sr064 sr072 sr030 sr035 sr045 sq171_1 sq171_2 sq171_3
->  sr007 sr013 sr024"
+. local flow_vars "sr050 sr055 sr063 sr064 sr073 sr030 sr035 sr045 sq171_1 sq171_2 sq171_3 s
+> r007 sr013 sr024"
 
 . di as txt "Checking for flow variables..."
 Checking for flow variables...
@@ -162,7 +162,7 @@ Checking for flow variables...
   OK: sr055 found
   OK: sr063 found
   OK: sr064 found
-  OK: sr072 found
+  OK: sr073 found
   OK: sr030 found
   OK: sr035 found
   OK: sr045 found
@@ -201,9 +201,8 @@ OK: No duplicate hhidpn in raw 2022 file
 . tempfile raw_flows
 
 . save "`raw_flows'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000005 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_01891.000005 saved as .dta
-    format
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .dta format
 
 . restore
 
@@ -284,8 +283,8 @@ Kept 15856 matched observations
 
 . 
 . * Clean missing value codes
-. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 9999
-> 999999 9999999998 -8 -9
+. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 999999
+> 9999 9999999998 -8 -9
 
 . foreach v of local flow_vars {
   2.     capture confirm numeric variable `v'
@@ -346,8 +345,8 @@ Cleaning sr063 (private stock net buyer/seller)...
 . capture confirm variable sr064
 
 . if _rc {
-.     di as txt "sr064 (stock magnitude) missing -> setting flow_stk_private_2022 to missi
-> ng"
+.     di as txt "sr064 (stock magnitude) missing -> setting flow_stk_private_2022 to missing
+> "
 .     gen double flow_stk_private_2022 = .
 . }
 
@@ -355,50 +354,46 @@ Cleaning sr063 (private stock net buyer/seller)...
 .     capture drop flow_stk_private_2022
 .     gen double flow_stk_private_2022 = .
 (15,856 missing values generated)
-.     replace flow_stk_private_2022 = sr063_dir * sr064 if !missing(sr063_dir) & !missing(
-> sr064)
+.     replace flow_stk_private_2022 = sr063_dir * sr064 if !missing(sr063_dir) & !missing(sr
+> 064)
 (173 real changes made)
 . }
 
 . 
-. * --- Public stocks: sr073 is reported as sold amount (inflow). Keep positive.
+. * --- Public stocks: SR073 is reported as sold amount (inflow). Keep positive.
+. capture drop flow_stk_public_2022
+
+. gen double flow_stk_public_2022 = .
+(15,856 missing values generated)
+
 . capture confirm variable sr073
 
-. if _rc {
-.     di as txt "sr073 not found -> flow_stk_public_2022 missing"
-sr073 not found -> flow_stk_public_2022 missing
-.     gen double flow_stk_public_2022 = .
-(15,856 missing values generated)
-. }
-
-. else {
-.     capture drop flow_stk_public_2022
-.     gen double flow_stk_public_2022 = sr073
-. }
+. if !_rc replace flow_stk_public_2022 = sr073
+(253 real changes made)
 
 . 
 . * Combine private + public stocks into total stocks flow
 . capture drop flow_stk_2022
 
-. gen double flow_stk_2022 = cond(!missing(flow_stk_private_2022), flow_stk_private_2022, 
-> 0) + ///
->                             cond(!missing(flow_stk_public_2022),  flow_stk_public_2022, 
->  0)
+. gen double flow_stk_2022 = cond(!missing(flow_stk_private_2022), flow_stk_private_2022, 0)
+>  + ///
+>                             cond(!missing(flow_stk_public_2022),  flow_stk_public_2022,  0
+> )
 
-. replace flow_stk_2022 = . if missing(flow_stk_private_2022) & missing(flow_stk_public_20
-> 22)
-(15,683 real changes made, 15,683 to missing)
+. replace flow_stk_2022 = . if missing(flow_stk_private_2022) & missing(flow_stk_public_2022
+> )
+(15,430 real changes made, 15,430 to missing)
 
 . 
-. * --- Real estate: sr035 (sold, inflow) - sr030 (buy, outflow) - sr045 (improvement cost
-> s, outflow)
+. * --- Real estate: sr035 (sold, inflow) - sr030 (buy, outflow) - sr045 (improvement costs,
+>  outflow)
 . capture drop flow_re_2022
 
 . gen double flow_re_2022 = .
 (15,856 missing values generated)
 
-. replace flow_re_2022 = cond(missing(sr035),0,sr035) - ( cond(missing(sr030),0,sr030) + c
-> ond(missing(sr045),0,sr045) ) if !missing(sr035) | !missing(sr030) | !missing(sr045)
+. replace flow_re_2022 = cond(missing(sr035),0,sr035) - ( cond(missing(sr030),0,sr030) + con
+> d(missing(sr045),0,sr045) ) if !missing(sr035) | !missing(sr030) | !missing(sr045)
 (416 real changes made)
 
 . 
@@ -412,16 +407,15 @@ sr073 not found -> flow_stk_public_2022 missing
 (13,953 real changes made, 13,953 to missing)
 
 . 
-. * --- Primary/secondary residence(s): sr013 (sell, inflow) - sr007 (buy, outflow) - sr02
-> 4 (improvements, outflow)
+. * --- Primary/secondary residence(s): sr013 (sell, inflow) - sr007 (buy, outflow) - sr024 
+> (improvements, outflow)
 . capture drop flow_residences_2022
 
 . gen double flow_residences_2022 = .
 (15,856 missing values generated)
 
-. replace flow_residences_2022 = cond(missing(sr013),0,sr013) - ( cond(missing(sr007),0,sr
-> 007) + cond(missing(sr024),0,sr024) ) if !missing(sr013) | !missing(sr007) | !missing(sr
-> 024)
+. replace flow_residences_2022 = cond(missing(sr013),0,sr013) - ( cond(missing(sr007),0,sr00
+> 7) + cond(missing(sr024),0,sr024) ) if !missing(sr013) | !missing(sr007) | !missing(sr024)
 (2,460 real changes made)
 
 . 
@@ -439,8 +433,8 @@ sr073 not found -> flow_stk_public_2022 missing
 (15,856 missing values generated)
 
 . * Check if at least one asset class has non-missing flow
-. egen byte any_flow_present = rownonmiss(flow_bus_2022 flow_re_2022 flow_stk_2022 flow_ir
-> a_2022 flow_residences_2022)
+. egen byte any_flow_present = rownonmiss(flow_bus_2022 flow_re_2022 flow_stk_2022 flow_ira_
+> 2022 flow_residences_2022)
 
 . * Compute total only if at least one flow is present
 . replace flow_total_2022 = cond(missing(flow_bus_2022),0,flow_bus_2022) + ///
@@ -449,7 +443,7 @@ sr073 not found -> flow_stk_public_2022 missing
 >                          cond(missing(flow_ira_2022),0,flow_ira_2022) + ///
 >                          cond(missing(flow_residences_2022),0,flow_residences_2022) ///
 >                          if any_flow_present > 0
-(4,163 real changes made)
+(4,249 real changes made)
 
 . drop any_flow_present
 
@@ -462,17 +456,17 @@ flow_total_2022 computed successfully
                        flow_total_2022
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%      -650000       -6400000
- 5%      -211000       -6400000
-10%       -94000       -2660000       Obs               4,163
-25%       -20000       -2660000       Sum of wgt.       4,163
+ 1%      -611000       -6400000
+ 5%      -205000       -6400000
+10%       -85000       -2660000       Obs               4,249
+25%       -20000       -2660000       Sum of wgt.       4,249
 
-50%          100                      Mean            10238.2
-                        Largest       Std. dev.      281541.3
-75%        25000        3450000
-90%       132119        3474000       Variance       7.93e+10
-95%       273000        3474000       Skewness       -3.44539
-99%       800000        3500000       Kurtosis       169.6066
+50%          720                      Mean           13893.93
+                        Largest       Std. dev.      281210.5
+75%        28500        3450000
+90%       140000        3474000       Variance       7.91e+10
+95%       290000        3474000       Skewness      -3.239746
+99%       785000        3500000       Kurtosis       168.9372
 
 . 
 . * ---------------------------------------------------------------------
@@ -484,12 +478,12 @@ flow_total_2022 computed successfully
 . 
 . save "`output_file'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_r
-    > andhrs1992_2022v1_analysis.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_ran
+    > dhrs1992_2022v1_analysis.dta saved
 
 . di as txt "Saved merged file to: `output_file'"
-Saved merged file to: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lon
-> g/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+Saved merged file to: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/
+> randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
 
 . 
 . quietly describe
@@ -526,13 +520,13 @@ Final merged file: 15856 observations, 19903 variables
 . local n_with_flows = r(N)
 
 . di as txt "Observations with flow_total_2022: `n_with_flows'"
-Observations with flow_total_2022: 4163
+Observations with flow_total_2022: 4249
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs
-> 1992_2022v1_STATA/long_merge_in.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
+> 92_2022v1_STATA/long_merge_in.log
   log type:  text
- closed on:   3 Oct 2025, 10:39:29
-------------------------------------------------------------------------------------------
+ closed on:   7 Oct 2025, 13:54:49
+--------------------------------------------------------------------------------------------

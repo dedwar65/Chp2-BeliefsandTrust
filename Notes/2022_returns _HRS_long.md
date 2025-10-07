@@ -1,3 +1,7 @@
+## Using the Longitudinal file
+
+# 1. Computing returns for 2022 
+
 * F_t net investment flows per asset class (that are available for 2022)
     * private business: SR050 (invest), SR055 (sell)
     * stocks: SR063 (net buyer or net seller), SR064 (magnitude)
@@ -68,3 +72,19 @@ Overall period numerator and annualization:
    base = A_{2020} + 0.5 * F_total_period
    R_period = num_period / base
    r_annual = (1 + R_period)^(1/2) - 1
+
+
+# 2. Collecting demographic variables
+
+* age: r15agey_b
+* education: raedyrs
+* employment: r15inlbrf
+* marital status: r15mstat
+* immigration status: rabplace
+
+# 3. Income variable (respondent only)
+* r15earn, r15pena, r15issdi, r15isret, r15iunwc, r15igxfr,
+* hwicap, hwiother
+
+# 4. Trust variables
+* rv557, rv558, rv559, rv560. rv561. rv562, rv563, rv564

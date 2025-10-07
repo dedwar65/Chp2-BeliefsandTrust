@@ -3,10 +3,11 @@
 * Prepare controls (marital, immigration) and respondent income aggregates for 2020
 * - Works on unified analysis dataset and writes back to it
 * - Creates:
-*   married_2020 (from r15mstat)
-*   born_us (from rabplacf/rabplace)
-*   resp_lab_inc (sum: r15earn r15pena r15issdi r15isret r15iunwc r15igxfr)
-*   resp_tot_inc (resp_lab_inc + hwicap + hwiother)
+*   married_2022 (from r15mstat)
+*   born_us_2022 (from rabplacf/rabplace)
+*   resp_lab_inc_2022 (sum: r15earn r15pena r15issdi r15isret r15iunwc r15igxfr)
+*   resp_tot_inc_2022 (resp_lab_inc_2022 + hwicap + hwiother)
+*   wealth_pct_2020, wealth_decile_2020, wealth_d1_2020-wealth_d10_2020 (based on h15atotb)
 *   Sums follow rule: missing only if all components missing; otherwise treat missing as 0
 *----------------------------------------------------------------------
 clear all
@@ -53,19 +54,19 @@ if _rc {
     exit 198
 }
 
-capture drop married_2020
-gen byte married_2020 = .
-replace married_2020 = 1 if inlist(r15mstat, 1, 2)
-replace married_2020 = 0 if inlist(r15mstat, 3, 4, 5, 6, 7, 8)
+capture drop married_2022
+gen byte married_2022 = .
+replace married_2022 = 1 if inlist(r15mstat, 1, 2)
+replace married_2022 = 0 if inlist(r15mstat, 3, 4, 5, 6, 7, 8)
 label define yesno 0 "not married" 1 "married", replace
-label values married_2020 yesno
-label var married_2020 "Married (r15mstat: 1 or 2) vs not married (3-8)"
+label values married_2022 yesno
+label var married_2022 "Married (r15mstat: 1 or 2) vs not married (3-8)"
 
 di as txt "Marital status (r15mstat) distribution:"
 tab r15mstat, missing
 
-di as txt "Married_2020 dummy summary:"
-tab married_2020, missing
+di as txt "Married_2022 dummy summary:"
+tab married_2022, missing
 
 * ---------------------------------------------------------------------
 * Immigration status: born in US dummy from rabplace only
@@ -87,21 +88,21 @@ else {
     generate double rabplace_num = rabplace
 }
 
-capture drop born_us
-gen byte born_us = .
+capture drop born_us_2022
+gen byte born_us_2022 = .
 * 1-10 are US Census divisions; 12=US territory => treat as US-born
-replace born_us = 1 if inrange(rabplace_num,1,10) | rabplace_num == 12
+replace born_us_2022 = 1 if inrange(rabplace_num,1,10) | rabplace_num == 12
 * 11=Not US or US territory; 13=Not US => not US-born
-replace born_us = 0 if inlist(rabplace_num,11,13)
-label values born_us yesno
-label var born_us "Born in US (1) vs not US (0)"
+replace born_us_2022 = 0 if inlist(rabplace_num,11,13)
+label values born_us_2022 yesno
+label var born_us_2022 "Born in US (1) vs not US (0)"
 
 di as txt "Immigration raw distribution (rabplace or numeric copy):"
 tab rabplace_num, missing
-quietly count if !missing(born_us)
-di as txt "Non-missing born_us count: " r(N)
+quietly count if !missing(born_us_2022)
+di as txt "Non-missing born_us_2022 count: " r(N)
 di as txt "Born-in-US dummy summary:"
-tab born_us, missing
+tab born_us_2022, missing
 
 * ---------------------------------------------------------------------
 * Respondent income aggregates (2020)
@@ -120,13 +121,13 @@ foreach v of local lab_vars {
 }
 
 * Sum with rule: missing only if all components missing
-capture drop resp_lab_inc
-egen double resp_lab_inc = rowtotal(`lab_vars')
-replace resp_lab_inc = . if missing(r15iearn) & missing(r15ipena) & missing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
-label var resp_lab_inc "Respondent labor income (sum of 6 components; missing if all missing)"
+capture drop resp_lab_inc_2022
+egen double resp_lab_inc_2022 = rowtotal(`lab_vars')
+replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) & missing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
+label var resp_lab_inc_2022 "Respondent labor income (sum of 6 components; missing if all missing)"
 
-di as txt "resp_lab_inc summary:"
-summarize resp_lab_inc, detail
+di as txt "resp_lab_inc_2022 summary:"
+summarize resp_lab_inc_2022, detail
 
 * Total income = labor income + household capital income + other household income
 local tot_add "h15icap h15iothr"
@@ -137,16 +138,16 @@ foreach v of local tot_add {
     }
 }
 
-capture drop resp_tot_inc
-gen double resp_tot_inc = resp_lab_inc ///
+capture drop resp_tot_inc_2022
+gen double resp_tot_inc_2022 = resp_lab_inc_2022 ///
     + cond(missing(h15icap), 0, h15icap) ///
     + cond(missing(h15iothr), 0, h15iothr)
 * If labor income is missing AND both additions are missing, set total to missing as well
-replace resp_tot_inc = . if missing(resp_lab_inc) & missing(h15icap) & missing(h15iothr)
-label var resp_tot_inc "Respondent total income (labor + hwicap + hwiother; missing if all missing)"
+replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h15icap) & missing(h15iothr)
+label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + hwiother; missing if all missing)"
 
-di as txt "resp_tot_inc summary:"
-summarize resp_tot_inc, detail
+di as txt "resp_tot_inc_2022 summary:"
+summarize resp_tot_inc_2022, detail
 
 * ---------------------------------------------------------------------
 * Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net worth (h15atotb)
@@ -159,35 +160,35 @@ if _rc {
 }
 
 * Wealth percentile (continuous 0-100 across non-missing)
-capture drop wealth_rank wealth_pct
+capture drop wealth_rank_2020 wealth_pct_2020
 quietly count if !missing(h15atotb)
 local N_wealth = r(N)
-egen double wealth_rank = rank(h15atotb) if !missing(h15atotb)
-gen double wealth_pct = .
-replace wealth_pct = 100 * (wealth_rank - 1) / (`N_wealth' - 1) if `N_wealth' > 1 & !missing(wealth_rank)
-replace wealth_pct = 50 if `N_wealth' == 1 & !missing(wealth_rank)
-label variable wealth_pct "Wealth percentile (based on h15atotb)"
+egen double wealth_rank_2020 = rank(h15atotb) if !missing(h15atotb)
+gen double wealth_pct_2020 = .
+replace wealth_pct_2020 = 100 * (wealth_rank_2020 - 1) / (`N_wealth' - 1) if `N_wealth' > 1 & !missing(wealth_rank_2020)
+replace wealth_pct_2020 = 50 if `N_wealth' == 1 & !missing(wealth_rank_2020)
+label variable wealth_pct_2020 "Wealth percentile (based on h15atotb)"
 
 di as txt "Wealth percentile diagnostics:"
-quietly count if !missing(wealth_pct)
-di as txt "  Non-missing wealth_pct: " r(N)
-tabstat wealth_pct, stats(n mean sd p50 min max) format(%12.4f)
-di as txt "[summarize] wealth_pct"
-capture noisily summarize wealth_pct, detail
+quietly count if !missing(wealth_pct_2020)
+di as txt "  Non-missing wealth_pct_2020: " r(N)
+tabstat wealth_pct_2020, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "[summarize] wealth_pct_2020"
+capture noisily summarize wealth_pct_2020, detail
 
 * Wealth deciles (1-10) across non-missing h15atotb
-capture drop wealth_decile
-xtile wealth_decile = h15atotb if !missing(h15atotb), n(10)
-label var wealth_decile "Wealth decile (1=lowest,10=highest)"
+capture drop wealth_decile_2020
+xtile wealth_decile_2020 = h15atotb if !missing(h15atotb), n(10)
+label var wealth_decile_2020 "Wealth decile (1=lowest,10=highest)"
 di as txt "Wealth decile distribution:"
-tab wealth_decile, missing
+tab wealth_decile_2020, missing
 
 * Create decile dummies wealth_d1-wealth_d10
 forvalues d = 1/10 {
-    capture drop wealth_d`d'
-    gen byte wealth_d`d' = wealth_decile == `d' if !missing(wealth_decile)
-    label values wealth_d`d' yesno
-    label var wealth_d`d' "Wealth decile `d'"
+    capture drop wealth_d`d'_2020
+    gen byte wealth_d`d'_2020 = wealth_decile_2020 == `d' if !missing(wealth_decile_2020)
+    label values wealth_d`d'_2020 yesno
+    label var wealth_d`d'_2020 "Wealth decile `d'"
 }
 
 * ---------------------------------------------------------------------

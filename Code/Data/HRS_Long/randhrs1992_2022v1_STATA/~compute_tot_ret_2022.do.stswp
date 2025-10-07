@@ -70,9 +70,7 @@ di as txt "flow_total_2022 found - using imported flows from HRS_RAND data"
 di as txt "Total net investment flows (flow_total_2022) summary:"
 summarize flow_total_2022, detail
 
-* Safe flows: treat missing as zero for computations
-capture drop flow_total_2022_safe
-gen double flow_total_2022_safe = cond(missing(flow_total_2022), 0, flow_total_2022)
+* Note: We will not create "safe" copies; we'll build numerators/denominators inline
 
 * ---------------------------------------------------------------------
 * Step 2: Beginning net worth (A_{2020})
@@ -108,9 +106,7 @@ gen double y_c_2022 = h16icap
 di as txt "Capital income (y_c_2022) summary:"
 summarize y_c_2022, detail
 
-* Safe capital income: treat missing as zero
-capture drop y_c_2022_safe
-gen double y_c_2022_safe = cond(missing(y_c_2022), 0, y_c_2022)
+* We'll use y_c_2022 directly in inline expressions below
 
 * ---------------------------------------------------------------------
 * Step 4: Compute capital gains by asset class (V_2022 - V_2020)
@@ -249,9 +245,11 @@ else {
     summarize cg_oth_2022, detail
 }
 
-* Total capital gains (sum; treat missing components as zero)
+* Total capital gains (sum non-missing components; set total to missing if ALL components missing)
 capture drop cg_total_2022
-gen double cg_total_2022 = cond(missing(cg_res_2022), 0, cg_res_2022) + ///
+egen byte any_cg_2022 = rownonmiss(cg_res_2022 cg_res2_2022 cg_re_2022 cg_bus_2022 cg_ira_2022 cg_stk_2022 cg_bnd_2022 cg_chk_2022 cg_cd_2022 cg_veh_2022 cg_oth_2022)
+gen double cg_total_2022 = .
+replace cg_total_2022 = cond(missing(cg_res_2022), 0, cg_res_2022) + ///
                           cond(missing(cg_res2_2022), 0, cg_res2_2022) + ///
                           cond(missing(cg_re_2022), 0, cg_re_2022) + ///
                           cond(missing(cg_bus_2022), 0, cg_bus_2022) + ///
@@ -261,11 +259,10 @@ gen double cg_total_2022 = cond(missing(cg_res_2022), 0, cg_res_2022) + ///
                           cond(missing(cg_chk_2022), 0, cg_chk_2022) + ///
                           cond(missing(cg_cd_2022), 0, cg_cd_2022) + ///
                           cond(missing(cg_veh_2022), 0, cg_veh_2022) + ///
-                          cond(missing(cg_oth_2022), 0, cg_oth_2022)
+                          cond(missing(cg_oth_2022), 0, cg_oth_2022) if any_cg_2022>0
+drop any_cg_2022
 
-* Safe CG (already zero when all components missing)
-capture drop cg_total_2022_safe
-gen double cg_total_2022_safe = cond(missing(cg_total_2022), 0, cg_total_2022)
+* Use cg_total_2022 directly below with inline missing handling
 
 di as txt "Total capital gains (cg_total_2022) summary:"
 summarize cg_total_2022, detail
@@ -330,17 +327,30 @@ di as txt "Debt payments set to zero for now"
 * ---------------------------------------------------------------------
 di as txt "=== Computing period returns ==="
 
-* Numerator (safe): y^c_2022 + sum_c(cg_class) - F_total_period (exclude debt payments)
+* Numerator: y^c_2022 + cg_total_2022 - flow_total_2022
+* - Treat missing components as 0 when present with others
+* - If ALL three are missing, set numerator to missing
 capture drop num_period
-gen double num_period = y_c_2022_safe + cg_total_2022_safe - flow_total_2022_safe
+gen double num_period = cond(missing(y_c_2022),0,y_c_2022) + ///
+                        cond(missing(cg_total_2022),0,cg_total_2022) - ///
+                        cond(missing(flow_total_2022),0,flow_total_2022)
+egen byte __num_has = rownonmiss(y_c_2022 cg_total_2022 flow_total_2022)
+replace num_period = . if __num_has == 0
+drop __num_has
 
-* Base (safe flows): A_{2020} + 0.5 * F_total_period
+* Base: A_{2020} + 0.5 * F_total_period (treat missing flows as 0 only when A_2020 is non-missing)
 capture drop base
-gen double base = a_2020 + 0.5 * flow_total_2022_safe
+gen double base = .
+replace base = a_2020 + 0.5 * cond(missing(flow_total_2022),0,flow_total_2022) if !missing(a_2020)
 
 * --- EXCLUDE RESIDENTIAL: compute returns using same base ---
 capture drop num_period_excl_res
-gen double num_period_excl_res = y_c_2022_safe + cg_total_2022_excl_res_safe - flow_total_2022_excl_res_safe
+gen double num_period_excl_res = cond(missing(y_c_2022),0,y_c_2022) + ///
+                                 cond(missing(cg_total_2022_excl_res),0,cg_total_2022_excl_res) - ///
+                                 cond(missing(flow_total_2022_excl_res),0,flow_total_2022_excl_res)
+egen byte __num_has_ex = rownonmiss(y_c_2022 cg_total_2022_excl_res flow_total_2022_excl_res)
+replace num_period_excl_res = . if __num_has_ex == 0
+drop __num_has_ex
 
 capture drop r_period_excl_res
 gen double r_period_excl_res = num_period_excl_res / base
@@ -460,35 +470,17 @@ di as txt "Trimmed returns summary:"
 summarize r_annual_2022_trimmed, detail
 
 * ---------------------------------------------------------------------
-* Step 9: Comprehensive diagnostics
+* Step 9: Simple N diagnostics (included vs excl-res)
 * ---------------------------------------------------------------------
-di as txt "=== Comprehensive Diagnostics ==="
-
-* Sample composition
+di as txt "=== N diagnostics (included and excl-res) ==="
+quietly count if !missing(r_period)
+di as txt "  N r_period (included): " r(N)
 quietly count if !missing(r_annual_2022)
-local n_with_returns = r(N)
-di as txt "Households with computed returns: `n_with_returns'"
-
-* Missing value patterns
-di as txt "Missing value patterns:"
-quietly count if missing(y_c_2022)
-di as txt "  Missing capital income: " r(N)
-quietly count if missing(cg_total_2022)
-di as txt "  Missing capital gains: " r(N)
-quietly count if missing(a_2020)
-di as txt "  Missing beginning net worth: " r(N)
-quietly count if missing(flow_total_2022)
-di as txt "  Missing flows: " r(N)
-
-* Extreme values
-quietly count if r_annual_2022 > 5 & !missing(r_annual_2022)
-di as txt "Returns > 500%: " r(N)
-quietly count if r_annual_2022 < -1 & !missing(r_annual_2022)
-di as txt "Returns < -100%: " r(N)
-
-* Component summaries
-di as txt "Component summaries:"
-tabstat y_c_2022 cg_total_2022 flow_total_2022 a_2020 r_period r_annual_2022, stats(n mean sd p50 min max) format(%12.4f)
+di as txt "  N r_annual_2022 (included): " r(N)
+quietly count if !missing(r_period_excl_res)
+di as txt "  N r_period_excl_res: " r(N)
+quietly count if !missing(r_annual_2022_excl_res)
+di as txt "  N r_annual_2022_excl_res: " r(N)
 
 * ---------------------------------------------------------------------
 * Save results
@@ -504,3 +496,24 @@ local n_obs_final = r(N)
 di as txt "Final file: `n_obs_final' observations, `n_vars_final' variables"
 
 log close
+
+* ---------------------------------------------------------------------
+* Post-run diagnostics: counts and overlap of included vs excl-res returns
+* ---------------------------------------------------------------------
+di as txt "=== Returns availability diagnostics (2022) ==="
+capture noisily {
+    quietly count if !missing(r_annual_2022)
+    local N_inc = r(N)
+    quietly count if !missing(r_annual_2022_excl_res)
+    local N_ex = r(N)
+    quietly count if !missing(r_annual_2022) & !missing(r_annual_2022_excl_res)
+    local N_both = r(N)
+    di as txt "  Non-missing included: `N_inc'"
+    di as txt "  Non-missing excl-res: `N_ex'"
+    di as txt "  Non-missing both: `N_both'"
+    gen byte has_r22    = !missing(r_annual_2022)
+    gen byte has_r22_ex = !missing(r_annual_2022_excl_res)
+    di as txt "  Cross-tab of included vs excl-res availability:"
+    tab has_r22 has_r22_ex, missing
+    drop has_r22 has_r22_ex
+}
