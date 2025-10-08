@@ -1,0 +1,852 @@
+--------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
+> 92_2022v1_STATA/RAND_2016_merge_and_returns.log
+  log type:  text
+ opened on:   8 Oct 2025, 10:22:02
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
+> dhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. local raw_2016  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_ra
+> w/2016/h16f2c_STATA/h16f2c.dta"
+
+. local out_ana   "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
+> dhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. 
+. * ---------------------------------------------------------------------
+. * Load unified dataset and check key
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading unified analysis dataset ==="
+=== Loading unified analysis dataset ===
+
+. capture confirm file "`long_file'"
+
+. if _rc {
+.     di as error "ERROR: unified analysis dataset not found -> `long_file'"
+.     exit 198
+. }
+
+. use "`long_file'", clear
+
+. capture confirm variable hhidpn
+
+. if _rc {
+.     di as error "ERROR: hhidpn not found in unified dataset"
+.     exit 198
+. }
+
+. 
+. * ---------------------------------------------------------------------
+. * Load 2016 RAND fat file and extract flows
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading 2016 RAND fat file ==="
+=== Loading 2016 RAND fat file ===
+
+. preserve
+
+. capture confirm file "`raw_2016'"
+
+. if _rc {
+.     di as error "ERROR: RAW 2016 file not found -> `raw_2016'"
+.     exit 198
+. }
+
+. use "`raw_2016'", clear
+
+. capture confirm variable hhidpn
+
+. if _rc {
+.     di as error "ERROR: hhidpn not found in RAW 2016"
+.     exit 198
+. }
+
+. 
+. * 2016 flow variables per notes
+. local flow16 "pr050 pr055 pr063 pr064 pr072 pr030 pr035 pr045 pq171_1 pq171_2 pq171_3 pr00
+> 7 pr013 pr024"
+
+. 
+. di as txt "Checking presence of 2016 flow variables..."
+Checking presence of 2016 flow variables...
+
+. foreach v of local flow16 {
+  2.     capture confirm variable `v'
+  3.     if _rc di as warn "  MISSING in 2016 RAW: `v'"
+  4.     else  di as txt  "  OK in 2016 RAW: `v'"
+  5. }
+  OK in 2016 RAW: pr050
+  OK in 2016 RAW: pr055
+  OK in 2016 RAW: pr063
+  OK in 2016 RAW: pr064
+  OK in 2016 RAW: pr072
+  OK in 2016 RAW: pr030
+  OK in 2016 RAW: pr035
+  OK in 2016 RAW: pr045
+  OK in 2016 RAW: pq171_1
+  OK in 2016 RAW: pq171_2
+  OK in 2016 RAW: pq171_3
+  OK in 2016 RAW: pr007
+  OK in 2016 RAW: pr013
+  OK in 2016 RAW: pr024
+
+. 
+. keep hhidpn `flow16'
+
+. tempfile raw16_flows
+
+. save "`raw16_flows'", replace
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .dta format
+
+. restore
+
+. 
+. * ---------------------------------------------------------------------
+. * Merge flows into unified dataset
+. * ---------------------------------------------------------------------
+. di as txt "=== Merging 2016 flows into unified dataset ==="
+=== Merging 2016 flows into unified dataset ===
+
+. merge 1:1 hhidpn using "`raw16_flows'", keep(master match)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         3,393
+        from master                     3,393  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                            12,463  (_merge==3)
+    -----------------------------------------
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |      3,393       21.40       21.40
+            Matched (3) |     12,463       78.60      100.00
+------------------------+-----------------------------------
+                  Total |     15,856      100.00
+
+. drop _merge
+
+. 
+. * ---------------------------------------------------------------------
+. * Clean special/miscodes for flow inputs (mirror prior rules)
+. * ---------------------------------------------------------------------
+. local misscodes 999998 999999 9999999 99999998 99999999 999999999 999999998 9999999999 999
+> 9999998 -8 -9
+
+. foreach v of local flow16 {
+  2.     capture confirm numeric variable `v'
+  3.     if !_rc {
+  4.         foreach mc of local misscodes {
+  5.             quietly replace `v' = . if `v' == `mc'
+  6.         }
+  7.     }
+  8. }
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute 2016 flow aggregates (suffix _2016)
+. * ---------------------------------------------------------------------
+. * pr063 direction and magnitude
+. capture drop pr063_dir16
+
+. gen byte pr063_dir16 = .
+(15,856 missing values generated)
+
+. replace pr063_dir16 = -1 if pr063 == 1
+(84 real changes made)
+
+. replace pr063_dir16 =  1 if pr063 == 2
+(84 real changes made)
+
+. replace pr063_dir16 =  0 if pr063 == 3
+(136 real changes made)
+
+. 
+. capture drop flow_bus_2016
+
+. gen double flow_bus_2016 = .
+(15,856 missing values generated)
+
+. replace flow_bus_2016 = pr055 - pr050 if !missing(pr055) & !missing(pr050)
+(12 real changes made)
+
+. replace flow_bus_2016 = pr055 if  missing(pr050) & !missing(pr055)
+(18 real changes made)
+
+. replace flow_bus_2016 = -pr050 if !missing(pr050) &  missing(pr055)
+(157 real changes made)
+
+. 
+. capture drop flow_stk_private_2016
+
+. gen double flow_stk_private_2016 = pr063_dir16 * pr064 if !missing(pr063_dir16) & !missing
+> (pr064)
+(15,697 missing values generated)
+
+. 
+. capture drop flow_stk_public_2016
+
+. gen double flow_stk_public_2016 = pr072 if !missing(pr072)
+(14,079 missing values generated)
+
+. 
+. capture drop flow_stk_2016
+
+. gen double flow_stk_2016 = cond(!missing(flow_stk_private_2016), flow_stk_private_2016, 0)
+>  + ///
+>                            cond(!missing(flow_stk_public_2016),  flow_stk_public_2016,  0)
+
+. replace flow_stk_2016 = . if missing(flow_stk_private_2016) & missing(flow_stk_public_2016
+> )
+(13,920 real changes made, 13,920 to missing)
+
+. 
+. capture drop flow_re_2016
+
+. gen double flow_re_2016 = .
+(15,856 missing values generated)
+
+. replace flow_re_2016 = cond(missing(pr035),0,pr035) - ( cond(missing(pr030),0,pr030) + con
+> d(missing(pr045),0,pr045) ) if !missing(pr035) | !missing(pr030) | !missing(pr045)
+(331 real changes made)
+
+. 
+. capture drop flow_ira_2016
+
+. egen double flow_ira_2016 = rowtotal(pq171_1 pq171_2 pq171_3)
+
+. replace flow_ira_2016 = . if missing(pq171_1) & missing(pq171_2) & missing(pq171_3)
+(14,208 real changes made, 14,208 to missing)
+
+. 
+. capture drop flow_residences_2016
+
+. gen double flow_residences_2016 = .
+(15,856 missing values generated)
+
+. replace flow_residences_2016 = cond(missing(pr013),0,pr013) - ( cond(missing(pr007),0,pr00
+> 7) + cond(missing(pr024),0,pr024) ) if !missing(pr013) | !missing(pr007) | !missing(pr024)
+(2,053 real changes made)
+
+. replace flow_residences_2016 = . if missing(pr013) & missing(pr007) & missing(pr024)
+(0 real changes made)
+
+. 
+. capture drop flow_total_2016
+
+. gen double flow_total_2016 = .
+(15,856 missing values generated)
+
+. egen byte any_flow_present16 = rownonmiss(flow_bus_2016 flow_re_2016 flow_stk_2016 flow_ir
+> a_2016 flow_residences_2016)
+
+. replace flow_total_2016 = cond(missing(flow_bus_2016),0,flow_bus_2016) + ///
+>                           cond(missing(flow_re_2016),0,flow_re_2016) + ///
+>                           cond(missing(flow_stk_2016),0,flow_stk_2016) + ///
+>                           cond(missing(flow_ira_2016),0,flow_ira_2016) + ///
+>                           cond(missing(flow_residences_2016),0,flow_residences_2016) ///
+>                           if any_flow_present16 > 0
+(4,365 real changes made)
+
+. drop any_flow_present16
+
+. 
+. di as txt "Flows 2016 summaries:"
+Flows 2016 summaries:
+
+. summarize flow_bus_2016 flow_re_2016 flow_stk_2016 flow_ira_2016 flow_residences_2016 flow
+> _total_2016
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+flow_bu~2016 |        187   -110821.8     1491559   -9999998    9999998
+flow_re_2016 |        331   -101866.5    813731.3   -9999998     999000
+flow_stk_2~6 |      1,936    35322.34    937806.1   -9999998    9999998
+flow_ir~2016 |      1,648    23957.91    38086.03          0     400000
+flow_resid~6 |      2,053   -260584.9     1831737  -1.00e+07    9999998
+-------------+---------------------------------------------------------
+flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute TOTAL RETURNS for 2016 (period 2014-2016)
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing 2016 returns (2014-2016) ==="
+=== Computing 2016 returns (2014-2016) ===
+
+. 
+. * Denominator base: A_{2014}
+. capture drop a_2014
+
+. gen double a_2014 = h12atotb
+(6,018 missing values generated)
+
+. label var a_2014 "Total net assets (A_2014 = h12atotb)"
+
+. 
+. * Capital income y^c_2016
+. capture drop y_c_2016
+
+. gen double y_c_2016 = h13icap
+(3,393 missing values generated)
+
+. label var y_c_2016 "Capital income 2016 (h13icap)"
+
+. 
+. * Capital gains per class: cg_class = V_2016 - V_2014
+. capture drop cg_pri_res_2016 cg_sec_res_2016 cg_re_2016 cg_bus_2016 cg_ira_2016 cg_stk_201
+> 6 cg_bond_2016 cg_chck_2016 cg_cd_2016 cg_veh_2016 cg_oth_2016
+
+. gen double cg_pri_res_2016 = h13atoth - h12atoth
+(6,257 missing values generated)
+
+. gen double cg_sec_res_2016 = h13anethb - h12anethb
+(6,257 missing values generated)
+
+. gen double cg_re_2016      = h13arles - h12arles
+(6,257 missing values generated)
+
+. gen double cg_bus_2016     = h13absns - h12absns
+(6,257 missing values generated)
+
+. gen double cg_ira_2016     = h13aira  - h12aira
+(6,257 missing values generated)
+
+. gen double cg_stk_2016     = h13astck - h12astck
+(6,257 missing values generated)
+
+. gen double cg_bond_2016    = h13abond - h12abond
+(6,257 missing values generated)
+
+. gen double cg_chck_2016    = h13achck - h12achck
+(6,257 missing values generated)
+
+. gen double cg_cd_2016      = h13acd   - h12acd
+(6,257 missing values generated)
+
+. gen double cg_veh_2016     = h13atran - h12atran
+(6,257 missing values generated)
+
+. gen double cg_oth_2016     = h13aothr - h12aothr
+(6,257 missing values generated)
+
+. 
+. di as txt "Capital gains components (2014->2016) summaries:"
+Capital gains components (2014->2016) summaries:
+
+. summarize cg_pri_res_2016 cg_sec_res_2016 cg_re_2016 cg_bus_2016 cg_ira_2016 cg_stk_2016 c
+> g_bond_2016 cg_chck_2016 cg_cd_2016 cg_veh_2016 cg_oth_2016
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+cg_pri_~2016 |      9,599    20439.64    154670.8   -3000000    6000000
+cg_sec_~2016 |      9,599    829.2808      146187   -6700000    6000000
+  cg_re_2016 |      9,599    6383.033    223793.3   -6000000    6141576
+ cg_bus_2016 |      9,599    1901.475    212450.7   -5021034    7400000
+ cg_ira_2016 |      9,599    8528.824    152875.5   -2300000    2521000
+-------------+---------------------------------------------------------
+ cg_stk_2016 |      9,599    7393.397    267791.1   -4500000    7823479
+cg_bond_2016 |      9,599    819.5022    57000.35   -1000000    1500000
+cg_chck_2016 |      9,599    872.2618    94365.42   -4373000    1500000
+  cg_cd_2016 |      9,599    520.3344     34810.6    -600000     750000
+ cg_veh_2016 |      9,599    911.0429    20984.58    -301000     400000
+-------------+---------------------------------------------------------
+ cg_oth_2016 |      9,599   -207.1755    84944.39   -2000000    1400000
+
+. 
+. * Total capital gains with missing logic
+. capture drop cg_total_2016
+
+. egen byte any_cg_2016 = rownonmiss(cg_pri_res_2016 cg_sec_res_2016 cg_re_2016 cg_bus_2016 
+> cg_ira_2016 cg_stk_2016 cg_bond_2016 cg_chck_2016 cg_cd_2016 cg_veh_2016 cg_oth_2016)
+
+. gen double cg_total_2016 = .
+(15,856 missing values generated)
+
+. replace cg_total_2016 = cond(missing(cg_pri_res_2016),0,cg_pri_res_2016) + ///
+>                         cond(missing(cg_sec_res_2016),0,cg_sec_res_2016) + ///
+>                         cond(missing(cg_re_2016),0,cg_re_2016) + ///
+>                         cond(missing(cg_bus_2016),0,cg_bus_2016) + ///
+>                         cond(missing(cg_ira_2016),0,cg_ira_2016) + ///
+>                         cond(missing(cg_stk_2016),0,cg_stk_2016) + ///
+>                         cond(missing(cg_bond_2016),0,cg_bond_2016) + ///
+>                         cond(missing(cg_chck_2016),0,cg_chck_2016) + ///
+>                         cond(missing(cg_cd_2016),0,cg_cd_2016) + ///
+>                         cond(missing(cg_veh_2016),0,cg_veh_2016) + ///
+>                         cond(missing(cg_oth_2016),0,cg_oth_2016) if any_cg_2016>0
+(9,599 real changes made)
+
+. drop any_cg_2016
+
+. 
+. di as txt "[summarize] y_c_2016, cg_total_2016, flow_total_2016"
+[summarize] y_c_2016, cg_total_2016, flow_total_2016
+
+. summarize y_c_2016 cg_total_2016 flow_total_2016
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    y_c_2016 |     12,463    14463.74    86177.78          0    7565036
+cg_tota~2016 |      9,599    48391.62    502511.7   -9456000    7798000
+flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
+
+. 
+. * Base: A_2014 + 0.5 * F_2016 (treat flows as 0 only when A_2014 is non-missing)
+. capture drop base_2016
+
+. gen double base_2016 = .
+(15,856 missing values generated)
+
+. replace base_2016 = a_2014 + 0.5 * cond(missing(flow_total_2016),0,flow_total_2016) if !mi
+> ssing(a_2014)
+(9,838 real changes made)
+
+. label var base_2016 "Base for 2016 returns (A_2014 + 0.5*F_2016)"
+
+. di as txt "[summarize] base_2016"
+[summarize] base_2016
+
+. summarize base_2016, detail
+
+         Base for 2016 returns (A_2014 + 0.5*F_2016)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      -139880       -9408994
+ 5%        -8150       -4992999
+10%            0       -4989499       Obs               9,838
+25%        20500       -4988699       Sum of wgt.       9,838
+
+50%       150100                      Mean           441274.9
+                        Largest       Std. dev.       1163665
+75%       496000       2.36e+07
+90%      1200000       2.36e+07       Variance       1.35e+12
+95%      1910250       2.37e+07       Skewness       6.189429
+99%      4983500       2.37e+07       Kurtosis       95.06811
+
+. 
+. * Period return and annualization (2-year)
+. capture drop num_period_2016 r_period_2016 r_annual_2016 r_annual_2016_trim
+
+. gen double num_period_2016 = cond(missing(y_c_2016),0,y_c_2016) + ///
+>                              cond(missing(cg_total_2016),0,cg_total_2016) - ///
+>                              cond(missing(flow_total_2016),0,flow_total_2016)
+
+. egen byte __num16_has = rownonmiss(y_c_2016 cg_total_2016 flow_total_2016)
+
+. replace num_period_2016 = . if __num16_has == 0
+(3,393 real changes made, 3,393 to missing)
+
+. drop __num16_has
+
+. 
+. gen double r_period_2016 = num_period_2016 / base_2016
+(6,709 missing values generated)
+
+. replace r_period_2016 = . if base_2016 < 10000
+(1,583 real changes made, 1,583 to missing)
+
+. gen double r_annual_2016 = (1 + r_period_2016)^(1/2) - 1
+(8,451 missing values generated)
+
+. replace r_annual_2016 = . if missing(r_period_2016)
+(0 real changes made)
+
+. 
+. * Trim 5% tails
+. capture drop r_annual_2016_trim
+
+. xtile __p_2016 = r_annual_2016 if !missing(r_annual_2016), n(100)
+
+. gen double r_annual_2016_trim = r_annual_2016
+(8,451 missing values generated)
+
+. replace r_annual_2016_trim = . if __p_2016 <= 5 | __p_2016 > 95
+(740 real changes made, 740 to missing)
+
+. drop __p_2016
+
+. 
+. di as txt "[summarize] r_period_2016, r_annual_2016, r_annual_2016_trim"
+[summarize] r_period_2016, r_annual_2016, r_annual_2016_trim
+
+. summarize r_period_2016 r_annual_2016 r_annual_2016_trim
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+r_perio~2016 |      7,564    .3735662    1.862996    -5.3366   58.57575
+r_annua~2016 |      7,405    .0984618    .4551285         -1   6.718533
+r_ann~6_trim |      6,665    .0684868    .2454073  -.4560961   .8462653
+
+. 
+. * Excluding residential housing
+. capture drop cg_total_2016_excl_res flow_total_2016_excl_res
+
+. gen double flow_total_2016_excl_res = .
+(15,856 missing values generated)
+
+. egen byte any_flow16_excl = rownonmiss(flow_bus_2016 flow_re_2016 flow_stk_2016 flow_ira_2
+> 016)
+
+. replace flow_total_2016_excl_res = cond(missing(flow_bus_2016),0,flow_bus_2016) + ///
+>                                    cond(missing(flow_re_2016),0,flow_re_2016) + ///
+>                                    cond(missing(flow_stk_2016),0,flow_stk_2016) + ///
+>                                    cond(missing(flow_ira_2016),0,flow_ira_2016) if any_flo
+> w16_excl>0
+(3,290 real changes made)
+
+. drop any_flow16_excl
+
+. 
+. gen double cg_total_2016_excl_res = .
+(15,856 missing values generated)
+
+. egen byte any_cg16_excl = rownonmiss(cg_re_2016 cg_bus_2016 cg_ira_2016 cg_stk_2016 cg_bon
+> d_2016 cg_chck_2016 cg_cd_2016 cg_veh_2016 cg_oth_2016)
+
+. replace cg_total_2016_excl_res = cond(missing(cg_re_2016),0,cg_re_2016) + ///
+>                                  cond(missing(cg_bus_2016),0,cg_bus_2016) + ///
+>                                  cond(missing(cg_ira_2016),0,cg_ira_2016) + ///
+>                                  cond(missing(cg_stk_2016),0,cg_stk_2016) + ///
+>                                  cond(missing(cg_bond_2016),0,cg_bond_2016) + ///
+>                                  cond(missing(cg_chck_2016),0,cg_chck_2016) + ///
+>                                  cond(missing(cg_cd_2016),0,cg_cd_2016) + ///
+>                                  cond(missing(cg_veh_2016),0,cg_veh_2016) + ///
+>                                  cond(missing(cg_oth_2016),0,cg_oth_2016) if any_cg16_excl
+> >0
+(9,599 real changes made)
+
+. drop any_cg16_excl
+
+. 
+. di as txt "EXCL-RES: cg_total_2016_excl_res and flow_total_2016_excl_res summaries:"
+EXCL-RES: cg_total_2016_excl_res and flow_total_2016_excl_res summaries:
+
+. summarize cg_total_2016_excl_res flow_total_2016_excl_res
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+c~6_excl_res |      9,599     27122.7    449469.4   -8530000    8334479
+f~6_excl_res |      3,290    16238.67      844014   -9999998   1.00e+07
+
+. 
+. * Use SAME base_2016
+. capture drop num_period_2016_excl_res r_period_2016_excl_res r_annual_2016_excl_res r_annu
+> al_2016_excl_res_trim
+
+. gen double num_period_2016_excl_res = cond(missing(y_c_2016),0,y_c_2016) + ///
+>                                       cond(missing(cg_total_2016_excl_res),0,cg_total_2016
+> _excl_res) - ///
+>                                       cond(missing(flow_total_2016_excl_res),0,flow_total_
+> 2016_excl_res)
+
+. egen byte __num16ex_has = rownonmiss(y_c_2016 cg_total_2016_excl_res flow_total_2016_excl_
+> res)
+
+. replace num_period_2016_excl_res = . if __num16ex_has == 0
+(3,393 real changes made, 3,393 to missing)
+
+. drop __num16ex_has
+
+. 
+. gen double r_period_2016_excl_res = num_period_2016_excl_res / base_2016
+(6,709 missing values generated)
+
+. replace r_period_2016_excl_res = . if base_2016 < 10000
+(1,583 real changes made, 1,583 to missing)
+
+. gen double r_annual_2016_excl_res = (1 + r_period_2016_excl_res)^(1/2) - 1
+(8,367 missing values generated)
+
+. replace r_annual_2016_excl_res = . if missing(r_period_2016_excl_res)
+(0 real changes made)
+
+. 
+. * Trim 5% for excl-res
+. xtile __p_ex16 = r_annual_2016_excl_res if !missing(r_annual_2016_excl_res), n(100)
+
+. gen double r_annual_2016_excl_res_trim = r_annual_2016_excl_res
+(8,367 missing values generated)
+
+. replace r_annual_2016_excl_res_trim = . if __p_ex16 <= 5 | __p_ex16 > 95
+(749 real changes made, 749 to missing)
+
+. drop __p_ex16
+
+. 
+. di as txt "[summarize] r_period_2016_excl_res, r_annual_2016_excl_res, r_annual_2016_excl_
+> res_trim"
+[summarize] r_period_2016_excl_res, r_annual_2016_excl_res, r_annual_2016_excl_res_trim
+
+. summarize r_period_2016_excl_res r_annual_2016_excl_res r_annual_2016_excl_res_trim
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+r_period_2.. |      7,564    .2016245     1.23759     -4.116   36.18355
+r_annual_2.. |      7,489    .0497784    .3406494         -1   5.097831
+r_annual_2.. |      6,740    .0262947    .1597994   -.343159   .5696353
+
+. 
+. * ---------------------------------------------------------------------
+. * Prepare 2014 controls inline (married_2014, wealth_*_2014, age_2014, inlbrf_2014)
+. * ---------------------------------------------------------------------
+. di as txt "=== Preparing 2014 controls (inline) ==="
+=== Preparing 2014 controls (inline) ===
+
+. 
+. * Marital status (2014): r12mstat -> married_2014
+. capture confirm variable r12mstat
+
+. if _rc {
+.     di as error "ERROR: r12mstat not found"
+.     exit 198
+. }
+
+. capture drop married_2014
+
+. gen byte married_2014 = .
+(15,856 missing values generated)
+
+. replace married_2014 = 1 if inlist(r12mstat, 1, 2)
+(6,077 real changes made)
+
+. replace married_2014 = 0 if inlist(r12mstat, 3, 4, 5, 6, 7, 8)
+(3,750 real changes made)
+
+. label define yesno 0 "no" 1 "yes", replace
+
+. label values married_2014 yesno
+
+. label var married_2014 "Married (r12mstat: 1 or 2) vs not married (3-8)"
+
+. di as txt "Marital status (2014) summary:"
+Marital status (2014) summary:
+
+. tab married_2014, missing
+
+    Married |
+ (r12mstat: |
+ 1 or 2) vs |
+not married |
+      (3-8) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         no |      3,750       23.65       23.65
+        yes |      6,077       38.33       61.98
+          . |      6,029       38.02      100.00
+------------+-----------------------------------
+      Total |     15,856      100.00
+
+. 
+. * Wealth percentile/deciles for 2014 using h12atotb
+. capture confirm variable h12atotb
+
+. if _rc {
+.     di as error "ERROR: h12atotb not found"
+.     exit 198
+. }
+
+. capture drop wealth_rank_2014 wealth_pct_2014
+
+. quietly count if !missing(h12atotb)
+
+. local N_wealth14 = r(N)
+
+. egen double wealth_rank_2014 = rank(h12atotb) if !missing(h12atotb)
+(6,018 missing values generated)
+
+. gen double wealth_pct_2014 = .
+(15,856 missing values generated)
+
+. replace wealth_pct_2014 = 100 * (wealth_rank_2014 - 1) / (`N_wealth14' - 1) if `N_wealth14
+> ' > 1 & !missing(wealth_rank_2014)
+(9,838 real changes made)
+
+. replace wealth_pct_2014 = 50 if `N_wealth14' == 1 & !missing(wealth_rank_2014)
+(0 real changes made)
+
+. label variable wealth_pct_2014 "Wealth percentile (based on h12atotb)"
+
+. di as txt "Wealth percentile (2014) summary:"
+Wealth percentile (2014) summary:
+
+. summarize wealth_pct_2014
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+wealth_pct~4 |      9,838          50    28.87029          0   99.99492
+
+. 
+. capture drop wealth_decile_2014
+
+. xtile wealth_decile_2014 = h12atotb if !missing(h12atotb), n(10)
+
+. label var wealth_decile_2014 "Wealth decile (1=lowest,10=highest)"
+
+. di as txt "Wealth decile distribution (2014):"
+Wealth decile distribution (2014):
+
+. tab wealth_decile_2014, missing
+
+     Wealth |
+     decile |
+(1=lowest,1 |
+ 0=highest) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      1,155        7.28        7.28
+          2 |        813        5.13       12.41
+          3 |        984        6.21       18.62
+          4 |        985        6.21       24.83
+          5 |        982        6.19       31.02
+          6 |        986        6.22       37.24
+          7 |        982        6.19       43.43
+          8 |        988        6.23       49.67
+          9 |        980        6.18       55.85
+         10 |        983        6.20       62.05
+          . |      6,018       37.95      100.00
+------------+-----------------------------------
+      Total |     15,856      100.00
+
+. 
+. forvalues d = 1/10 {
+  2.     capture drop wealth_d`d'_2014
+  3.     gen byte wealth_d`d'_2014 = wealth_decile_2014 == `d' if !missing(wealth_decile_201
+> 4)
+  4.     label values wealth_d`d'_2014 yesno
+  5.     label var wealth_d`d'_2014 "Wealth decile `d' (2014)"
+  6. }
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+(6,018 missing values generated)
+
+. 
+. * Age (2014): carry r12agey_b to age_2014
+. capture confirm variable r12agey_b
+
+. if _rc {
+.     di as error "ERROR: r12agey_b not found"
+.     exit 198
+. }
+
+. capture drop age_2014
+
+. gen double age_2014 = r12agey_b
+(6,018 missing values generated)
+
+. label var age_2014 "Respondent age in 2014 (r12agey_b)"
+
+. di as txt "Age (2014) summary:"
+Age (2014) summary:
+
+. summarize age_2014
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    age_2014 |      9,838    64.52531    9.302137         18         97
+
+. 
+. * Employment (2014): carry r12inlbrf to inlbrf_2014
+. capture confirm variable r12inlbrf
+
+. if _rc {
+.     di as error "ERROR: r12inlbrf not found"
+.     exit 198
+. }
+
+. capture drop inlbrf_2014
+
+. clonevar inlbrf_2014 = r12inlbrf
+(6,049 missing values generated)
+
+. label var inlbrf_2014 "Labor force status in 2014 (r12inlbrf)"
+
+. di as txt "Employment (2014) distribution:"
+Employment (2014) distribution:
+
+. tab inlbrf_2014, missing
+
+          Labor force status in 2014 |
+                         (r12inlbrf) |      Freq.     Percent        Cum.
+-------------------------------------+-----------------------------------
+                                0.no |      4,970       31.34       31.34
+                               1.yes |      4,837       30.51       61.85
+                                   . |      6,018       37.95       99.80
+                               .d=dk |          2        0.01       99.82
+                .i=institutionalized |         18        0.11       99.93
+                      .m=oth missing |          8        0.05       99.98
+                               .r=rf |          3        0.02      100.00
+-------------------------------------+-----------------------------------
+                               Total |     15,856      100.00
+
+. 
+. * Save back to unified analysis dataset
+. di as txt "=== Saving updated analysis dataset (with 2016 flows and returns) ==="
+=== Saving updated analysis dataset (with 2016 flows and returns) ===
+
+. 
+. * Overlap only: All 4-year overlap (included/excl-res)
+. di as txt "=== Overlap across years (counts) ==="
+=== Overlap across years (counts) ===
+
+. quietly count if !missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_annual_201
+> 8) & !missing(r_annual_2016)
+
+. di as txt "  All 4 years (included): " %9.0f r(N)
+  All 4 years (included):      6063
+
+. quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !mi
+> ssing(r_annual_2018_excl_res) & !missing(r_annual_2016_excl_res)
+
+. di as txt "  All 4 years (excl-res): " %9.0f r(N)
+  All 4 years (excl-res):      6110
+
+. 
+. * Trimmed overlaps
+. quietly count if !missing(r_annual_2022_trim) & !missing(r_annual_2020_trim) & !missing(r_
+> annual_2018_trim) & !missing(r_annual_2016_trim)
+
+. di as txt "  All 4 years (included, trimmed): " %9.0f r(N)
+  All 4 years (included, trimmed):      4877
+
+. quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_t
+> rim) & !missing(r_annual_2018_excl_res_trim) & !missing(r_annual_2016_excl_res_trim)
+
+. di as txt "  All 4 years (excl-res, trimmed): " %9.0f r(N)
+  All 4 years (excl-res, trimmed):      4711
+
+. 
+. save "`out_ana'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_ran
+    > dhrs1992_2022v1_analysis.dta saved
+
+. di as txt "Saved: `out_ana'"
+Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_202
+> 2v1_STATA/_randhrs1992_2022v1_analysis.dta
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
+> 92_2022v1_STATA/RAND_2016_merge_and_returns.log
+  log type:  text
+ closed on:   8 Oct 2025, 10:22:08
+--------------------------------------------------------------------------------------------
