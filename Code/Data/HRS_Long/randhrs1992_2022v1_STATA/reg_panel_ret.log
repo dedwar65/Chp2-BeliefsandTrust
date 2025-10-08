@@ -1,0 +1,710 @@
+--------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
+> 92_2022v1_STATA/reg_panel_ret.log
+  log type:  text
+ opened on:   8 Oct 2025, 14:24:00
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
+> dhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. local out_ana   "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
+> dhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. 
+. * ---------------------------------------------------------------------
+. * Load unified analysis dataset
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading unified analysis dataset ==="
+=== Loading unified analysis dataset ===
+
+. capture confirm file `"`long_file'"'
+
+. if _rc {
+.     di as error "ERROR: unified analysis dataset not found -> `long_file'"
+.     exit 198
+. }
+
+. use "`long_file'", clear
+
+. capture confirm variable hhidpn
+
+. if _rc {
+.     di as error "ERROR: hhidpn not found in unified dataset"
+.     exit 198
+. }
+
+. 
+. * ---------------------------------------------------------------------
+. * Drop all existing asset share variables to allow re-running
+. * ---------------------------------------------------------------------
+. di as txt "=== Dropping existing asset share variables ==="
+=== Dropping existing asset share variables ===
+
+. forvalues year = 2002(2)2020 {
+  2.     capture drop share_pri_res_`year' share_sec_res_`year' share_re_`year' share_vehicl
+> es_`year' share_bus_`year' share_ira_`year' share_stk_`year' share_chck_`year' share_cd_`y
+> ear' share_bond_`year' share_other_`year' risky_share_`year'
+  3. }
+
+. 
+. * ---------------------------------------------------------------------
+. * Compute asset shares for each wave (2002-2020)
+. * Using exact variable names from returns computation files
+. * ---------------------------------------------------------------------
+. di as txt "=== Computing asset shares for waves 2002-2020 ==="
+=== Computing asset shares for waves 2002-2020 ===
+
+. 
+. * 2002 (H6 variables)
+. di as txt "Computing asset shares for 2002 (Wave 6)"
+Computing asset shares for 2002 (Wave 6)
+
+. 
+. gen double share_pri_res_2002 = h6atoth / h6atotb if !missing(h6atoth) & !missing(h6atotb)
+>  & h6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_sec_res_2002 = h6anethb / h6atotb if !missing(h6anethb) & !missing(h6atot
+> b) & h6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_re_2002 = h6arles / h6atotb if !missing(h6arles) & !missing(h6atotb) & h6
+> atotb != 0
+(11,764 missing values generated)
+
+. gen double share_vehicles_2002 = h6atran / h6atotb if !missing(h6atran) & !missing(h6atotb
+> ) & h6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_bus_2002 = h6absns / h6atotb if !missing(h6absns) & !missing(h6atotb) & h
+> 6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_ira_2002 = h6aira / h6atotb if !missing(h6aira) & !missing(h6atotb) & h6a
+> totb != 0
+(11,764 missing values generated)
+
+. gen double share_stk_2002 = h6astck / h6atotb if !missing(h6astck) & !missing(h6atotb) & h
+> 6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_chck_2002 = h6achck / h6atotb if !missing(h6achck) & !missing(h6atotb) & 
+> h6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_cd_2002 = h6acd / h6atotb if !missing(h6acd) & !missing(h6atotb) & h6atot
+> b != 0
+(11,764 missing values generated)
+
+. gen double share_bond_2002 = h6abond / h6atotb if !missing(h6abond) & !missing(h6atotb) & 
+> h6atotb != 0
+(11,764 missing values generated)
+
+. gen double share_other_2002 = h6aothr / h6atotb if !missing(h6aothr) & !missing(h6atotb) &
+>  h6atotb != 0
+(11,764 missing values generated)
+
+. gen double risky_share_2002 = (h6astck + h6absns) / h6atotb if !missing(h6astck) & !missin
+> g(h6absns) & !missing(h6atotb) & h6atotb != 0
+(11,764 missing values generated)
+
+. replace risky_share_2002 = h6astck / h6atotb if missing(h6absns) & !missing(h6astck) & !mi
+> ssing(h6atotb) & h6atotb != 0
+(0 real changes made)
+
+. replace risky_share_2002 = h6absns / h6atotb if missing(h6astck) & !missing(h6absns) & !mi
+> ssing(h6atotb) & h6atotb != 0
+(0 real changes made)
+
+. 
+. * 2004 (H7 variables)
+. di as txt "Computing asset shares for 2004 (Wave 7)"
+Computing asset shares for 2004 (Wave 7)
+
+. 
+. gen double share_pri_res_2004 = h7atoth / h7atotb if !missing(h7atoth) & !missing(h7atotb)
+>  & h7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_sec_res_2004 = h7anethb / h7atotb if !missing(h7anethb) & !missing(h7atot
+> b) & h7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_re_2004 = h7arles / h7atotb if !missing(h7arles) & !missing(h7atotb) & h7
+> atotb != 0
+(10,060 missing values generated)
+
+. gen double share_vehicles_2004 = h7atran / h7atotb if !missing(h7atran) & !missing(h7atotb
+> ) & h7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_bus_2004 = h7absns / h7atotb if !missing(h7absns) & !missing(h7atotb) & h
+> 7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_ira_2004 = h7aira / h7atotb if !missing(h7aira) & !missing(h7atotb) & h7a
+> totb != 0
+(10,060 missing values generated)
+
+. gen double share_stk_2004 = h7astck / h7atotb if !missing(h7astck) & !missing(h7atotb) & h
+> 7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_chck_2004 = h7achck / h7atotb if !missing(h7achck) & !missing(h7atotb) & 
+> h7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_cd_2004 = h7acd / h7atotb if !missing(h7acd) & !missing(h7atotb) & h7atot
+> b != 0
+(10,060 missing values generated)
+
+. gen double share_bond_2004 = h7abond / h7atotb if !missing(h7abond) & !missing(h7atotb) & 
+> h7atotb != 0
+(10,060 missing values generated)
+
+. gen double share_other_2004 = h7aothr / h7atotb if !missing(h7aothr) & !missing(h7atotb) &
+>  h7atotb != 0
+(10,060 missing values generated)
+
+. gen double risky_share_2004 = (h7astck + h7absns) / h7atotb if !missing(h7astck) & !missin
+> g(h7absns) & !missing(h7atotb) & h7atotb != 0
+(10,060 missing values generated)
+
+. replace risky_share_2004 = h7astck / h7atotb if missing(h7absns) & !missing(h7astck) & !mi
+> ssing(h7atotb) & h7atotb != 0
+(0 real changes made)
+
+. replace risky_share_2004 = h7absns / h7atotb if missing(h7astck) & !missing(h7absns) & !mi
+> ssing(h7atotb) & h7atotb != 0
+(0 real changes made)
+
+. 
+. * 2006 (H8 variables)
+. di as txt "Computing asset shares for 2006 (Wave 8)"
+Computing asset shares for 2006 (Wave 8)
+
+. 
+. gen double share_pri_res_2006 = h8atoth / h8atotb if !missing(h8atoth) & !missing(h8atotb)
+>  & h8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_sec_res_2006 = h8anethb / h8atotb if !missing(h8anethb) & !missing(h8atot
+> b) & h8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_re_2006 = h8arles / h8atotb if !missing(h8arles) & !missing(h8atotb) & h8
+> atotb != 0
+(10,098 missing values generated)
+
+. gen double share_vehicles_2006 = h8atran / h8atotb if !missing(h8atran) & !missing(h8atotb
+> ) & h8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_bus_2006 = h8absns / h8atotb if !missing(h8absns) & !missing(h8atotb) & h
+> 8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_ira_2006 = h8aira / h8atotb if !missing(h8aira) & !missing(h8atotb) & h8a
+> totb != 0
+(10,098 missing values generated)
+
+. gen double share_stk_2006 = h8astck / h8atotb if !missing(h8astck) & !missing(h8atotb) & h
+> 8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_chck_2006 = h8achck / h8atotb if !missing(h8achck) & !missing(h8atotb) & 
+> h8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_cd_2006 = h8acd / h8atotb if !missing(h8acd) & !missing(h8atotb) & h8atot
+> b != 0
+(10,098 missing values generated)
+
+. gen double share_bond_2006 = h8abond / h8atotb if !missing(h8abond) & !missing(h8atotb) & 
+> h8atotb != 0
+(10,098 missing values generated)
+
+. gen double share_other_2006 = h8aothr / h8atotb if !missing(h8aothr) & !missing(h8atotb) &
+>  h8atotb != 0
+(10,098 missing values generated)
+
+. gen double risky_share_2006 = (h8astck + h8absns) / h8atotb if !missing(h8astck) & !missin
+> g(h8absns) & !missing(h8atotb) & h8atotb != 0
+(10,098 missing values generated)
+
+. replace risky_share_2006 = h8astck / h8atotb if missing(h8absns) & !missing(h8astck) & !mi
+> ssing(h8atotb) & h8atotb != 0
+(0 real changes made)
+
+. replace risky_share_2006 = h8absns / h8atotb if missing(h8astck) & !missing(h8absns) & !mi
+> ssing(h8atotb) & h8atotb != 0
+(0 real changes made)
+
+. 
+. * 2008 (H9 variables)
+. di as txt "Computing asset shares for 2008 (Wave 9)"
+Computing asset shares for 2008 (Wave 9)
+
+. 
+. gen double share_pri_res_2008 = h9atoth / h9atotb if !missing(h9atoth) & !missing(h9atotb)
+>  & h9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_sec_res_2008 = h9anethb / h9atotb if !missing(h9anethb) & !missing(h9atot
+> b) & h9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_re_2008 = h9arles / h9atotb if !missing(h9arles) & !missing(h9atotb) & h9
+> atotb != 0
+(10,011 missing values generated)
+
+. gen double share_vehicles_2008 = h9atran / h9atotb if !missing(h9atran) & !missing(h9atotb
+> ) & h9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_bus_2008 = h9absns / h9atotb if !missing(h9absns) & !missing(h9atotb) & h
+> 9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_ira_2008 = h9aira / h9atotb if !missing(h9aira) & !missing(h9atotb) & h9a
+> totb != 0
+(10,011 missing values generated)
+
+. gen double share_stk_2008 = h9astck / h9atotb if !missing(h9astck) & !missing(h9atotb) & h
+> 9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_chck_2008 = h9achck / h9atotb if !missing(h9achck) & !missing(h9atotb) & 
+> h9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_cd_2008 = h9acd / h9atotb if !missing(h9acd) & !missing(h9atotb) & h9atot
+> b != 0
+(10,011 missing values generated)
+
+. gen double share_bond_2008 = h9abond / h9atotb if !missing(h9abond) & !missing(h9atotb) & 
+> h9atotb != 0
+(10,011 missing values generated)
+
+. gen double share_other_2008 = h9aothr / h9atotb if !missing(h9aothr) & !missing(h9atotb) &
+>  h9atotb != 0
+(10,011 missing values generated)
+
+. gen double risky_share_2008 = (h9astck + h9absns) / h9atotb if !missing(h9astck) & !missin
+> g(h9absns) & !missing(h9atotb) & h9atotb != 0
+(10,011 missing values generated)
+
+. replace risky_share_2008 = h9astck / h9atotb if missing(h9absns) & !missing(h9astck) & !mi
+> ssing(h9atotb) & h9atotb != 0
+(0 real changes made)
+
+. replace risky_share_2008 = h9absns / h9atotb if missing(h9astck) & !missing(h9absns) & !mi
+> ssing(h9atotb) & h9atotb != 0
+(0 real changes made)
+
+. 
+. * 2010 (H10 variables)
+. di as txt "Computing asset shares for 2010 (Wave 10)"
+Computing asset shares for 2010 (Wave 10)
+
+. 
+. gen double share_pri_res_2010 = h10atoth / h10atotb if !missing(h10atoth) & !missing(h10at
+> otb) & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_sec_res_2010 = h10anethb / h10atotb if !missing(h10anethb) & !missing(h10
+> atotb) & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_re_2010 = h10arles / h10atotb if !missing(h10arles) & !missing(h10atotb) 
+> & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_vehicles_2010 = h10atran / h10atotb if !missing(h10atran) & !missing(h10a
+> totb) & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_bus_2010 = h10absns / h10atotb if !missing(h10absns) & !missing(h10atotb)
+>  & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_ira_2010 = h10aira / h10atotb if !missing(h10aira) & !missing(h10atotb) &
+>  h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_stk_2010 = h10astck / h10atotb if !missing(h10astck) & !missing(h10atotb)
+>  & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_chck_2010 = h10achck / h10atotb if !missing(h10achck) & !missing(h10atotb
+> ) & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_cd_2010 = h10acd / h10atotb if !missing(h10acd) & !missing(h10atotb) & h1
+> 0atotb != 0
+(6,579 missing values generated)
+
+. gen double share_bond_2010 = h10abond / h10atotb if !missing(h10abond) & !missing(h10atotb
+> ) & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double share_other_2010 = h10aothr / h10atotb if !missing(h10aothr) & !missing(h10atot
+> b) & h10atotb != 0
+(6,579 missing values generated)
+
+. gen double risky_share_2010 = (h10astck + h10absns) / h10atotb if !missing(h10astck) & !mi
+> ssing(h10absns) & !missing(h10atotb) & h10atotb != 0
+(6,579 missing values generated)
+
+. replace risky_share_2010 = h10astck / h10atotb if missing(h10absns) & !missing(h10astck) &
+>  !missing(h10atotb) & h10atotb != 0
+(0 real changes made)
+
+. replace risky_share_2010 = h10absns / h10atotb if missing(h10astck) & !missing(h10absns) &
+>  !missing(h10atotb) & h10atotb != 0
+(0 real changes made)
+
+. 
+. * 2012 (H11 variables)
+. di as txt "Computing asset shares for 2012 (Wave 11)"
+Computing asset shares for 2012 (Wave 11)
+
+. 
+. gen double share_pri_res_2012 = h11atoth / h11atotb if !missing(h11atoth) & !missing(h11at
+> otb) & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_sec_res_2012 = h11anethb / h11atotb if !missing(h11anethb) & !missing(h11
+> atotb) & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_re_2012 = h11arles / h11atotb if !missing(h11arles) & !missing(h11atotb) 
+> & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_vehicles_2012 = h11atran / h11atotb if !missing(h11atran) & !missing(h11a
+> totb) & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_bus_2012 = h11absns / h11atotb if !missing(h11absns) & !missing(h11atotb)
+>  & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_ira_2012 = h11aira / h11atotb if !missing(h11aira) & !missing(h11atotb) &
+>  h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_stk_2012 = h11astck / h11atotb if !missing(h11astck) & !missing(h11atotb)
+>  & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_chck_2012 = h11achck / h11atotb if !missing(h11achck) & !missing(h11atotb
+> ) & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_cd_2012 = h11acd / h11atotb if !missing(h11acd) & !missing(h11atotb) & h1
+> 1atotb != 0
+(6,554 missing values generated)
+
+. gen double share_bond_2012 = h11abond / h11atotb if !missing(h11abond) & !missing(h11atotb
+> ) & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double share_other_2012 = h11aothr / h11atotb if !missing(h11aothr) & !missing(h11atot
+> b) & h11atotb != 0
+(6,554 missing values generated)
+
+. gen double risky_share_2012 = (h11astck + h11absns) / h11atotb if !missing(h11astck) & !mi
+> ssing(h11absns) & !missing(h11atotb) & h11atotb != 0
+(6,554 missing values generated)
+
+. replace risky_share_2012 = h11astck / h11atotb if missing(h11absns) & !missing(h11astck) &
+>  !missing(h11atotb) & h11atotb != 0
+(0 real changes made)
+
+. replace risky_share_2012 = h11absns / h11atotb if missing(h11astck) & !missing(h11absns) &
+>  !missing(h11atotb) & h11atotb != 0
+(0 real changes made)
+
+. 
+. * 2014 (H12 variables)
+. di as txt "Computing asset shares for 2014 (Wave 12)"
+Computing asset shares for 2014 (Wave 12)
+
+. 
+. gen double share_pri_res_2014 = h12atoth / h12atotb if !missing(h12atoth) & !missing(h12at
+> otb) & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_sec_res_2014 = h12anethb / h12atotb if !missing(h12anethb) & !missing(h12
+> atotb) & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_re_2014 = h12arles / h12atotb if !missing(h12arles) & !missing(h12atotb) 
+> & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_vehicles_2014 = h12atran / h12atotb if !missing(h12atran) & !missing(h12a
+> totb) & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_bus_2014 = h12absns / h12atotb if !missing(h12absns) & !missing(h12atotb)
+>  & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_ira_2014 = h12aira / h12atotb if !missing(h12aira) & !missing(h12atotb) &
+>  h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_stk_2014 = h12astck / h12atotb if !missing(h12astck) & !missing(h12atotb)
+>  & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_chck_2014 = h12achck / h12atotb if !missing(h12achck) & !missing(h12atotb
+> ) & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_cd_2014 = h12acd / h12atotb if !missing(h12acd) & !missing(h12atotb) & h1
+> 2atotb != 0
+(6,491 missing values generated)
+
+. gen double share_bond_2014 = h12abond / h12atotb if !missing(h12abond) & !missing(h12atotb
+> ) & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double share_other_2014 = h12aothr / h12atotb if !missing(h12aothr) & !missing(h12atot
+> b) & h12atotb != 0
+(6,491 missing values generated)
+
+. gen double risky_share_2014 = (h12astck + h12absns) / h12atotb if !missing(h12astck) & !mi
+> ssing(h12absns) & !missing(h12atotb) & h12atotb != 0
+(6,491 missing values generated)
+
+. replace risky_share_2014 = h12astck / h12atotb if missing(h12absns) & !missing(h12astck) &
+>  !missing(h12atotb) & h12atotb != 0
+(0 real changes made)
+
+. replace risky_share_2014 = h12absns / h12atotb if missing(h12astck) & !missing(h12absns) &
+>  !missing(h12atotb) & h12atotb != 0
+(0 real changes made)
+
+. 
+. * 2016 (H13 variables)
+. di as txt "Computing asset shares for 2016 (Wave 13)"
+Computing asset shares for 2016 (Wave 13)
+
+. 
+. gen double share_pri_res_2016 = h13atoth / h13atotb if !missing(h13atoth) & !missing(h13at
+> otb) & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_sec_res_2016 = h13anethb / h13atotb if !missing(h13anethb) & !missing(h13
+> atotb) & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_re_2016 = h13arles / h13atotb if !missing(h13arles) & !missing(h13atotb) 
+> & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_vehicles_2016 = h13atran / h13atotb if !missing(h13atran) & !missing(h13a
+> totb) & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_bus_2016 = h13absns / h13atotb if !missing(h13absns) & !missing(h13atotb)
+>  & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_ira_2016 = h13aira / h13atotb if !missing(h13aira) & !missing(h13atotb) &
+>  h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_stk_2016 = h13astck / h13atotb if !missing(h13astck) & !missing(h13atotb)
+>  & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_chck_2016 = h13achck / h13atotb if !missing(h13achck) & !missing(h13atotb
+> ) & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_cd_2016 = h13acd / h13atotb if !missing(h13acd) & !missing(h13atotb) & h1
+> 3atotb != 0
+(4,178 missing values generated)
+
+. gen double share_bond_2016 = h13abond / h13atotb if !missing(h13abond) & !missing(h13atotb
+> ) & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double share_other_2016 = h13aothr / h13atotb if !missing(h13aothr) & !missing(h13atot
+> b) & h13atotb != 0
+(4,178 missing values generated)
+
+. gen double risky_share_2016 = (h13astck + h13absns) / h13atotb if !missing(h13astck) & !mi
+> ssing(h13absns) & !missing(h13atotb) & h13atotb != 0
+(4,178 missing values generated)
+
+. replace risky_share_2016 = h13astck / h13atotb if missing(h13absns) & !missing(h13astck) &
+>  !missing(h13atotb) & h13atotb != 0
+(0 real changes made)
+
+. replace risky_share_2016 = h13absns / h13atotb if missing(h13astck) & !missing(h13absns) &
+>  !missing(h13atotb) & h13atotb != 0
+(0 real changes made)
+
+. 
+. * 2018 (H14 variables)
+. di as txt "Computing asset shares for 2018 (Wave 14)"
+Computing asset shares for 2018 (Wave 14)
+
+. 
+. gen double share_pri_res_2018 = h14atoth / h14atotb if !missing(h14atoth) & !missing(h14at
+> otb) & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_sec_res_2018 = h14anethb / h14atotb if !missing(h14anethb) & !missing(h14
+> atotb) & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_re_2018 = h14arles / h14atotb if !missing(h14arles) & !missing(h14atotb) 
+> & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_vehicles_2018 = h14atran / h14atotb if !missing(h14atran) & !missing(h14a
+> totb) & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_bus_2018 = h14absns / h14atotb if !missing(h14absns) & !missing(h14atotb)
+>  & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_ira_2018 = h14aira / h14atotb if !missing(h14aira) & !missing(h14atotb) &
+>  h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_stk_2018 = h14astck / h14atotb if !missing(h14astck) & !missing(h14atotb)
+>  & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_chck_2018 = h14achck / h14atotb if !missing(h14achck) & !missing(h14atotb
+> ) & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_cd_2018 = h14acd / h14atotb if !missing(h14acd) & !missing(h14atotb) & h1
+> 4atotb != 0
+(4,705 missing values generated)
+
+. gen double share_bond_2018 = h14abond / h14atotb if !missing(h14abond) & !missing(h14atotb
+> ) & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double share_other_2018 = h14aothr / h14atotb if !missing(h14aothr) & !missing(h14atot
+> b) & h14atotb != 0
+(4,705 missing values generated)
+
+. gen double risky_share_2018 = (h14astck + h14absns) / h14atotb if !missing(h14astck) & !mi
+> ssing(h14absns) & !missing(h14atotb) & h14atotb != 0
+(4,705 missing values generated)
+
+. replace risky_share_2018 = h14astck / h14atotb if missing(h14absns) & !missing(h14astck) &
+>  !missing(h14atotb) & h14atotb != 0
+(0 real changes made)
+
+. replace risky_share_2018 = h14absns / h14atotb if missing(h14astck) & !missing(h14absns) &
+>  !missing(h14atotb) & h14atotb != 0
+(0 real changes made)
+
+. 
+. * 2020 (H15 variables)
+. di as txt "Computing asset shares for 2020 (Wave 15)"
+Computing asset shares for 2020 (Wave 15)
+
+. 
+. gen double share_pri_res_2020 = h15atoth / h15atotb if !missing(h15atoth) & !missing(h15at
+> otb) & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_sec_res_2020 = h15anethb / h15atotb if !missing(h15anethb) & !missing(h15
+> atotb) & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_re_2020 = h15arles / h15atotb if !missing(h15arles) & !missing(h15atotb) 
+> & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_vehicles_2020 = h15atran / h15atotb if !missing(h15atran) & !missing(h15a
+> totb) & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_bus_2020 = h15absns / h15atotb if !missing(h15absns) & !missing(h15atotb)
+>  & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_ira_2020 = h15aira / h15atotb if !missing(h15aira) & !missing(h15atotb) &
+>  h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_stk_2020 = h15astck / h15atotb if !missing(h15astck) & !missing(h15atotb)
+>  & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_chck_2020 = h15achck / h15atotb if !missing(h15achck) & !missing(h15atotb
+> ) & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_cd_2020 = h15acd / h15atotb if !missing(h15acd) & !missing(h15atotb) & h1
+> 5atotb != 0
+(4,484 missing values generated)
+
+. gen double share_bond_2020 = h15abond / h15atotb if !missing(h15abond) & !missing(h15atotb
+> ) & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double share_other_2020 = h15aothr / h15atotb if !missing(h15aothr) & !missing(h15atot
+> b) & h15atotb != 0
+(4,484 missing values generated)
+
+. gen double risky_share_2020 = (h15astck + h15absns) / h15atotb if !missing(h15astck) & !mi
+> ssing(h15absns) & !missing(h15atotb) & h15atotb != 0
+(4,484 missing values generated)
+
+. replace risky_share_2020 = h15astck / h15atotb if missing(h15absns) & !missing(h15astck) &
+>  !missing(h15atotb) & h15atotb != 0
+(0 real changes made)
+
+. replace risky_share_2020 = h15absns / h15atotb if missing(h15astck) & !missing(h15absns) &
+>  !missing(h15atotb) & h15atotb != 0
+(0 real changes made)
+
+. 
+. * ---------------------------------------------------------------------
+. * Create wave dummy variables for all 11 waves
+. * ---------------------------------------------------------------------
+. di as txt "=== Creating wave dummy variables ==="
+=== Creating wave dummy variables ===
+
+. 
+. * Drop existing wave dummy variables
+. foreach y in 2002 2004 2006 2008 2010 2012 2014 2016 2018 2020 2022 {
+  2.     capture drop wave`y'
+  3. }
+
+. 
+. * Create wave dummy variables
+. foreach y in 2002 2004 2006 2008 2010 2012 2014 2016 2018 2020 2022 {
+  2.     gen byte wave`y' = (year==`y')
+  3.     label var wave`y' "Wave `y' dummy"
+  4. }
+year not found
+r(111);
+
+end of do-file
+
+r(111);
+
