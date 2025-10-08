@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
 > 92_2022v1_STATA/RAND_2016_merge_and_returns.log
   log type:  text
- opened on:   8 Oct 2025, 10:22:02
+ opened on:   8 Oct 2025, 11:02:27
 
 . 
 . set more off
@@ -143,8 +143,8 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . * ---------------------------------------------------------------------
 . * Clean special/miscodes for flow inputs (mirror prior rules)
 . * ---------------------------------------------------------------------
-. local misscodes 999998 999999 9999999 99999998 99999999 999999999 999999998 9999999999 999
-> 9999998 -8 -9
+. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 999999
+> 9999 9999999998 -8 -9 -9999999 -9999998
 
 . foreach v of local flow16 {
   2.     capture confirm numeric variable `v'
@@ -184,17 +184,17 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 (12 real changes made)
 
 . replace flow_bus_2016 = pr055 if  missing(pr050) & !missing(pr055)
-(18 real changes made)
+(17 real changes made)
 
 . replace flow_bus_2016 = -pr050 if !missing(pr050) &  missing(pr055)
-(157 real changes made)
+(154 real changes made)
 
 . 
 . capture drop flow_stk_private_2016
 
 . gen double flow_stk_private_2016 = pr063_dir16 * pr064 if !missing(pr063_dir16) & !missing
 > (pr064)
-(15,697 missing values generated)
+(15,714 missing values generated)
 
 . 
 . capture drop flow_stk_public_2016
@@ -211,7 +211,7 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 
 . replace flow_stk_2016 = . if missing(flow_stk_private_2016) & missing(flow_stk_public_2016
 > )
-(13,920 real changes made, 13,920 to missing)
+(13,937 real changes made, 13,937 to missing)
 
 . 
 . capture drop flow_re_2016
@@ -221,7 +221,7 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 
 . replace flow_re_2016 = cond(missing(pr035),0,pr035) - ( cond(missing(pr030),0,pr030) + con
 > d(missing(pr045),0,pr045) ) if !missing(pr035) | !missing(pr030) | !missing(pr045)
-(331 real changes made)
+(329 real changes made)
 
 . 
 . capture drop flow_ira_2016
@@ -239,7 +239,7 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 
 . replace flow_residences_2016 = cond(missing(pr013),0,pr013) - ( cond(missing(pr007),0,pr00
 > 7) + cond(missing(pr024),0,pr024) ) if !missing(pr013) | !missing(pr007) | !missing(pr024)
-(2,053 real changes made)
+(1,992 real changes made)
 
 . replace flow_residences_2016 = . if missing(pr013) & missing(pr007) & missing(pr024)
 (0 real changes made)
@@ -259,7 +259,7 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 >                           cond(missing(flow_ira_2016),0,flow_ira_2016) + ///
 >                           cond(missing(flow_residences_2016),0,flow_residences_2016) ///
 >                           if any_flow_present16 > 0
-(4,365 real changes made)
+(4,320 real changes made)
 
 . drop any_flow_present16
 
@@ -272,13 +272,13 @@ Flows 2016 summaries:
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-flow_bu~2016 |        187   -110821.8     1491559   -9999998    9999998
-flow_re_2016 |        331   -101866.5    813731.3   -9999998     999000
-flow_stk_2~6 |      1,936    35322.34    937806.1   -9999998    9999998
+flow_bu~2016 |        183   -3954.525    297397.5   -1000000    3000000
+flow_re_2016 |        329   -41695.44    255280.5   -1800000     999000
+flow_stk_2~6 |      1,919   -842.0677    46845.05   -1000000     800000
 flow_ir~2016 |      1,648    23957.91    38086.03          0     400000
-flow_resid~6 |      2,053   -260584.9     1831737  -1.00e+07    9999998
+flow_resid~6 |      1,992     -7520.5    151321.1   -2400000    1200000
 -------------+---------------------------------------------------------
-flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
+flow_to~2016 |      4,320    1954.719    144532.3   -2163000    2600000
 
 . 
 . * ---------------------------------------------------------------------
@@ -401,7 +401,7 @@ cg_chck_2016 |      9,599    872.2618    94365.42   -4373000    1500000
 -------------+---------------------------------------------------------
     y_c_2016 |     12,463    14463.74    86177.78          0    7565036
 cg_tota~2016 |      9,599    48391.62    502511.7   -9456000    7798000
-flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
+flow_to~2016 |      4,320    1954.719    144532.3   -2163000    2600000
 
 . 
 . * Base: A_2014 + 0.5 * F_2016 (treat flows as 0 only when A_2014 is non-missing)
@@ -424,17 +424,17 @@ flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
          Base for 2016 returns (A_2014 + 0.5*F_2016)
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%      -139880       -9408994
- 5%        -8150       -4992999
-10%            0       -4989499       Obs               9,838
-25%        20500       -4988699       Sum of wgt.       9,838
+ 1%       -72600       -1109500
+ 5%        -5900        -490992
+10%            0        -381000       Obs               9,838
+25%        22500        -300000       Sum of wgt.       9,838
 
-50%       150100                      Mean           441274.9
-                        Largest       Std. dev.       1163665
-75%       496000       2.36e+07
-90%      1200000       2.36e+07       Variance       1.35e+12
-95%      1910250       2.37e+07       Skewness       6.189429
-99%      4983500       2.37e+07       Kurtosis       95.06811
+50%       153820                      Mean           465670.1
+                        Largest       Std. dev.       1050387
+75%       503000       2.36e+07
+90%      1190813       2.36e+07       Variance       1.10e+12
+95%      1880564       2.37e+07       Skewness       8.737123
+99%      4472504       2.37e+07       Kurtosis        135.221
 
 . 
 . * Period return and annualization (2-year)
@@ -456,10 +456,10 @@ flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
 (6,709 missing values generated)
 
 . replace r_period_2016 = . if base_2016 < 10000
-(1,583 real changes made, 1,583 to missing)
+(1,515 real changes made, 1,515 to missing)
 
 . gen double r_annual_2016 = (1 + r_period_2016)^(1/2) - 1
-(8,451 missing values generated)
+(8,363 missing values generated)
 
 . replace r_annual_2016 = . if missing(r_period_2016)
 (0 real changes made)
@@ -471,10 +471,10 @@ flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
 . xtile __p_2016 = r_annual_2016 if !missing(r_annual_2016), n(100)
 
 . gen double r_annual_2016_trim = r_annual_2016
-(8,451 missing values generated)
+(8,363 missing values generated)
 
 . replace r_annual_2016_trim = . if __p_2016 <= 5 | __p_2016 > 95
-(740 real changes made, 740 to missing)
+(749 real changes made, 749 to missing)
 
 . drop __p_2016
 
@@ -486,9 +486,9 @@ flow_to~2016 |      4,365     -110322     1477713  -2.00e+07   1.02e+07
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-r_perio~2016 |      7,564    .3735662    1.862996    -5.3366   58.57575
-r_annua~2016 |      7,405    .0984618    .4551285         -1   6.718533
-r_ann~6_trim |      6,665    .0684868    .2454073  -.4560961   .8462653
+r_perio~2016 |      7,632    .3834557    1.882637    -5.3366   58.57575
+r_annua~2016 |      7,493    .0993591    .4574666         -1   6.718533
+r_ann~6_trim |      6,744    .0687194    .2452809  -.4522774   .8462653
 
 . 
 . * Excluding residential housing
@@ -505,7 +505,7 @@ r_ann~6_trim |      6,665    .0684868    .2454073  -.4560961   .8462653
 >                                    cond(missing(flow_stk_2016),0,flow_stk_2016) + ///
 >                                    cond(missing(flow_ira_2016),0,flow_ira_2016) if any_flo
 > w16_excl>0
-(3,290 real changes made)
+(3,277 real changes made)
 
 . drop any_flow16_excl
 
@@ -539,7 +539,7 @@ EXCL-RES: cg_total_2016_excl_res and flow_total_2016_excl_res summaries:
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
 c~6_excl_res |      9,599     27122.7    449469.4   -8530000    8334479
-f~6_excl_res |      3,290    16238.67      844014   -9999998   1.00e+07
+f~6_excl_res |      3,277    7148.374    116197.3   -1800000    2600000
 
 . 
 . * Use SAME base_2016
@@ -565,10 +565,10 @@ f~6_excl_res |      3,290    16238.67      844014   -9999998   1.00e+07
 (6,709 missing values generated)
 
 . replace r_period_2016_excl_res = . if base_2016 < 10000
-(1,583 real changes made, 1,583 to missing)
+(1,515 real changes made, 1,515 to missing)
 
 . gen double r_annual_2016_excl_res = (1 + r_period_2016_excl_res)^(1/2) - 1
-(8,367 missing values generated)
+(8,289 missing values generated)
 
 . replace r_annual_2016_excl_res = . if missing(r_period_2016_excl_res)
 (0 real changes made)
@@ -578,10 +578,10 @@ f~6_excl_res |      3,290    16238.67      844014   -9999998   1.00e+07
 . xtile __p_ex16 = r_annual_2016_excl_res if !missing(r_annual_2016_excl_res), n(100)
 
 . gen double r_annual_2016_excl_res_trim = r_annual_2016_excl_res
-(8,367 missing values generated)
+(8,289 missing values generated)
 
 . replace r_annual_2016_excl_res_trim = . if __p_ex16 <= 5 | __p_ex16 > 95
-(749 real changes made, 749 to missing)
+(758 real changes made, 758 to missing)
 
 . drop __p_ex16
 
@@ -594,9 +594,9 @@ f~6_excl_res |      3,290    16238.67      844014   -9999998   1.00e+07
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-r_period_2.. |      7,564    .2016245     1.23759     -4.116   36.18355
-r_annual_2.. |      7,489    .0497784    .3406494         -1   5.097831
-r_annual_2.. |      6,740    .0262947    .1597994   -.343159   .5696353
+r_period_2.. |      7,632    .2041124     1.23257     -4.116   36.18355
+r_annual_2.. |      7,567    .0500513    .3399965         -1   5.097831
+r_annual_2.. |      6,809    .0266725    .1598237   -.339579   .5696353
 
 . 
 . * ---------------------------------------------------------------------
@@ -810,13 +810,13 @@ Employment (2014) distribution:
 > 8) & !missing(r_annual_2016)
 
 . di as txt "  All 4 years (included): " %9.0f r(N)
-  All 4 years (included):      6063
+  All 4 years (included):      6136
 
 . quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !mi
 > ssing(r_annual_2018_excl_res) & !missing(r_annual_2016_excl_res)
 
 . di as txt "  All 4 years (excl-res): " %9.0f r(N)
-  All 4 years (excl-res):      6110
+  All 4 years (excl-res):      6178
 
 . 
 . * Trimmed overlaps
@@ -824,13 +824,13 @@ Employment (2014) distribution:
 > annual_2018_trim) & !missing(r_annual_2016_trim)
 
 . di as txt "  All 4 years (included, trimmed): " %9.0f r(N)
-  All 4 years (included, trimmed):      4877
+  All 4 years (included, trimmed):      4935
 
 . quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_t
 > rim) & !missing(r_annual_2018_excl_res_trim) & !missing(r_annual_2016_excl_res_trim)
 
 . di as txt "  All 4 years (excl-res, trimmed): " %9.0f r(N)
-  All 4 years (excl-res, trimmed):      4711
+  All 4 years (excl-res, trimmed):      4761
 
 . 
 . save "`out_ana'", replace
@@ -848,5 +848,5 @@ Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
 > 92_2022v1_STATA/RAND_2016_merge_and_returns.log
   log type:  text
- closed on:   8 Oct 2025, 10:22:08
+ closed on:   8 Oct 2025, 11:02:33
 --------------------------------------------------------------------------------------------

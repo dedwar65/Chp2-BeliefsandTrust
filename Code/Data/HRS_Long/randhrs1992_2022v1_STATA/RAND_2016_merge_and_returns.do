@@ -76,7 +76,7 @@ drop _merge
 * ---------------------------------------------------------------------
 * Clean special/miscodes for flow inputs (mirror prior rules)
 * ---------------------------------------------------------------------
-local misscodes 999998 999999 9999999 99999998 99999999 999999999 999999998 9999999999 9999999998 -8 -9
+local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 9999999999 9999999998 -8 -9 -9999999 -9999998
 foreach v of local flow16 {
     capture confirm numeric variable `v'
     if !_rc {
@@ -368,5 +368,7 @@ save "`out_ana'", replace
 di as txt "Saved: `out_ana'"
 
 log close
+
+
 
 

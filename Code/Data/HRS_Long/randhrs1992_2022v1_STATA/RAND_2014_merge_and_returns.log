@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
 > 92_2022v1_STATA/RAND_2014_merge_and_returns.log
   log type:  text
- opened on:   8 Oct 2025, 10:37:27
+ opened on:   8 Oct 2025, 11:02:35
 
 . 
 . set more off
@@ -853,7 +853,7 @@ Employment (2012) distribution:
 
 . 
 . di as txt "  All 5 years (included): " %9.0f r(N)
-  All 5 years (included):      5722
+  All 5 years (included):      5791
 
 . 
 . quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !mi
@@ -862,7 +862,7 @@ Employment (2012) distribution:
 
 . 
 . di as txt "  All 5 years (excl-res): " %9.0f r(N)
-  All 5 years (excl-res):      5760
+  All 5 years (excl-res):      5823
 
 . 
 . quietly count if !missing(r_annual_2022_trim) & !missing(r_annual_2020_trim) & !missing(r_
@@ -870,7 +870,7 @@ Employment (2012) distribution:
 
 . 
 . di as txt "  All 5 years (included, trimmed): " %9.0f r(N)
-  All 5 years (included, trimmed):      4440
+  All 5 years (included, trimmed):      4492
 
 . 
 . quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_t
@@ -879,7 +879,7 @@ Employment (2012) distribution:
 
 . 
 . di as txt "  All 5 years (excl-res, trimmed): " %9.0f r(N)
-  All 5 years (excl-res, trimmed):      4228
+  All 5 years (excl-res, trimmed):      4273
 
 . 
 . save "`out_ana'", replace
@@ -898,5 +898,5 @@ Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
 > 92_2022v1_STATA/RAND_2014_merge_and_returns.log
   log type:  text
- closed on:   8 Oct 2025, 10:37:33
+ closed on:   8 Oct 2025, 11:02:39
 --------------------------------------------------------------------------------------------

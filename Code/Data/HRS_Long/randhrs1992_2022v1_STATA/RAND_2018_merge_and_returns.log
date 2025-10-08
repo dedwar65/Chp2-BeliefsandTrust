@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
 > 92_2022v1_STATA/RAND_2018_merge_and_returns.log
   log type:  text
- opened on:   7 Oct 2025, 17:46:37
+ opened on:   8 Oct 2025, 11:02:21
 
 . 
 . set more off
@@ -145,7 +145,7 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . * Clean special/miscodes for flow inputs (mirror 2022 cleaning rules)
 . * ---------------------------------------------------------------------
 . local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 999999
-> 9999 9999999998 -8 -9
+> 9999 9999999998 -8 -9 -9999999 -9999998
 
 . foreach v of local flow18 {
   2.     capture confirm numeric variable `v'
@@ -966,5 +966,5 @@ Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
 > 92_2022v1_STATA/RAND_2018_merge_and_returns.log
   log type:  text
- closed on:   7 Oct 2025, 17:46:43
+ closed on:   8 Oct 2025, 11:02:26
 --------------------------------------------------------------------------------------------
