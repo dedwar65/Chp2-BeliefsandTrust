@@ -23,93 +23,18 @@ di as txt "===================================================================="
 di as txt ""
 
 * ---------------------------------------------------------------------
-* Load panel dataset
-* ---------------------------------------------------------------------
-use "_randhrs1992_2022v1_panel.dta", clear
-
-* Restrict to balanced panel: keep only individuals with non-missing returns in ALL waves
-di as txt "Initial sample size: " %9.0f _N
-
-* Check which years are in the dataset
-quietly summarize year
-local min_year = r(min)
-local max_year = r(max)
-di as txt "Years in dataset: `min_year' to `max_year'"
-
-* Count how many years each individual has non-missing r_annual
-bysort hhidpn: egen n_nonmissing_returns = count(r_annual) if !missing(r_annual)
-
-* Count total years per individual
-bysort hhidpn: gen n_total_years = _N
-
-* Check if individual has returns in ALL years
-gen has_all_returns = (n_nonmissing_returns == n_total_years)
-
-* Keep only individuals with returns in ALL years
-keep if has_all_returns == 1
-di as txt "After keeping only individuals with returns in ALL years: " %9.0f _N
-
-* Count unique individuals
-quietly bysort hhidpn: gen tag = _n == 1
-quietly count if tag == 1
-local n_individuals = r(N)
-di as txt "Number of unique individuals in balanced panel: " %9.0f `n_individuals'
-drop tag n_nonmissing_returns n_total_years has_all_returns
-
-* Set panel structure
-xtset hhidpn year
-
-* Generate age squared
-gen age_sq = age^2
-label var age_sq "Age squared"
-
-di as txt "Panel structure set: hhidpn (individual) x year (time)"
-di as txt "Observations: " _N
-di as txt ""
-
-* Check what variables exist
-di as txt "Checking available variables..."
-describe r_annual*, short
-describe wealth_d*, short
-describe wealth_nonres_d*, short
-di as txt ""
-
-* Check for missing values in key variables
-di as txt "Checking for missing values..."
-count if missing(r_annual)
-di as txt "Missing r_annual: " r(N)
-count if missing(wealth_d2)
-di as txt "Missing wealth_d2: " r(N)
-count if missing(raedyrs)
-di as txt "Missing raedyrs: " r(N)
-count if missing(born_us)
-di as txt "Missing born_us: " r(N)
-di as txt ""
-
-* Check year variable
-tab year, missing
-di as txt ""
-
-* ---------------------------------------------------------------------
-* Regression 1: r_annual (including residential)
+* Regression 1.1: r_annual (including residential)
 * ---------------------------------------------------------------------
 di as txt "===================================================================="
 di as txt "Regression 1.1: r_annual (including residential)"
 di as txt "===================================================================="
 
-* Check if required variables exist
-capture confirm variable r_annual
-if _rc {
-    di as error "ERROR: r_annual not found"
-    exit 198
-}
+* Load fresh data
+use "_randhrs1992_2022v1_panel.dta", clear
 
-capture confirm variable wealth_d2
-if _rc {
-    di as error "ERROR: wealth_d2 not found"
-    exit 198
-}
-
+* Set panel structure
+xtset hhidpn year
+gen age_sq = age^2
 
 eststo clear
 eststo reg1_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us ///
@@ -121,11 +46,34 @@ eststo reg1_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us ///
 di as txt ""
 
 * ---------------------------------------------------------------------
-* Regression 2: r_annual_trim (including residential, trimmed)
+* Regression 1.2: r_annual_trim (including residential, trimmed)
 * ---------------------------------------------------------------------
 di as txt "===================================================================="
 di as txt "Regression 1.2: r_annual_trim (including residential, trimmed)"
 di as txt "===================================================================="
+
+* Load fresh data and restrict to balanced panel for r_annual_trim
+use "_randhrs1992_2022v1_panel.dta", clear
+
+* Count non-missing r_annual_trim per individual
+bysort hhidpn: egen n_nonmiss = count(r_annual_trim) if !missing(r_annual_trim)
+bysort hhidpn: egen total_obs = count(r_annual_trim)
+bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
+
+* Keep only individuals with non-missing r_annual_trim in ALL years (11 years total)
+keep if max_nonmiss == 11 & total_obs == 11
+drop n_nonmiss total_obs max_nonmiss
+
+* Verify balanced panel
+bysort hhidpn: gen n_obs = _N
+summarize n_obs
+di as txt "Sample restricted to individuals with r_annual_trim in all 11 years: " _N " observations"
+di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
+drop n_obs
+
+* Set panel structure
+xtset hhidpn year
+gen age_sq = age^2
 
 eststo reg1_2: reg r_annual_trim age age_sq raedyrs i.inlbrf i.married i.born_us ///
     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
@@ -136,11 +84,34 @@ eststo reg1_2: reg r_annual_trim age age_sq raedyrs i.inlbrf i.married i.born_us
 di as txt ""
 
 * ---------------------------------------------------------------------
-* Regression 3: r_annual_excl (excluding residential)
+* Regression 1.3: r_annual_excl (excluding residential)
 * ---------------------------------------------------------------------
 di as txt "===================================================================="
 di as txt "Regression 1.3: r_annual_excl (excluding residential)"
 di as txt "===================================================================="
+
+* Load fresh data and restrict to balanced panel for r_annual_excl
+use "_randhrs1992_2022v1_panel.dta", clear
+
+* Count non-missing r_annual_excl per individual
+bysort hhidpn: egen n_nonmiss = count(r_annual_excl) if !missing(r_annual_excl)
+bysort hhidpn: egen total_obs = count(r_annual_excl)
+bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
+
+* Keep only individuals with non-missing r_annual_excl in ALL years (11 years total)
+keep if max_nonmiss == 11 & total_obs == 11
+drop n_nonmiss total_obs max_nonmiss
+
+* Verify balanced panel
+bysort hhidpn: gen n_obs = _N
+summarize n_obs
+di as txt "Sample restricted to individuals with r_annual_excl in all 11 years: " _N " observations"
+di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
+drop n_obs
+
+* Set panel structure
+xtset hhidpn year
+gen age_sq = age^2
 
 eststo reg1_3: reg r_annual_excl age age_sq raedyrs i.inlbrf i.married i.born_us ///
     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
@@ -151,11 +122,34 @@ eststo reg1_3: reg r_annual_excl age age_sq raedyrs i.inlbrf i.married i.born_us
 di as txt ""
 
 * ---------------------------------------------------------------------
-* Regression 4: r_annual_excl_trim (excluding residential, trimmed)
+* Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
 * ---------------------------------------------------------------------
 di as txt "===================================================================="
 di as txt "Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)"
 di as txt "===================================================================="
+
+* Load fresh data and restrict to balanced panel for r_annual_excl_trim
+use "_randhrs1992_2022v1_panel.dta", clear
+
+* Count non-missing r_annual_excl_trim per individual
+bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r_annual_excl_trim)
+bysort hhidpn: egen total_obs = count(r_annual_excl_trim)
+bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
+
+* Keep only individuals with non-missing r_annual_excl_trim in ALL years (11 years total)
+keep if max_nonmiss == 11 & total_obs == 11
+drop n_nonmiss total_obs max_nonmiss
+
+* Verify balanced panel
+bysort hhidpn: gen n_obs = _N
+summarize n_obs
+di as txt "Sample restricted to individuals with r_annual_excl_trim in all 11 years: " _N " observations"
+di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
+drop n_obs
+
+* Set panel structure
+xtset hhidpn year
+gen age_sq = age^2
 
 eststo reg1_4: reg r_annual_excl_trim age age_sq raedyrs i.inlbrf i.married i.born_us ///
     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
@@ -169,12 +163,15 @@ di as txt ""
 * Export results
 * ---------------------------------------------------------------------
 di as txt "===================================================================="
-di as txt "Exporting results to baseline_pooled.tex"
+di as txt "=== Exporting Results                                            ==="
 di as txt "===================================================================="
 
-esttab reg1_1 reg1_2 reg1_3 reg1_4 using "baseline_pooled.tex", replace ///
+* Export to LaTeX table
+esttab reg1_1 reg1_2 reg1_3 reg1_4 using "baseline_pooled.tex", ///
+    replace booktabs ///
     se star(* 0.10 ** 0.05 *** 0.01) ///
-    label booktabs compress nogaps ///
+    label compress ///
+    drop(_cons) ///
     stats(N r2 r2_a, labels("Observations" "R-squared" "Adjusted R-squared")) ///
     title("Baseline Pooled OLS Regressions") ///
     addnote("Clustered standard errors at individual level in parentheses" ///
