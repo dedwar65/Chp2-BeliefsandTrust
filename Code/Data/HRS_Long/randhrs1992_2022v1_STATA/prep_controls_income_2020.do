@@ -4,7 +4,7 @@
 * - Works on unified analysis dataset and writes back to it
 * - Creates:
 *   married_2022 (from r15mstat)
-*   born_us_2022 (from rabplacf/rabplace)
+*   born_us (from rabplacf/rabplace)
 *   resp_lab_inc_2022 (sum: r15earn r15pena r15issdi r15isret r15iunwc r15igxfr)
 *   resp_tot_inc_2022 (resp_lab_inc_2022 + hwicap + hwiother)
 *   wealth_pct_2020, wealth_decile_2020, wealth_d1_2020-wealth_d10_2020 (based on h15atotb)
@@ -88,21 +88,21 @@ else {
     generate double rabplace_num = rabplace
 }
 
-capture drop born_us_2022
-gen byte born_us_2022 = .
+capture drop born_us
+gen byte born_us = .
 * 1-10 are US Census divisions; 12=US territory => treat as US-born
-replace born_us_2022 = 1 if inrange(rabplace_num,1,10) | rabplace_num == 12
+replace born_us = 1 if inrange(rabplace_num,1,10) | rabplace_num == 12
 * 11=Not US or US territory; 13=Not US => not US-born
-replace born_us_2022 = 0 if inlist(rabplace_num,11,13)
-label values born_us_2022 yesno
-label var born_us_2022 "Born in US (1) vs not US (0)"
+replace born_us = 0 if inlist(rabplace_num,11,13)
+label values born_us yesno
+label var born_us "Born in US (1) vs not US (0)"
 
 di as txt "Immigration raw distribution (rabplace or numeric copy):"
 tab rabplace_num, missing
-quietly count if !missing(born_us_2022)
-di as txt "Non-missing born_us_2022 count: " r(N)
+quietly count if !missing(born_us)
+di as txt "Non-missing born_us count: " r(N)
 di as txt "Born-in-US dummy summary:"
-tab born_us_2022, missing
+tab born_us, missing
 
 * ---------------------------------------------------------------------
 * Respondent income aggregates (2020)

@@ -1,0 +1,551 @@
+---------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/reg_ret_panel.log
+  log type:  text
+ opened on:  17 Oct 2025, 19:10:13
+
+. 
+. set more off
+
+. 
+. * ---------------------------------------------------------------------
+. * File paths
+. * ---------------------------------------------------------------------
+. local wide_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lon
+> g/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. local panel_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lo
+> ng/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_panel.dta"
+
+. 
+. * ---------------------------------------------------------------------
+. * Load wide-format analysis dataset
+. * ---------------------------------------------------------------------
+. di as txt "=== Loading wide-format analysis dataset ==="
+=== Loading wide-format analysis dataset ===
+
+. capture confirm file `"`wide_file'"'
+
+. if _rc {
+.     di as error "ERROR: Wide-format analysis dataset not found -> `wide_file'"
+.     exit 198
+. }
+
+. use "`wide_file'", clear
+
+. quietly describe
+
+. local n_vars_wide = r(k)
+
+. local n_obs_wide = r(N)
+
+. di as txt "Wide dataset loaded: `n_obs_wide' observations, `n_vars_wide' variables"
+Wide dataset loaded: 15856 observations, 20881 variables
+
+. 
+. capture confirm variable hhidpn
+
+. if _rc {
+.     di as error "ERROR: hhidpn not found in wide dataset"
+.     exit 198
+. }
+
+. di as txt "OK: hhidpn found in wide dataset"
+OK: hhidpn found in wide dataset
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 1: Create returns long table
+. * ---------------------------------------------------------------------
+. di as txt "=== Step 1: Creating returns long table ==="
+=== Step 1: Creating returns long table ===
+
+. 
+. * Keep only return variables and hhidpn
+. preserve
+
+. keep hhidpn r_annual_* r_annual_trim_* r_annual_excl_* r_annual_excl_trim_*
+
+. 
+. * Reshape return variables to long format
+. reshape long r_annual_ r_annual_trim_ r_annual_excl_ r_annual_excl_trim_, i(hhidpn) j
+> (return_year)
+(j = 2002 2004 2006 2008 2010 2012 2014 2016 2018 2020 2022)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations           15,856   ->   174,416     
+Number of variables                  45   ->   6           
+j variable (11 values)                    ->   return_year
+xij variables:
+r_annual_2002 r_annual_2004 ... r_annual_2022->r_annual_
+r_annual_trim_2002 r_annual_trim_2004 ... r_annual_trim_2022->r_annual_trim_
+r_annual_excl_2002 r_annual_excl_2004 ... r_annual_excl_2022->r_annual_excl_
+r_annual_excl_trim_2002 r_annual_excl_trim_2004 ... r_annual_excl_trim_2022->r_annual_e
+> xcl_trim_
+-----------------------------------------------------------------------------
+
+. 
+. * Rename variables for clarity
+. rename r_annual_ r_annual
+
+. rename r_annual_trim_ r_annual_trim
+
+. rename r_annual_excl_ r_annual_excl
+
+. rename r_annual_excl_trim_ r_annual_excl_trim
+
+. 
+. * Save returns long table
+. tempfile returns_long
+
+. save "`returns_long'", replace
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 saved as .dta
+    format
+
+. 
+. quietly describe
+
+. local n_obs_returns = r(N)
+
+. di as txt "Returns long table: `n_obs_returns' observations"
+Returns long table: 174416 observations
+
+. restore
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 2: Create controls long table
+. * ---------------------------------------------------------------------
+. di as txt "=== Step 2: Creating controls long table ==="
+=== Step 2: Creating controls long table ===
+
+. 
+. * Keep control variables and hhidpn
+. preserve
+
+. keep hhidpn age_* inlbrf_* married_* born_us raedyrs ///
+>      share_pri_res_* share_sec_res_* share_re_* share_vehicles_* share_bus_* share_ir
+> a_* ///
+>      share_stk_* share_chck_* share_cd_* share_bond_* share_other_* risky_share_* ///
+>      liability_share_* wealth_nonres_* wealth_nonres_decile_* ///
+>      wealth_nonres_d1_* wealth_nonres_d2_* wealth_nonres_d3_* wealth_nonres_d4_* weal
+> th_nonres_d5_* ///
+>      wealth_nonres_d6_* wealth_nonres_d7_* wealth_nonres_d8_* wealth_nonres_d9_* weal
+> th_nonres_d10_* ///
+>      wealth_d1_* wealth_d2_* wealth_d3_* wealth_d4_* wealth_d5_* ///
+>      wealth_d6_* wealth_d7_* wealth_d8_* wealth_d9_* wealth_d10_*
+
+. 
+. * Reshape control variables to long format
+. reshape long age_ inlbrf_ married_ ///
+>              share_pri_res_ share_sec_res_ share_re_ share_vehicles_ share_bus_ share
+> _ira_ ///
+>              share_stk_ share_chck_ share_cd_ share_bond_ share_other_ risky_share_ /
+> //
+>              liability_share_ wealth_nonres_ wealth_nonres_decile_ ///
+>              wealth_nonres_d1_ wealth_nonres_d2_ wealth_nonres_d3_ wealth_nonres_d4_ 
+> wealth_nonres_d5_ ///
+>              wealth_nonres_d6_ wealth_nonres_d7_ wealth_nonres_d8_ wealth_nonres_d9_ 
+> wealth_nonres_d10_ ///
+>              wealth_d1_ wealth_d2_ wealth_d3_ wealth_d4_ wealth_d5_ ///
+>              wealth_d6_ wealth_d7_ wealth_d8_ wealth_d9_ wealth_d10_, ///
+>              i(hhidpn) j(control_year)
+(j = 2000 2002 2004 2006 2008 2010 2012 2014 2016 2018 2020 2022)
+(variable share_pri_res_2022 not found)
+(variable share_sec_res_2022 not found)
+(variable share_re_2022 not found)
+(variable share_vehicles_2022 not found)
+(variable share_bus_2022 not found)
+(variable share_ira_2022 not found)
+(variable share_stk_2022 not found)
+(variable share_chck_2022 not found)
+(variable share_cd_2022 not found)
+(variable share_bond_2022 not found)
+(variable share_other_2022 not found)
+(variable risky_share_2022 not found)
+(variable liability_share_2022 not found)
+(variable wealth_nonres_2022 not found)
+(variable wealth_nonres_decile_2022 not found)
+(variable wealth_nonres_d1_2022 not found)
+(variable wealth_nonres_d2_2022 not found)
+(variable wealth_nonres_d3_2022 not found)
+(variable wealth_nonres_d4_2022 not found)
+(variable wealth_nonres_d5_2022 not found)
+(variable wealth_nonres_d6_2022 not found)
+(variable wealth_nonres_d7_2022 not found)
+(variable wealth_nonres_d8_2022 not found)
+(variable wealth_nonres_d9_2022 not found)
+(variable wealth_nonres_d10_2022 not found)
+(variable wealth_d1_2022 not found)
+(variable wealth_d2_2022 not found)
+(variable wealth_d3_2022 not found)
+(variable wealth_d4_2022 not found)
+(variable wealth_d5_2022 not found)
+(variable wealth_d6_2022 not found)
+(variable wealth_d7_2022 not found)
+(variable wealth_d8_2022 not found)
+(variable wealth_d9_2022 not found)
+(variable wealth_d10_2022 not found)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations           15,856   ->   190,272     
+Number of variables                 424   ->   42          
+j variable (12 values)                    ->   control_year
+xij variables:
+         age_2000 age_2002 ... age_2022   ->   age_
+inlbrf_2000 inlbrf_2002 ... inlbrf_2022   ->   inlbrf_
+married_2000 married_2002 ... married_2022->   married_
+share_pri_res_2000 share_pri_res_2002 ... share_pri_res_2022->share_pri_res_
+share_sec_res_2000 share_sec_res_2002 ... share_sec_res_2022->share_sec_res_
+share_re_2000 share_re_2002 ... share_re_2022->share_re_
+share_vehicles_2000 share_vehicles_2002 ... share_vehicles_2022->share_vehicles_
+share_bus_2000 share_bus_2002 ... share_bus_2022->share_bus_
+share_ira_2000 share_ira_2002 ... share_ira_2022->share_ira_
+share_stk_2000 share_stk_2002 ... share_stk_2022->share_stk_
+share_chck_2000 share_chck_2002 ... share_chck_2022->share_chck_
+share_cd_2000 share_cd_2002 ... share_cd_2022->share_cd_
+share_bond_2000 share_bond_2002 ... share_bond_2022->share_bond_
+share_other_2000 share_other_2002 ... share_other_2022->share_other_
+risky_share_2000 risky_share_2002 ... risky_share_2022->risky_share_
+liability_share_2000 liability_share_2002 ... liability_share_2022->liability_share_
+wealth_nonres_2000 wealth_nonres_2002 ... wealth_nonres_2022->wealth_nonres_
+wealth_nonres_decile_2000 wealth_nonres_decile_2002 ... wealth_nonres_decile_2022->weal
+> th_nonres_decile_
+wealth_nonres_d1_2000 wealth_nonres_d1_2002 ... wealth_nonres_d1_2022->wealth_nonres_d1
+> _
+wealth_nonres_d2_2000 wealth_nonres_d2_2002 ... wealth_nonres_d2_2022->wealth_nonres_d2
+> _
+wealth_nonres_d3_2000 wealth_nonres_d3_2002 ... wealth_nonres_d3_2022->wealth_nonres_d3
+> _
+wealth_nonres_d4_2000 wealth_nonres_d4_2002 ... wealth_nonres_d4_2022->wealth_nonres_d4
+> _
+wealth_nonres_d5_2000 wealth_nonres_d5_2002 ... wealth_nonres_d5_2022->wealth_nonres_d5
+> _
+wealth_nonres_d6_2000 wealth_nonres_d6_2002 ... wealth_nonres_d6_2022->wealth_nonres_d6
+> _
+wealth_nonres_d7_2000 wealth_nonres_d7_2002 ... wealth_nonres_d7_2022->wealth_nonres_d7
+> _
+wealth_nonres_d8_2000 wealth_nonres_d8_2002 ... wealth_nonres_d8_2022->wealth_nonres_d8
+> _
+wealth_nonres_d9_2000 wealth_nonres_d9_2002 ... wealth_nonres_d9_2022->wealth_nonres_d9
+> _
+wealth_nonres_d10_2000 wealth_nonres_d10_2002 ... wealth_nonres_d10_2022->wealth_nonres
+> _d10_
+wealth_d1_2000 wealth_d1_2002 ... wealth_d1_2022->wealth_d1_
+wealth_d2_2000 wealth_d2_2002 ... wealth_d2_2022->wealth_d2_
+wealth_d3_2000 wealth_d3_2002 ... wealth_d3_2022->wealth_d3_
+wealth_d4_2000 wealth_d4_2002 ... wealth_d4_2022->wealth_d4_
+wealth_d5_2000 wealth_d5_2002 ... wealth_d5_2022->wealth_d5_
+wealth_d6_2000 wealth_d6_2002 ... wealth_d6_2022->wealth_d6_
+wealth_d7_2000 wealth_d7_2002 ... wealth_d7_2022->wealth_d7_
+wealth_d8_2000 wealth_d8_2002 ... wealth_d8_2022->wealth_d8_
+wealth_d9_2000 wealth_d9_2002 ... wealth_d9_2022->wealth_d9_
+wealth_d10_2000 wealth_d10_2002 ... wealth_d10_2022->wealth_d10_
+-----------------------------------------------------------------------------
+
+. 
+. * Rename variables for clarity
+. rename age_ age
+
+. rename inlbrf_ inlbrf
+
+. rename married_ married
+
+. rename share_pri_res_ share_pri_res
+
+. rename share_sec_res_ share_sec_res
+
+. rename share_re_ share_re
+
+. rename share_vehicles_ share_vehicles
+
+. rename share_bus_ share_bus
+
+. rename share_ira_ share_ira
+
+. rename share_stk_ share_stk
+
+. rename share_chck_ share_chck
+
+. rename share_cd_ share_cd
+
+. rename share_bond_ share_bond
+
+. rename share_other_ share_other
+
+. rename risky_share_ risky_share
+
+. rename liability_share_ liability_share
+
+. rename wealth_nonres_ wealth_nonres
+
+. rename wealth_nonres_decile_ wealth_nonres_decile
+
+. rename wealth_nonres_d1_ wealth_nonres_d1
+
+. rename wealth_nonres_d2_ wealth_nonres_d2
+
+. rename wealth_nonres_d3_ wealth_nonres_d3
+
+. rename wealth_nonres_d4_ wealth_nonres_d4
+
+. rename wealth_nonres_d5_ wealth_nonres_d5
+
+. rename wealth_nonres_d6_ wealth_nonres_d6
+
+. rename wealth_nonres_d7_ wealth_nonres_d7
+
+. rename wealth_nonres_d8_ wealth_nonres_d8
+
+. rename wealth_nonres_d9_ wealth_nonres_d9
+
+. rename wealth_nonres_d10_ wealth_nonres_d10
+
+. rename wealth_d1_ wealth_d1
+
+. rename wealth_d2_ wealth_d2
+
+. rename wealth_d3_ wealth_d3
+
+. rename wealth_d4_ wealth_d4
+
+. rename wealth_d5_ wealth_d5
+
+. rename wealth_d6_ wealth_d6
+
+. rename wealth_d7_ wealth_d7
+
+. rename wealth_d8_ wealth_d8
+
+. rename wealth_d9_ wealth_d9
+
+. rename wealth_d10_ wealth_d10
+
+. 
+. * Save controls long table
+. tempfile controls_long
+
+. save "`controls_long'", replace
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000005 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000005 saved as .dta
+    format
+
+. 
+. quietly describe
+
+. local n_obs_controls = r(N)
+
+. di as txt "Controls long table: `n_obs_controls' observations"
+Controls long table: 190272 observations
+
+. restore
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 3: Merge returns with controls using lag mapping
+. * ---------------------------------------------------------------------
+. di as txt "=== Step 3: Merging returns with controls (2-year lag) ==="
+=== Step 3: Merging returns with controls (2-year lag) ===
+
+. 
+. * Load returns long table
+. use "`returns_long'", clear
+
+. 
+. * Create control_year = return_year - 2 (2-year lag)
+. gen control_year = return_year - 2
+
+. 
+. * Merge with controls
+. merge m:1 hhidpn control_year using "`controls_long'", keep(match master)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           174,416  (_merge==3)
+    -----------------------------------------
+
+. 
+. * Check merge results
+. quietly count if _merge == 1
+
+. local n_unmatched_returns = r(N)
+
+. quietly count if _merge == 2
+
+. local n_unmatched_controls = r(N)
+
+. quietly count if _merge == 3
+
+. local n_matched = r(N)
+
+. 
+. di as txt "Merge results:"
+Merge results:
+
+. di as txt "  Matched: `n_matched' observations"
+  Matched: 174416 observations
+
+. di as txt "  Unmatched returns: `n_unmatched_returns' observations"
+  Unmatched returns: 0 observations
+
+. di as txt "  Unmatched controls: `n_unmatched_controls' observations"
+  Unmatched controls: 0 observations
+
+. 
+. * Keep only matched observations
+. keep if _merge == 3
+(0 observations deleted)
+
+. drop _merge
+
+. 
+. * Rename return_year to year for consistency
+. rename return_year year
+
+. 
+. di as txt "Final dataset: `n_matched' observations with returns and lagged controls"
+Final dataset: 174416 observations with returns and lagged controls
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 4: Create year dummies
+. * ---------------------------------------------------------------------
+. di as txt "=== Step 4: Creating year dummies ==="
+=== Step 4: Creating year dummies ===
+
+. 
+. * Create year dummies
+. tab year, gen(year_)
+
+       year |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       2002 |     15,856        9.09        9.09
+       2004 |     15,856        9.09       18.18
+       2006 |     15,856        9.09       27.27
+       2008 |     15,856        9.09       36.36
+       2010 |     15,856        9.09       45.45
+       2012 |     15,856        9.09       54.55
+       2014 |     15,856        9.09       63.64
+       2016 |     15,856        9.09       72.73
+       2018 |     15,856        9.09       81.82
+       2020 |     15,856        9.09       90.91
+       2022 |     15,856        9.09      100.00
+------------+-----------------------------------
+      Total |    174,416      100.00
+
+. 
+. di as txt "Year dummies created"
+Year dummies created
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 5: Set panel structure
+. * ---------------------------------------------------------------------
+. di as txt "=== Step 5: Setting panel structure ==="
+=== Step 5: Setting panel structure ===
+
+. 
+. * Set panel structure
+. xtset hhidpn year
+
+Panel variable: hhidpn (strongly balanced)
+ Time variable: year, 2002 to 2022, but with gaps
+         Delta: 1 unit
+
+. 
+. * Check panel structure
+. di as txt "Panel structure set:"
+Panel structure set:
+
+. xtdescribe, patterns(10)
+
+  hhidpn:  10001010, 10003030, ..., 9.597e+08                n =      15856
+    year:  2002, 2004, ..., 2022                             T =         11
+           Delta(year) = 1 unit
+           Span(year)  = 21 periods
+           (hhidpn*year uniquely identifies each observation)
+
+Distribution of T_i:   min      5%     25%       50%       75%     95%     max
+                        11      11      11        11        11      11      11
+
+     Freq.  Percent    Cum. |  Pattern*
+ ---------------------------+-------------
+    15856    100.00  100.00 |  11111111111
+ ---------------------------+-------------
+    15856    100.00         |  XXXXXXXXXXX
+ -----------------------------------------
+ *Each column represents 2 periods.
+
+
+. 
+. * ---------------------------------------------------------------------
+. * Step 6: Save panel dataset
+. * ---------------------------------------------------------------------
+. di as txt "=== Step 6: Saving panel dataset ==="
+=== Step 6: Saving panel dataset ===
+
+. 
+. save "`panel_file'", replace
+file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA
+    > /_randhrs1992_2022v1_panel.dta saved
+
+. di as txt "Panel dataset saved: `panel_file'"
+Panel dataset saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_L
+> ong/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_panel.dta
+
+. 
+. quietly describe
+
+. local n_vars_final = r(k)
+
+. local n_obs_final = r(N)
+
+. di as txt "Final panel dataset: `n_obs_final' observations, `n_vars_final' variables"
+Final panel dataset: 174416 observations, 58 variables
+
+. 
+. * ---------------------------------------------------------------------
+. * Final summary
+. * ---------------------------------------------------------------------
+. di as txt "=== Panel Dataset Creation Complete ==="
+=== Panel Dataset Creation Complete ===
+
+. di as txt "Input wide dataset: `n_obs_wide' observations, `n_vars_wide' variables"
+Input wide dataset: 15856 observations, 20881 variables
+
+. di as txt "Returns long table: `n_obs_returns' observations"
+Returns long table: 174416 observations
+
+. di as txt "Controls long table: `n_obs_controls' observations"
+Controls long table: 190272 observations
+
+. di as txt "Final panel dataset: `n_obs_final' observations, `n_vars_final' variables"
+Final panel dataset: 174416 observations, 58 variables
+
+. di as txt "Panel structure: hhidpn (individual) x year (time)"
+Panel structure: hhidpn (individual) x year (time)
+
+. di as txt "Lag structure: Controls from 2 years prior to returns"
+Lag structure: Controls from 2 years prior to returns
+
+. di as txt "Return measures: r_annual, r_annual_trim, r_annual_excl, r_annual_excl_tri
+> m"
+Return measures: r_annual, r_annual_trim, r_annual_excl, r_annual_excl_trim
+
+. di as txt "Ready for panel regression analysis!"
+Ready for panel regression analysis!
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/reg_ret_panel.log
+  log type:  text
+ closed on:  17 Oct 2025, 19:10:20
+---------------------------------------------------------------------------------------

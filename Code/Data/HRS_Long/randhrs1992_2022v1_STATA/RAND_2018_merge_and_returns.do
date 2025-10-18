@@ -204,7 +204,7 @@ di as txt "[summarize] base_2018"
 summarize base_2018, detail
 
 * Period return and annualization (2-year)
-capture drop num_period_2018 r_period_2018 r_annual_2018 r_annual_2018_trim
+capture drop num_period_2018 r_period_2018 r_annual_2018 r_annual_trim_2018
 gen double num_period_2018 = cond(missing(y_c_2018),0,y_c_2018) + ///
                              cond(missing(cg_total_2018),0,cg_total_2018) - ///
                              cond(missing(flow_total_2018),0,flow_total_2018)
@@ -218,14 +218,14 @@ gen double r_annual_2018 = (1 + r_period_2018)^(1/2) - 1
 replace r_annual_2018 = . if missing(r_period_2018)
 
 * Trim 5% tails
-capture drop r_annual_2018_trim
+capture drop r_annual_trim_2018
 xtile __p_2018 = r_annual_2018 if !missing(r_annual_2018), n(100)
-gen double r_annual_2018_trim = r_annual_2018
-replace r_annual_2018_trim = . if __p_2018 <= 5 | __p_2018 > 95
+gen double r_annual_trim_2018 = r_annual_2018
+replace r_annual_trim_2018 = . if __p_2018 <= 5 | __p_2018 > 95
 drop __p_2018
 
-di as txt "[summarize] r_period_2018, r_annual_2018, r_annual_2018_trim"
-summarize r_period_2018 r_annual_2018 r_annual_2018_trim
+di as txt "[summarize] r_period_2018, r_annual_2018, r_annual_trim_2018"
+summarize r_period_2018 r_annual_2018 r_annual_trim_2018
 
 * Excluding residential housing (remove primary and secondary residence from cg and flows)
 capture drop cg_total_2018_excl_res flow_total_2018_excl_res
@@ -254,7 +254,7 @@ di as txt "EXCL-RES: cg_total_2018_excl_res and flow_total_2018_excl_res summari
 summarize cg_total_2018_excl_res flow_total_2018_excl_res
 
 * Use SAME base_2018
-capture drop num_period_2018_excl_res r_period_2018_excl_res r_annual_2018_excl_res r_annual_2018_excl_res_trim
+capture drop num_period_2018_excl_res r_period_2018_excl_res r_annual_excl_2018 r_annual_excl_trim_2018
 gen double num_period_2018_excl_res = cond(missing(y_c_2018),0,y_c_2018) + ///
                                       cond(missing(cg_total_2018_excl_res),0,cg_total_2018_excl_res) - ///
                                       cond(missing(flow_total_2018_excl_res),0,flow_total_2018_excl_res)
@@ -264,17 +264,17 @@ drop __num18ex_has
 
 gen double r_period_2018_excl_res = num_period_2018_excl_res / base_2018
 replace r_period_2018_excl_res = . if base_2018 < 10000
-gen double r_annual_2018_excl_res = (1 + r_period_2018_excl_res)^(1/2) - 1
-replace r_annual_2018_excl_res = . if missing(r_period_2018_excl_res)
+gen double r_annual_excl_2018 = (1 + r_period_2018_excl_res)^(1/2) - 1
+replace r_annual_excl_2018 = . if missing(r_period_2018_excl_res)
 
 * Trim 5% for excl-res
-xtile __p_ex18 = r_annual_2018_excl_res if !missing(r_annual_2018_excl_res), n(100)
-gen double r_annual_2018_excl_res_trim = r_annual_2018_excl_res
-replace r_annual_2018_excl_res_trim = . if __p_ex18 <= 5 | __p_ex18 > 95
+xtile __p_ex18 = r_annual_excl_2018 if !missing(r_annual_excl_2018), n(100)
+gen double r_annual_excl_trim_2018 = r_annual_excl_2018
+replace r_annual_excl_trim_2018 = . if __p_ex18 <= 5 | __p_ex18 > 95
 drop __p_ex18
 
-di as txt "[summarize] r_period_2018_excl_res, r_annual_2018_excl_res, r_annual_2018_excl_res_trim"
-summarize r_period_2018_excl_res r_annual_2018_excl_res r_annual_2018_excl_res_trim
+di as txt "[summarize] r_period_2018_excl_res, r_annual_excl_2018, r_annual_excl_trim_2018"
+summarize r_period_2018_excl_res r_annual_excl_2018 r_annual_excl_trim_2018
 
 * ---------------------------------------------------------------------
 * Prepare 2016 controls inline (married_2016, wealth_*_2016, age_2016, inlbrf_2016)
@@ -364,13 +364,13 @@ quietly count if !missing(r_annual_2022)
 di as txt "                    N r_annual_2022 = " %9.0f r(N)
 quietly count if !missing(r_period_excl_res)
 di as txt "  2022 excl-res:   N r_period_excl_res = " %9.0f r(N)
-quietly count if !missing(r_annual_2022_excl_res)
-di as txt "                    N r_annual_2022_excl_res = " %9.0f r(N)
+quietly count if !missing(r_annual_excl_2022)
+di as txt "                    N r_annual_excl_2022 = " %9.0f r(N)
 
 * Both annual and trimmed available (2022 included/excl-res)
-quietly count if !missing(r_annual_2022) & !missing(r_annual_2022_trimmed)
+quietly count if !missing(r_annual_2022) & !missing(r_annual_trim_2022)
 di as txt "  2022 included:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
-quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2022_excl_res_trim)
+quietly count if !missing(r_annual_excl_2022) & !missing(r_annual_excl_trim_2022)
 di as txt "  2022 excl-res:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
 
 quietly count if !missing(r_period_2020)
@@ -379,13 +379,13 @@ quietly count if !missing(r_annual_2020)
 di as txt "                    N r_annual_2020 = " %9.0f r(N)
 quietly count if !missing(r_period_2020_excl_res)
 di as txt "  2020 excl-res:   N r_period_2020_excl_res = " %9.0f r(N)
-quietly count if !missing(r_annual_2020_excl_res)
-di as txt "                    N r_annual_2020_excl_res = " %9.0f r(N)
+quietly count if !missing(r_annual_excl_2020)
+di as txt "                    N r_annual_excl_2020 = " %9.0f r(N)
 
 * Both annual and trimmed available (2020 included/excl-res)
-quietly count if !missing(r_annual_2020) & !missing(r_annual_2020_trim)
+quietly count if !missing(r_annual_2020) & !missing(r_annual_trim_2020)
 di as txt "  2020 included:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
-quietly count if !missing(r_annual_2020_excl_res) & !missing(r_annual_2020_excl_res_trim)
+quietly count if !missing(r_annual_excl_2020) & !missing(r_annual_excl_trim_2020)
 di as txt "  2020 excl-res:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
 
 quietly count if !missing(r_period_2018)
@@ -394,13 +394,13 @@ quietly count if !missing(r_annual_2018)
 di as txt "                    N r_annual_2018 = " %9.0f r(N)
 quietly count if !missing(r_period_2018_excl_res)
 di as txt "  2018 excl-res:   N r_period_2018_excl_res = " %9.0f r(N)
-quietly count if !missing(r_annual_2018_excl_res)
-di as txt "                    N r_annual_2018_excl_res = " %9.0f r(N)
+quietly count if !missing(r_annual_excl_2018)
+di as txt "                    N r_annual_excl_2018 = " %9.0f r(N)
 
 * Both annual and trimmed available (2018 included/excl-res)
-quietly count if !missing(r_annual_2018) & !missing(r_annual_2018_trim)
+quietly count if !missing(r_annual_2018) & !missing(r_annual_trim_2018)
 di as txt "  2018 included:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
-quietly count if !missing(r_annual_2018_excl_res) & !missing(r_annual_2018_excl_res_trim)
+quietly count if !missing(r_annual_excl_2018) & !missing(r_annual_excl_trim_2018)
 di as txt "  2018 excl-res:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
 
 * Overlap analysis: how many obs have returns for all 3 years
@@ -411,15 +411,15 @@ quietly count if !missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_
 di as txt "  All 3 years (included): " %9.0f r(N)
 
 * All 3 years - included returns with trimming
-quietly count if !missing(r_annual_2022_trimmed) & !missing(r_annual_2020_trim) & !missing(r_annual_2018_trim)
+quietly count if !missing(r_annual_trim_2022) & !missing(r_annual_trim_2020) & !missing(r_annual_trim_2018)
 di as txt "  All 3 years (included, trimmed): " %9.0f r(N)
 
 * All 3 years - excluded residential
-quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !missing(r_annual_2018_excl_res)
+quietly count if !missing(r_annual_excl_2022) & !missing(r_annual_excl_2020) & !missing(r_annual_excl_2018)
 di as txt "  All 3 years (excl-res): " %9.0f r(N)
 
 * All 3 years - excluded residential with trimming
-quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_trim) & !missing(r_annual_2018_excl_res_trim)
+quietly count if !missing(r_annual_excl_trim_2022) & !missing(r_annual_excl_trim_2020) & !missing(r_annual_excl_trim_2018)
 di as txt "  All 3 years (excl-res, trimmed): " %9.0f r(N)
 
 

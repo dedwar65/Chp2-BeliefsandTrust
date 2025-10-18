@@ -202,7 +202,7 @@ di as txt "[summarize] base_2002"
 summarize base_2002, detail
 
 * Period return and annualization (2-year)
-capture drop num_period_2002 r_period_2002 r_annual_2002 r_annual_2002_trim
+capture drop num_period_2002 r_period_2002 r_annual_2002 r_annual_trim_2002
 gen double num_period_2002 = cond(missing(y_c_2002),0,y_c_2002) + ///
                              cond(missing(cg_total_2002),0,cg_total_2002) - ///
                              cond(missing(flow_total_2002),0,flow_total_2002)
@@ -217,14 +217,14 @@ gen double r_annual_2002 = (1 + r_period_2002)^(1/2) - 1
 replace r_annual_2002 = . if missing(r_period_2002)
 
 * Trim 5% tails
-capture drop r_annual_2002_trim
+capture drop r_annual_trim_2002
 xtile __p_2002 = r_annual_2002 if !missing(r_annual_2002), n(100)
-gen double r_annual_2002_trim = r_annual_2002
-replace r_annual_2002_trim = . if __p_2002 <= 5 | __p_2002 > 95
+gen double r_annual_trim_2002 = r_annual_2002
+replace r_annual_trim_2002 = . if __p_2002 <= 5 | __p_2002 > 95
 drop __p_2002
 
-di as txt "[summarize] r_period_2002, r_annual_2002, r_annual_2002_trim"
-summarize r_period_2002 r_annual_2002 r_annual_2002_trim
+di as txt "[summarize] r_period_2002, r_annual_2002, r_annual_trim_2002"
+summarize r_period_2002 r_annual_2002 r_annual_trim_2002
 
 * Excluding residential housing
 capture drop cg_total_2002_excl_res flow_total_2002_excl_res
@@ -253,7 +253,7 @@ di as txt "EXCL-RES: cg_total_2002_excl_res and flow_total_2002_excl_res summari
 summarize cg_total_2002_excl_res flow_total_2002_excl_res
 
 * Use SAME base_2002
-capture drop num_period_2002_excl_res r_period_2002_excl_res r_annual_2002_excl_res r_annual_2002_excl_res_trim
+capture drop num_period_2002_excl_res r_period_2002_excl_res r_annual_excl_2002 r_annual_excl_trim_2002
 gen double num_period_2002_excl_res = cond(missing(y_c_2002),0,y_c_2002) + ///
                                       cond(missing(cg_total_2002_excl_res),0,cg_total_2002_excl_res) - ///
                                       cond(missing(flow_total_2002_excl_res),0,flow_total_2002_excl_res)
@@ -263,17 +263,17 @@ drop __num02ex_has
 
 gen double r_period_2002_excl_res = num_period_2002_excl_res / base_2002
 replace r_period_2002_excl_res = . if base_2002 < 10000
-gen double r_annual_2002_excl_res = (1 + r_period_2002_excl_res)^(1/2) - 1
-replace r_annual_2002_excl_res = . if missing(r_period_2002_excl_res)
+gen double r_annual_excl_2002 = (1 + r_period_2002_excl_res)^(1/2) - 1
+replace r_annual_excl_2002 = . if missing(r_period_2002_excl_res)
 
 * Trim 5% for excl-res
-xtile __p_ex02 = r_annual_2002_excl_res if !missing(r_annual_2002_excl_res), n(100)
-gen double r_annual_2002_excl_res_trim = r_annual_2002_excl_res
-replace r_annual_2002_excl_res_trim = . if __p_ex02 <= 5 | __p_ex02 > 95
+xtile __p_ex02 = r_annual_excl_2002 if !missing(r_annual_excl_2002), n(100)
+gen double r_annual_excl_trim_2002 = r_annual_excl_2002
+replace r_annual_excl_trim_2002 = . if __p_ex02 <= 5 | __p_ex02 > 95
 drop __p_ex02
 
-di as txt "[summarize] r_period_2002_excl_res, r_annual_2002_excl_res, r_annual_2002_excl_res_trim"
-summarize r_period_2002_excl_res r_annual_2002_excl_res r_annual_2002_excl_res_trim
+di as txt "[summarize] r_period_2002_excl_res, r_annual_excl_2002, r_annual_excl_trim_2002"
+summarize r_period_2002_excl_res r_annual_excl_2002 r_annual_excl_trim_2002
 
 * ---------------------------------------------------------------------
 * Prepare 2000 controls inline (married_2000, wealth_*_2000, age_2000, inlbrf_2000)
@@ -368,13 +368,13 @@ di as txt "=== Saving updated analysis dataset (with 2002 flows and returns) ===
 quietly count if !missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_annual_2018) & !missing(r_annual_2016) & !missing(r_annual_2014) & !missing(r_annual_2012) & !missing(r_annual_2010) & !missing(r_annual_2008) & !missing(r_annual_2006) & !missing(r_annual_2004) & !missing(r_annual_2002)
 di as txt "  All 11 years (included): " %9.0f r(N)
 
-quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !missing(r_annual_2018_excl_res) & !missing(r_annual_2016_excl_res) & !missing(r_annual_2014_excl_res) & !missing(r_annual_2012_excl_res) & !missing(r_annual_2010_excl_res) & !missing(r_annual_2008_excl_res) & !missing(r_annual_2006_excl_res) & !missing(r_annual_2004_excl_res) & !missing(r_annual_2002_excl_res)
+quietly count if !missing(r_annual_excl_2022) & !missing(r_annual_excl_2020) & !missing(r_annual_excl_2018) & !missing(r_annual_excl_2016) & !missing(r_annual_excl_2014) & !missing(r_annual_excl_2012) & !missing(r_annual_excl_2010) & !missing(r_annual_excl_2008) & !missing(r_annual_excl_2006) & !missing(r_annual_excl_2004) & !missing(r_annual_excl_2002)
 di as txt "  All 11 years (excl-res): " %9.0f r(N)
 
-quietly count if !missing(r_annual_2022_trim) & !missing(r_annual_2020_trim) & !missing(r_annual_2018_trim) & !missing(r_annual_2016_trim) & !missing(r_annual_2014_trim) & !missing(r_annual_2012_trim) & !missing(r_annual_2010_trim) & !missing(r_annual_2008_trim) & !missing(r_annual_2006_trim) & !missing(r_annual_2004_trim) & !missing(r_annual_2002_trim)
+quietly count if !missing(r_annual_trim_2022) & !missing(r_annual_trim_2020) & !missing(r_annual_trim_2018) & !missing(r_annual_trim_2016) & !missing(r_annual_trim_2014) & !missing(r_annual_trim_2012) & !missing(r_annual_trim_2010) & !missing(r_annual_trim_2008) & !missing(r_annual_trim_2006) & !missing(r_annual_trim_2004) & !missing(r_annual_trim_2002)
 di as txt "  All 11 years (included, trimmed): " %9.0f r(N)
 
-quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_trim) & !missing(r_annual_2018_excl_res_trim) & !missing(r_annual_2016_excl_res_trim) & !missing(r_annual_2014_excl_res_trim) & !missing(r_annual_2012_excl_res_trim) & !missing(r_annual_2010_excl_res_trim) & !missing(r_annual_2008_excl_res_trim) & !missing(r_annual_2006_excl_res_trim) & !missing(r_annual_2004_excl_res_trim) & !missing(r_annual_2002_excl_res_trim)
+quietly count if !missing(r_annual_excl_trim_2022) & !missing(r_annual_excl_trim_2020) & !missing(r_annual_excl_trim_2018) & !missing(r_annual_excl_trim_2016) & !missing(r_annual_excl_trim_2014) & !missing(r_annual_excl_trim_2012) & !missing(r_annual_excl_trim_2010) & !missing(r_annual_excl_trim_2008) & !missing(r_annual_excl_trim_2006) & !missing(r_annual_excl_trim_2004) & !missing(r_annual_excl_trim_2002)
 di as txt "  All 11 years (excl-res, trimmed): " %9.0f r(N)
 
 save "`out_ana'", replace

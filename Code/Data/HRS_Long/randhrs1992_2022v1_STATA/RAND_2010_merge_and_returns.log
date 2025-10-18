@@ -1,9 +1,9 @@
---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
-> 92_2022v1_STATA/RAND_2010_merge_and_returns.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/RAND_2010_merge_and_returns.log
   log type:  text
- opened on:   8 Oct 2025, 12:09:47
+ opened on:  17 Oct 2025, 18:59:03
 
 . 
 . set more off
@@ -12,15 +12,15 @@
 . * ---------------------------------------------------------------------
 . * File paths
 . * ---------------------------------------------------------------------
-. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
-> dhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+. local long_file "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lon
+> g/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
 . * Note: Provided path is a ZIP; ensure you point to the extracted .dta inside.
-. local raw_2010  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAND/_ra
-> w/2010/hd10f6b_STATA/hd10f6b.dta"
+. local raw_2010  "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_RAN
+> D/_raw/2010/hd10f6b_STATA/hd10f6b.dta"
 
-. local out_ana   "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
-> dhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+. local out_ana   "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Lon
+> g/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
 . 
 . * ---------------------------------------------------------------------
@@ -73,8 +73,8 @@
 
 . 
 . * 2010 flow variables per notes (MR*). IRA triplet is MQ in 2010.
-. local flow10 "mr050 mr055 mr063 mr064 mr072 mr030 mr035 mr045 mq171_1 mq171_2 mq171_3 mr00
-> 7 mr013 mr024"
+. local flow10 "mr050 mr055 mr063 mr064 mr072 mr030 mr035 mr045 mq171_1 mq171_2 mq171_3
+>  mr007 mr013 mr024"
 
 . 
 . di as txt "Checking presence of 2010 flow variables..."
@@ -106,8 +106,9 @@ Checking presence of 2010 flow variables...
 . tempfile raw10_flows
 
 . save "`raw10_flows'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .dta format
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 saved as .dta
+    format
 
 . restore
 
@@ -145,8 +146,8 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . * ---------------------------------------------------------------------
 . * Clean special/miscodes for flow inputs (follow expanded list used in 2012/2016)
 . * ---------------------------------------------------------------------
-. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 999999
-> 9999 9999999998 -8 -9 -9999999 -9999998 98 99
+. local misscodes 999998 999999 9999999 9999998 99999998 99999999 999999999 999999998 9
+> 999999999 9999999998 -8 -9 -9999999 -9999998 98 99
 
 . foreach v of local flow10 {
   2.     capture confirm numeric variable `v'
@@ -194,8 +195,8 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . 
 . capture drop flow_stk_private_2010
 
-. gen double flow_stk_private_2010 = mr063_dir10 * mr064 if !missing(mr063_dir10) & !missing
-> (mr064)
+. gen double flow_stk_private_2010 = mr063_dir10 * mr064 if !missing(mr063_dir10) & !mi
+> ssing(mr064)
 (15,705 missing values generated)
 
 . 
@@ -207,12 +208,13 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . 
 . capture drop flow_stk_2010
 
-. gen double flow_stk_2010 = cond(!missing(flow_stk_private_2010), flow_stk_private_2010, 0)
->  + ///
->                            cond(!missing(flow_stk_public_2010),  flow_stk_public_2010,  0)
+. gen double flow_stk_2010 = cond(!missing(flow_stk_private_2010), flow_stk_private_201
+> 0, 0) + ///
+>                            cond(!missing(flow_stk_public_2010),  flow_stk_public_2010
+> ,  0)
 
-. replace flow_stk_2010 = . if missing(flow_stk_private_2010) & missing(flow_stk_public_2010
-> )
+. replace flow_stk_2010 = . if missing(flow_stk_private_2010) & missing(flow_stk_public
+> _2010)
 (14,276 real changes made, 14,276 to missing)
 
 . 
@@ -221,8 +223,9 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . gen double flow_re_2010 = .
 (15,856 missing values generated)
 
-. replace flow_re_2010 = cond(missing(mr035),0,mr035) - ( cond(missing(mr030),0,mr030) + con
-> d(missing(mr045),0,mr045) ) if !missing(mr035) | !missing(mr030) | !missing(mr045)
+. replace flow_re_2010 = cond(missing(mr035),0,mr035) - ( cond(missing(mr030),0,mr030) 
+> + cond(missing(mr045),0,mr045) ) if !missing(mr035) | !missing(mr030) | !missing(mr04
+> 5)
 (227 real changes made)
 
 . 
@@ -239,8 +242,9 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . gen double flow_residences_2010 = .
 (15,856 missing values generated)
 
-. replace flow_residences_2010 = cond(missing(mr013),0,mr013) - ( cond(missing(mr007),0,mr00
-> 7) + cond(missing(mr024),0,mr024) ) if !missing(mr013) | !missing(mr007) | !missing(mr024)
+. replace flow_residences_2010 = cond(missing(mr013),0,mr013) - ( cond(missing(mr007),0
+> ,mr007) + cond(missing(mr024),0,mr024) ) if !missing(mr013) | !missing(mr007) | !miss
+> ing(mr024)
 (1,447 real changes made)
 
 . replace flow_residences_2010 = . if missing(mr013) & missing(mr007) & missing(mr024)
@@ -252,14 +256,15 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . gen double flow_total_2010 = .
 (15,856 missing values generated)
 
-. egen byte any_flow_present10 = rownonmiss(flow_bus_2010 flow_re_2010 flow_stk_2010 flow_ir
-> a_2010 flow_residences_2010)
+. egen byte any_flow_present10 = rownonmiss(flow_bus_2010 flow_re_2010 flow_stk_2010 fl
+> ow_ira_2010 flow_residences_2010)
 
 . replace flow_total_2010 = cond(missing(flow_bus_2010),0,flow_bus_2010) + ///
 >                           cond(missing(flow_re_2010),0,flow_re_2010) + ///
 >                           cond(missing(flow_stk_2010),0,flow_stk_2010) + ///
 >                           cond(missing(flow_ira_2010),0,flow_ira_2010) + ///
->                           cond(missing(flow_residences_2010),0,flow_residences_2010) ///
+>                           cond(missing(flow_residences_2010),0,flow_residences_2010) 
+> ///
 >                           if any_flow_present10 > 0
 (3,254 real changes made)
 
@@ -269,8 +274,8 @@ file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_97518.000003 saved as .
 . di as txt "Flows 2010 summaries:"
 Flows 2010 summaries:
 
-. summarize flow_bus_2010 flow_re_2010 flow_stk_2010 flow_ira_2010 flow_residences_2010 flow
-> _total_2010
+. summarize flow_bus_2010 flow_re_2010 flow_stk_2010 flow_ira_2010 flow_residences_2010
+>  flow_total_2010
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
@@ -309,8 +314,8 @@ flow_to~2010 |      3,254    688.5298    130725.1   -2099995    1430008
 
 . 
 . * Capital gains per class: cg_class = V_2010 - V_2008
-. capture drop cg_pri_res_2010 cg_sec_res_2010 cg_re_2010 cg_bus_2010 cg_ira_2010 cg_stk_201
-> 0 cg_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010
+. capture drop cg_pri_res_2010 cg_sec_res_2010 cg_re_2010 cg_bus_2010 cg_ira_2010 cg_st
+> k_2010 cg_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010
 
 . gen double cg_pri_res_2010 = h10atoth - h9atoth
 (9,976 missing values generated)
@@ -349,8 +354,8 @@ flow_to~2010 |      3,254    688.5298    130725.1   -2099995    1430008
 . di as txt "Capital gains components (2008->2010) summaries:"
 Capital gains components (2008->2010) summaries:
 
-. summarize cg_pri_res_2010 cg_sec_res_2010 cg_re_2010 cg_bus_2010 cg_ira_2010 cg_stk_2010 c
-> g_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010
+. summarize cg_pri_res_2010 cg_sec_res_2010 cg_re_2010 cg_bus_2010 cg_ira_2010 cg_stk_2
+> 010 cg_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
@@ -372,8 +377,9 @@ cg_chck_2010 |      5,880    4438.287    102952.4    -999000    3950000
 . * Total capital gains with missing logic (missing only if all components missing)
 . capture drop cg_total_2010
 
-. egen byte any_cg_2010 = rownonmiss(cg_pri_res_2010 cg_sec_res_2010 cg_re_2010 cg_bus_2010 
-> cg_ira_2010 cg_stk_2010 cg_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010)
+. egen byte any_cg_2010 = rownonmiss(cg_pri_res_2010 cg_sec_res_2010 cg_re_2010 cg_bus_
+> 2010 cg_ira_2010 cg_stk_2010 cg_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_
+> 2010)
 
 . gen double cg_total_2010 = .
 (15,856 missing values generated)
@@ -412,8 +418,8 @@ flow_to~2010 |      3,254    688.5298    130725.1   -2099995    1430008
 . gen double base_2010 = .
 (15,856 missing values generated)
 
-. replace base_2010 = a_2008 + 0.5 * cond(missing(flow_total_2010),0,flow_total_2010) if !mi
-> ssing(a_2008)
+. replace base_2010 = a_2008 + 0.5 * cond(missing(flow_total_2010),0,flow_total_2010) i
+> f !missing(a_2008)
 (5,969 real changes made)
 
 . label var base_2010 "Base for 2010 returns (A_2008 + 0.5*F_2010)"
@@ -441,7 +447,7 @@ flow_to~2010 |      3,254    688.5298    130725.1   -2099995    1430008
 
 . 
 . * Period return and annualization (2-year)
-. capture drop num_period_2010 r_period_2010 r_annual_2010 r_annual_2010_trim
+. capture drop num_period_2010 r_period_2010 r_annual_2010 r_annual_trim_2010
 
 . gen double num_period_2010 = cond(missing(y_c_2010),0,y_c_2010) + ///
 >                              cond(missing(cg_total_2010),0,cg_total_2010) - ///
@@ -470,29 +476,29 @@ flow_to~2010 |      3,254    688.5298    130725.1   -2099995    1430008
 
 . 
 . * Trim 5% tails
-. capture drop r_annual_2010_trim
+. capture drop r_annual_trim_2010
 
 . xtile __p_2010 = r_annual_2010 if !missing(r_annual_2010), n(100)
 
-. gen double r_annual_2010_trim = r_annual_2010
+. gen double r_annual_trim_2010 = r_annual_2010
 (10,794 missing values generated)
 
-. replace r_annual_2010_trim = . if __p_2010 <= 5 | __p_2010 > 95
+. replace r_annual_trim_2010 = . if __p_2010 <= 5 | __p_2010 > 95
 (507 real changes made, 507 to missing)
 
 . drop __p_2010
 
 . 
-. di as txt "[summarize] r_period_2010, r_annual_2010, r_annual_2010_trim"
-[summarize] r_period_2010, r_annual_2010, r_annual_2010_trim
+. di as txt "[summarize] r_period_2010, r_annual_2010, r_annual_trim_2010"
+[summarize] r_period_2010, r_annual_2010, r_annual_trim_2010
 
-. summarize r_period_2010 r_annual_2010 r_annual_2010_trim
+. summarize r_period_2010 r_annual_2010 r_annual_trim_2010
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
 r_perio~2010 |      5,196    .1156135    1.409072  -7.527149   39.04828
-r_annua~2010 |      5,062    .0032541    .3954547         -1   5.328371
-r_an~10_trim |      4,555   -.0221794    .2132755  -.4840915   .6182939
+r_ann~l_2010 |      5,062    .0032541    .3954547         -1   5.328371
+r_ann~m_2010 |      4,555   -.0221794    .2132755  -.4840915   .6182939
 
 . 
 . * Excluding residential housing
@@ -501,14 +507,14 @@ r_an~10_trim |      4,555   -.0221794    .2132755  -.4840915   .6182939
 . gen double flow_total_2010_excl_res = .
 (15,856 missing values generated)
 
-. egen byte any_flow10_excl = rownonmiss(flow_bus_2010 flow_re_2010 flow_stk_2010 flow_ira_2
-> 010)
+. egen byte any_flow10_excl = rownonmiss(flow_bus_2010 flow_re_2010 flow_stk_2010 flow_
+> ira_2010)
 
 . replace flow_total_2010_excl_res = cond(missing(flow_bus_2010),0,flow_bus_2010) + ///
 >                                    cond(missing(flow_re_2010),0,flow_re_2010) + ///
 >                                    cond(missing(flow_stk_2010),0,flow_stk_2010) + ///
->                                    cond(missing(flow_ira_2010),0,flow_ira_2010) if any_flo
-> w10_excl>0
+>                                    cond(missing(flow_ira_2010),0,flow_ira_2010) if an
+> y_flow10_excl>0
 (2,556 real changes made)
 
 . drop any_flow10_excl
@@ -517,8 +523,8 @@ r_an~10_trim |      4,555   -.0221794    .2132755  -.4840915   .6182939
 . gen double cg_total_2010_excl_res = .
 (15,856 missing values generated)
 
-. egen byte any_cg10_excl = rownonmiss(cg_re_2010 cg_bus_2010 cg_ira_2010 cg_stk_2010 cg_bon
-> d_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010)
+. egen byte any_cg10_excl = rownonmiss(cg_re_2010 cg_bus_2010 cg_ira_2010 cg_stk_2010 c
+> g_bond_2010 cg_chck_2010 cg_cd_2010 cg_veh_2010 cg_oth_2010)
 
 . replace cg_total_2010_excl_res = cond(missing(cg_re_2010),0,cg_re_2010) + ///
 >                                  cond(missing(cg_bus_2010),0,cg_bus_2010) + ///
@@ -528,8 +534,8 @@ r_an~10_trim |      4,555   -.0221794    .2132755  -.4840915   .6182939
 >                                  cond(missing(cg_chck_2010),0,cg_chck_2010) + ///
 >                                  cond(missing(cg_cd_2010),0,cg_cd_2010) + ///
 >                                  cond(missing(cg_veh_2010),0,cg_veh_2010) + ///
->                                  cond(missing(cg_oth_2010),0,cg_oth_2010) if any_cg10_excl
-> >0
+>                                  cond(missing(cg_oth_2010),0,cg_oth_2010) if any_cg10
+> _excl>0
 (5,880 real changes made)
 
 . drop any_cg10_excl
@@ -547,17 +553,17 @@ flow_total.. |      2,556    9209.775    114797.5   -2099995    1430008
 
 . 
 . * Use SAME base_2010
-. capture drop num_period_2010_excl_res r_period_2010_excl_res r_annual_2010_excl_res r_annu
-> al_2010_excl_res_trim
+. capture drop num_period_2010_excl_res r_period_2010_excl_res r_annual_excl_2010 r_ann
+> ual_excl_trim_2010
 
 . gen double num_period_2010_excl_res = cond(missing(y_c_2010),0,y_c_2010) + ///
->                                       cond(missing(cg_total_2010_excl_res),0,cg_total_2010
-> _excl_res) - ///
->                                       cond(missing(flow_total_2010_excl_res),0,flow_total_
-> 2010_excl_res)
+>                                       cond(missing(cg_total_2010_excl_res),0,cg_total
+> _2010_excl_res) - ///
+>                                       cond(missing(flow_total_2010_excl_res),0,flow_t
+> otal_2010_excl_res)
 
-. egen byte __num10ex_has = rownonmiss(y_c_2010 cg_total_2010_excl_res flow_total_2010_excl_
-> res)
+. egen byte __num10ex_has = rownonmiss(y_c_2010 cg_total_2010_excl_res flow_total_2010_
+> excl_res)
 
 . replace num_period_2010_excl_res = . if __num10ex_has == 0
 (6,172 real changes made, 6,172 to missing)
@@ -571,36 +577,36 @@ flow_total.. |      2,556    9209.775    114797.5   -2099995    1430008
 . replace r_period_2010_excl_res = . if base_2010 < 10000
 (568 real changes made, 568 to missing)
 
-. gen double r_annual_2010_excl_res = (1 + r_period_2010_excl_res)^(1/2) - 1
+. gen double r_annual_excl_2010 = (1 + r_period_2010_excl_res)^(1/2) - 1
 (10,693 missing values generated)
 
-. replace r_annual_2010_excl_res = . if missing(r_period_2010_excl_res)
+. replace r_annual_excl_2010 = . if missing(r_period_2010_excl_res)
 (0 real changes made)
 
 . 
 . * Trim 5% for excl-res
-. xtile __p_ex10 = r_annual_2010_excl_res if !missing(r_annual_2010_excl_res), n(100)
+. xtile __p_ex10 = r_annual_excl_2010 if !missing(r_annual_excl_2010), n(100)
 
-. gen double r_annual_2010_excl_res_trim = r_annual_2010_excl_res
+. gen double r_annual_excl_trim_2010 = r_annual_excl_2010
 (10,693 missing values generated)
 
-. replace r_annual_2010_excl_res_trim = . if __p_ex10 <= 5 | __p_ex10 > 95
+. replace r_annual_excl_trim_2010 = . if __p_ex10 <= 5 | __p_ex10 > 95
 (516 real changes made, 516 to missing)
 
 . drop __p_ex10
 
 . 
-. di as txt "[summarize] r_period_2010_excl_res, r_annual_2010_excl_res, r_annual_2010_excl_
-> res_trim"
-[summarize] r_period_2010_excl_res, r_annual_2010_excl_res, r_annual_2010_excl_res_trim
+. di as txt "[summarize] r_period_2010_excl_res, r_annual_excl_2010, r_annual_excl_trim
+> _2010"
+[summarize] r_period_2010_excl_res, r_annual_excl_2010, r_annual_excl_trim_2010
 
-. summarize r_period_2010_excl_res r_annual_2010_excl_res r_annual_2010_excl_res_trim
+. summarize r_period_2010_excl_res r_annual_excl_2010 r_annual_excl_trim_2010
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
 r_period_2.. |      5,196    .1210198    1.135741  -6.274018   36.30915
-r_annual_2.. |      5,163    .0177281    .3120511         -1   5.108121
-r_annual_2.. |      4,647   -.0011888    .1482826  -.3582621   .4659537
+r_an~cl_2010 |      5,163    .0177281    .3120511         -1   5.108121
+r_annual_e.. |      4,647   -.0011888    .1482826  -.3582621   .4659537
 
 . 
 . * ---------------------------------------------------------------------
@@ -676,8 +682,8 @@ not married |
 . gen double wealth_pct_2008 = .
 (15,856 missing values generated)
 
-. replace wealth_pct_2008 = 100 * (wealth_rank_2008 - 1) / (`N_wealth08' - 1) if `N_wealth08
-> ' > 1 & !missing(wealth_rank_2008)
+. replace wealth_pct_2008 = 100 * (wealth_rank_2008 - 1) / (`N_wealth08' - 1) if `N_wea
+> lth08' > 1 & !missing(wealth_rank_2008)
 (5,969 real changes made)
 
 . replace wealth_pct_2008 = 50 if `N_wealth08' == 1 & !missing(wealth_rank_2008)
@@ -730,8 +736,8 @@ Wealth decile distribution (2008):
 . 
 . forvalues d = 1/10 {
   2.     capture drop wealth_d`d'_2008
-  3.     gen byte wealth_d`d'_2008 = wealth_decile_2008 == `d' if !missing(wealth_decile_200
-> 8)
+  3.     gen byte wealth_d`d'_2008 = wealth_decile_2008 == `d' if !missing(wealth_decil
+> e_2008)
   4.     label values wealth_d`d'_2008 yesno
   5.     label var wealth_d`d'_2008 "Wealth decile `d' (2008)"
   6. }
@@ -816,34 +822,34 @@ Employment (2008) distribution:
 
 . 
 . * Overlap only: All 7-year overlap (included/excl-res and trimmed)
-. quietly count if !missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_annual_201
-> 8) & !missing(r_annual_2016) & !missing(r_annual_2014) & !missing(r_annual_2012) & !missin
-> g(r_annual_2010)
+. quietly count if !missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_annua
+> l_2018) & !missing(r_annual_2016) & !missing(r_annual_2014) & !missing(r_annual_2012)
+>  & !missing(r_annual_2010)
 
 . di as txt "  All 7 years (included): " %9.0f r(N)
   All 7 years (included):      3906
 
 . 
-. quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !mi
-> ssing(r_annual_2018_excl_res) & !missing(r_annual_2016_excl_res) & !missing(r_annual_2014_
-> excl_res) & !missing(r_annual_2012_excl_res) & !missing(r_annual_2010_excl_res)
+. quietly count if !missing(r_annual_excl_2022) & !missing(r_annual_excl_2020) & !missi
+> ng(r_annual_excl_2018) & !missing(r_annual_excl_2016) & !missing(r_annual_excl_2014) 
+> & !missing(r_annual_excl_2012) & !missing(r_annual_excl_2010)
 
 . di as txt "  All 7 years (excl-res): " %9.0f r(N)
   All 7 years (excl-res):      3950
 
 . 
-. quietly count if !missing(r_annual_2022_trim) & !missing(r_annual_2020_trim) & !missing(r_
-> annual_2018_trim) & !missing(r_annual_2016_trim) & !missing(r_annual_2014_trim) & !missing
-> (r_annual_2012_trim) & !missing(r_annual_2010_trim)
+. quietly count if !missing(r_annual_trim_2022) & !missing(r_annual_trim_2020) & !missi
+> ng(r_annual_trim_2018) & !missing(r_annual_trim_2016) & !missing(r_annual_trim_2014) 
+> & !missing(r_annual_trim_2012) & !missing(r_annual_trim_2010)
 
 . di as txt "  All 7 years (included, trimmed): " %9.0f r(N)
   All 7 years (included, trimmed):      2949
 
 . 
-. quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_t
-> rim) & !missing(r_annual_2018_excl_res_trim) & !missing(r_annual_2016_excl_res_trim) & !mi
-> ssing(r_annual_2014_excl_res_trim) & !missing(r_annual_2012_excl_res_trim) & !missing(r_an
-> nual_2010_excl_res_trim)
+. quietly count if !missing(r_annual_excl_trim_2022) & !missing(r_annual_excl_trim_2020
+> ) & !missing(r_annual_excl_trim_2018) & !missing(r_annual_excl_trim_2016) & !missing(
+> r_annual_excl_trim_2014) & !missing(r_annual_excl_trim_2012) & !missing(r_annual_excl
+> _trim_2010)
 
 . di as txt "  All 7 years (excl-res, trimmed): " %9.0f r(N)
   All 7 years (excl-res, trimmed):      2717
@@ -851,18 +857,18 @@ Employment (2008) distribution:
 . 
 . save "`out_ana'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_ran
-    > dhrs1992_2022v1_analysis.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA
+    > /_randhrs1992_2022v1_analysis.dta saved
 
 . di as txt "Saved: `out_ana'"
-Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_202
-> 2v1_STATA/_randhrs1992_2022v1_analysis.dta
+Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs199
+> 2_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs19
-> 92_2022v1_STATA/RAND_2010_merge_and_returns.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/RAND_2010_merge_and_returns.log
   log type:  text
- closed on:   8 Oct 2025, 12:09:53
---------------------------------------------------------------------------------------------
+ closed on:  17 Oct 2025, 18:59:07
+---------------------------------------------------------------------------------------

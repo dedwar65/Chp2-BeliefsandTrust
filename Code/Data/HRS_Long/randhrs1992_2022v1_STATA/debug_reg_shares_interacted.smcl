@@ -1,0 +1,675 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}debug
+       {txt}log:  {res}/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/debug_reg_shares_interacted.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}17 Oct 2025, 20:15:14
+{txt}r; t=0.00 20:15:14
+
+{com}. set trace on
+{txt}r; t=0.00 20:15:14
+
+{com}. set tracedepth 2
+{txt}r; t=0.00 20:15:14
+
+{com}. set traceexpand on
+{txt}r; t=0.00 20:15:14
+
+{com}. set linesize 255
+{txt}r; t=0.00 20:15:14
+
+{com}. set rmsg on
+{txt}r; t=0.00 20:15:14
+
+{com}. di as txt ">>> PWD: " c(pwd)
+{res}{txt}>>> PWD: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA
+r; t=0.00 20:15:14
+
+{com}. di as txt ">>> Listing do-files in current dir:"
+{res}{txt}>>> Listing do-files in current dir:
+r; t=0.00 20:15:14
+
+{com}. quietly: dir *.do
+{txt}r; t=0.03 20:15:14
+
+{com}. capture noisily do "reg_shares_interacted.do"
+{txt}
+{com}. *----------------------------------------------------------------------
+. * reg_shares_interacted.do
+. * Regression Set 2: Asset Shares × Year Interactions
+. * Test whether asset share effects vary over time
+. *----------------------------------------------------------------------
+. clear all
+{txt}  {hline 237} begin clear {hline}
+  - if _caller() < 10 {c -(}
+    _clear_9 `0'
+    exit
+    {c )-}
+  - version 10
+  - syntax [anything]
+  - tokenize `anything'
+  = tokenize all
+  - if `"`2'"' != "" {c -(}
+  = if `""' != "" {c -(}
+    display as err "`2' not allowed"
+    exit 198
+    {c )-}
+  - if "`1'"=="" {c -(}
+  = if "all"=="" {c -(}
+    drop _all
+    label drop _all
+    {c )-}
+  - else if "`1'"=="collect" {c -(}
+  = else if "all"=="collect" {c -(}
+    collect clear
+    {c )-}
+  - else if "`1'"=="frames" {c -(}
+  = else if "all"=="frames" {c -(}
+    frames reset
+    {c )-}
+  - else if "`1'"=="mata" {c -(}
+  = else if "all"=="mata" {c -(}
+    mata: mata clear
+    {c )-}
+  - else if "`1'"=="python" {c -(}
+  = else if "all"=="python" {c -(}
+    python clear
+    {c )-}
+  - else if "`1'"=="java" {c -(}
+  = else if "all"=="java" {c -(}
+    java clear
+    {c )-}
+  - else if inlist("`1'", "results", "matrix") {c -(}
+  = else if inlist("all", "results", "matrix") {c -(}
+    return clear
+    clearreturn
+    ereturn clear
+    sreturn clear
+    _return drop _all
+    if ("`1'" == "matrix") {c -(}
+    matrix drop _all
+    _est drop _all
+    {c )-}
+    {c )-}
+  - else if "`1'"=="programs" {c -(}
+  = else if "all"=="programs" {c -(}
+    program drop _all
+    {c )-}
+  - else if "`1'"=="ado" {c -(}
+  = else if "all"=="ado" {c -(}
+    program drop _allado
+    {c )-}
+  - else if "`1'"=="rngstream" | "`1'"=="rngstreams" {c -(}
+  = else if "all"=="rngstream" | "all"=="rngstreams" {c -(}
+    set rngstream clear
+    {c )-}
+  - else if "`1'"=="*" | "`1'"=="all" {c -(}
+  = else if "all"=="*" | "all"=="all" {c -(}
+  - capture mata: st_local("semmods", strofreal(sg__global.hasmodels()))
+  - capture
+  - if (0`semmods') {c -(}
+  = if (0) {c -(}
+    display as err "-clear all- not allowed while an SEM Builder is open"
+    exit 1
+    {c )-}
+  - drop _all
+  - frames reset
+  - label drop _all
+  - matrix drop _all
+  - scalar drop _all
+  - constraint drop _all
+  - eq drop _all
+  - file close _all
+  - postutil clear
+  - _return drop _all
+  - discard
+  - collect clear
+{res}  {txt}- program drop _all
+  - timer clear
+  - mata: _st__put_cmd_clear()
+{res}  {txt}- mata: mata clear
+  - python clear
+  - java clear
+  - {c )-}
+  - else {c -(}
+    display as err "`1' not allowed"
+    exit 198
+    {c )-}
+  {hline 239} end clear {hline}
+r; t=0.00 20:15:14
+
+{com}. capture log close
+{txt}r; t=0.00 20:15:14
+
+{com}. cd "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA"
+{res}/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA
+{txt}r; t=0.00 20:15:14
+
+{com}. log using "reg_shares_interacted.log", replace text
+{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/reg_shares_interacted.log
+  {txt}log type:  {res}text
+ {txt}opened on:  {res}17 Oct 2025, 20:15:14
+{txt}r; t=0.00 20:15:14
+
+{com}. 
+. set more off
+{txt}r; t=0.00 20:15:14
+
+{com}. 
+. * Install estout package if not already installed
+. capture which estout
+{txt}r; t=0.00 20:15:14
+
+{com}. if _rc {c -(}
+.     ssc install estout, replace
+{txt}r; t=0.00 20:15:14
+{com}. {c )-}
+{txt}r; t=0.00 20:15:14
+
+{com}. 
+. di as txt "===================================================================="
+{res}{txt}====================================================================
+r; t=0.00 20:15:14
+
+{com}. di as txt "=== Regression Set 2: Asset Shares × Year Interactions          ==="
+{res}{txt}=== Regression Set 2: Asset Shares × Year Interactions          ===
+r; t=0.00 20:15:14
+
+{com}. di as txt "===================================================================="
+{res}{txt}====================================================================
+r; t=0.00 20:15:14
+
+{com}. di as txt ""
+{res}{txt}
+r; t=0.00 20:15:14
+
+{com}. 
+. * ---------------------------------------------------------------------
+. * Load panel dataset
+. * ---------------------------------------------------------------------
+. use "_randhrs1992_2022v1_panel.dta", clear
+{txt}r; t=0.02 20:15:14
+
+{com}. 
+. * Set panel structure
+. xtset hhidpn year
+{txt}  {hline 237} begin xtset {hline}
+  - version 9.2
+  - syntax [varlist(numeric max=2 default=none)] [, MI *]
+  - if ("`mi'"=="") {c -(}
+  = if (""=="") {c -(}
+  - u_mi_not_mi_set xtset
+  - {c )-}
+  - else {c -(}
+    u_mi_check_setvars settime xtset `varlist'
+    {c )-}
+  - local nvars : list sizeof varlist
+  - if (`nvars' == 2) {c -(}
+  = if (2 == 2) {c -(}
+  - tsset `0'
+  = tsset hhidpn year
+{res}
+{col 1}{txt:Panel variable: }{res:hhidpn}{txt: (strongly balanced)}
+{p 1 16 2}{txt:Time variable: }{res:year}{txt:, }{res:{bind:2002}}{txt: to }{res:{bind:2022}}{txt:, but with gaps}{p_end}
+{txt}{col 10}Delta: {res}1 unit
+  {txt}- {c )-}
+  - else if (`nvars' == 1) {c -(}
+  = else if (2 == 1) {c -(}
+    PanelSet `0'
+    {c )-}
+  - else {c -(}
+    syntax [, clear MI PANELNAME(passthru) DISPLAYINDENT(passthru) NOBLANK]
+    if ("`clear'" != "") {c -(}
+    syntax , clear [ MI ]
+    tsset, clear `mi'
+    {c )-}
+    else {c -(}
+    if (`"`_dta[_TStvar]'"' == "") {c -(}
+    PanelSet, `mi' `panelname' `displayindent' `noblank'
+    {c )-}
+    else {c -(}
+    tsset, `mi' `panelname' `displayindent' `noblank'
+    {c )-}
+    {c )-}
+    {c )-}
+  {hline 239} end xtset {hline}
+r; t=0.22 20:15:14
+
+{com}. 
+. * Generate age squared
+. gen age_sq = age^2
+{txt}(82,616 missing values generated)
+r; t=0.00 20:15:14
+
+{com}. label var age_sq "Age squared"
+{txt}  {hline 237} begin label {hline}
+  - version 10.0
+  - local vv : display "version " string(_caller()) ", missing:"
+  - gettoken val : 0
+  - if (strpos("`val'", "val") > 0 ) {c -(}
+  = if (strpos("var", "val") > 0 ) {c -(}
+    gettoken val 0 : 0
+    syntax anything [, nofix]
+    if "`fix'" != "" {c -(}
+    local fix ", nofix"
+    {c )-}
+    gettoken var rest : anything
+    while `"`rest'"' != "" {c -(}
+    gettoken lab rest : rest
+    local label "`lab'"
+    {c )-}
+    local vlist : list anything - lab
+    if "`lab'" == "." {c -(}
+    local lab ""
+    {c )-}
+    foreach var of varlist `vlist' {c -(}
+    `vv' _label `val' `var' `lab' `fix'
+    {c )-}
+    {c )-}
+  - else {c -(}
+  - `vv' _label `macval(0)'
+  = version 18, missing: _label var age_sq "Age squared"
+  - {c )-}
+  {hline 239} end label {hline}
+r; t=0.00 20:15:14
+
+{com}. 
+. di as txt "Panel structure set: hhidpn (individual) x year (time)"
+{res}{txt}Panel structure set: hhidpn (individual) x year (time)
+r; t=0.00 20:15:14
+
+{com}. di as txt "Observations: " _N
+{res}{txt}Observations: 174416
+r; t=0.00 20:15:14
+
+{com}. di as txt ""
+{res}{txt}
+r; t=0.00 20:15:14
+
+{com}. 
+. * ---------------------------------------------------------------------
+. * Regression 2.1: r_annual (including residential)
+. * ---------------------------------------------------------------------
+. di as txt "===================================================================="
+{res}{txt}====================================================================
+r; t=0.00 20:15:14
+
+{com}. di as txt "Regression 2.1: r_annual (including residential)"
+{res}{txt}Regression 2.1: r_annual (including residential)
+r; t=0.00 20:15:14
+
+{com}. di as txt "===================================================================="
+{res}{txt}====================================================================
+r; t=0.00 20:15:14
+
+{com}. 
+. eststo clear
+{txt}  {hline 236} begin eststo {hline}
+  - version 8.2
+  - local caller : di _caller()
+  - if `"`1'"'=="clear" {c -(}
+  = if `"clear"'=="clear" {c -(}
+  - if `"`0'"'!="clear" {c -(}
+  = if `"clear"'!="clear" {c -(}
+    di as err "invalid syntax"
+    exit 198
+    {c )-}
+  - if "`_byvars'"!="" error 190
+  = if ""!="" error 190
+  - _eststo_clear
+  - exit
+  {hline 238} end eststo {hline}
+r; t=0.00 20:15:14
+
+{com}. eststo reg2_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us ///
+>     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
+>     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
+>     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     liability_share, vce(cluster hhidpn)
+{txt}  {hline 236} begin eststo {hline}
+  - version 8.2
+  - local caller : di _caller()
+  - if `"`1'"'=="clear" {c -(}
+  = if `"reg2_1:"'=="clear" {c -(}
+    if `"`0'"'!="clear" {c -(}
+    di as err "invalid syntax"
+    exit 198
+    {c )-}
+    if "`_byvars'"!="" error 190
+    _eststo_clear
+    exit
+    {c )-}
+  - _eststo_cleanglobal
+  - if `"`1'"'=="dir" {c -(}
+  = if `"reg2_1:"'=="dir" {c -(}
+    if `"`0'"'!="dir" {c -(}
+    di as err "invalid syntax"
+    exit 198
+    {c )-}
+    if "`_byvars'"!="" error 190
+    _eststo_dir
+    exit
+    {c )-}
+  - if `"`1'"'=="drop" {c -(}
+  = if `"reg2_1:"'=="drop" {c -(}
+    if "`_byvars'"!="" error 190
+    _eststo_`0'
+    exit
+    {c )-}
+  - if "`_byvars'"=="" {c -(}
+  = if ""=="" {c -(}
+  - version `caller': _eststo_store `0'
+  = version 18: _eststo_store reg2_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11)     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11)     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11)     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11)     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11)     liability_share, vce(cluster hhidpn)
+{p 0 6 2}note: {bf:1.year_11} omitted because of collinearity.{p_end}
+{p 0 6 2}note: {bf:1.year_11#c.share_stk} omitted because of collinearity.{p_end}
+{p 0 6 2}note: {bf:1.year_11#c.share_bond} omitted because of collinearity.{p_end}
+{p 0 6 2}note: {bf:1.year_11#c.share_re} omitted because of collinearity.{p_end}
+{p 0 6 2}note: {bf:1.year_11#c.share_ira} omitted because of collinearity.{p_end}
+{p 0 6 2}note: {bf:1.year_11#c.share_bus} omitted because of collinearity.{p_end}
+
+Linear regression                               Number of obs     = {res}    71,264
+                                                {txt}F(81, 11318)      =  {res}    42.03
+                                                {txt}Prob > F          = {res}    0.0000
+                                                {txt}R-squared         = {res}    0.0539
+                                                {txt}Root MSE          =    {res} .46427
+
+{txt}{ralign 86:(Std. err. adjusted for {res:11,319} clusters in {res:hhidpn})}
+{hline 21}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 22}{c |}{col 34}    Robust
+{col 1}            r_annual{col 22}{c |} Coefficient{col 34}  std. err.{col 46}      t{col 54}   P>|t|{col 62}     [95% con{col 75}f. interval]
+{hline 21}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 17}age {c |}{col 22}{res}{space 2}  .004604{col 34}{space 2} .0019402{col 45}{space 1}    2.37{col 54}{space 3}0.018{col 62}{space 4} .0008008{col 75}{space 3} .0084071
+{txt}{space 14}age_sq {c |}{col 22}{res}{space 2} -.000049{col 34}{space 2} .0000146{col 45}{space 1}   -3.36{col 54}{space 3}0.001{col 62}{space 4}-.0000775{col 75}{space 3}-.0000204
+{txt}{space 13}raedyrs {c |}{col 22}{res}{space 2}  .014101{col 34}{space 2} .0007086{col 45}{space 1}   19.90{col 54}{space 3}0.000{col 62}{space 4} .0127121{col 75}{space 3} .0154899
+{txt}{space 20} {c |}
+{space 14}inlbrf {c |}
+{space 14}1.yes  {c |}{col 22}{res}{space 2} .0418203{col 34}{space 2} .0039222{col 45}{space 1}   10.66{col 54}{space 3}0.000{col 62}{space 4} .0341322{col 75}{space 3} .0495084
+{txt}{space 20} {c |}
+{space 13}married {c |}
+{space 16}yes  {c |}{col 22}{res}{space 2} .0408363{col 34}{space 2} .0040882{col 45}{space 1}    9.99{col 54}{space 3}0.000{col 62}{space 4} .0328226{col 75}{space 3} .0488499
+{txt}{space 20} {c |}
+{space 13}born_us {c |}
+{space 16}yes  {c |}{col 22}{res}{space 2}-.0055941{col 34}{space 2} .0057092{col 45}{space 1}   -0.98{col 54}{space 3}0.327{col 62}{space 4}-.0167851{col 75}{space 3} .0055969
+{txt}{space 9}1.wealth_d2 {c |}{col 22}{res}{space 2}-.0010081{col 34}{space 2}  .015862{col 45}{space 1}   -0.06{col 54}{space 3}0.949{col 62}{space 4}-.0321004{col 75}{space 3} .0300842
+{txt}{space 9}1.wealth_d3 {c |}{col 22}{res}{space 2} .0035432{col 34}{space 2} .0151489{col 45}{space 1}    0.23{col 54}{space 3}0.815{col 62}{space 4}-.0261513{col 75}{space 3} .0332377
+{txt}{space 9}1.wealth_d4 {c |}{col 22}{res}{space 2} .0130709{col 34}{space 2} .0151594{col 45}{space 1}    0.86{col 54}{space 3}0.389{col 62}{space 4} -.016644{col 75}{space 3} .0427859
+{txt}{space 9}1.wealth_d5 {c |}{col 22}{res}{space 2}-.0124857{col 34}{space 2}  .014793{col 45}{space 1}   -0.84{col 54}{space 3}0.399{col 62}{space 4}-.0414825{col 75}{space 3} .0165112
+{txt}{space 9}1.wealth_d6 {c |}{col 22}{res}{space 2}-.0675524{col 34}{space 2} .0150102{col 45}{space 1}   -4.50{col 54}{space 3}0.000{col 62}{space 4} -.096975{col 75}{space 3}-.0381298
+{txt}{space 9}1.wealth_d7 {c |}{col 22}{res}{space 2}-.1110328{col 34}{space 2} .0159074{col 45}{space 1}   -6.98{col 54}{space 3}0.000{col 62}{space 4}-.1422142{col 75}{space 3}-.0798515
+{txt}{space 9}1.wealth_d8 {c |}{col 22}{res}{space 2}-.1474341{col 34}{space 2} .0170705{col 45}{space 1}   -8.64{col 54}{space 3}0.000{col 62}{space 4}-.1808953{col 75}{space 3} -.113973
+{txt}{space 9}1.wealth_d9 {c |}{col 22}{res}{space 2}-.1871363{col 34}{space 2} .0180863{col 45}{space 1}  -10.35{col 54}{space 3}0.000{col 62}{space 4}-.2225887{col 75}{space 3} -.151684
+{txt}{space 8}1.wealth_d10 {c |}{col 22}{res}{space 2}-.2554135{col 34}{space 2} .0201345{col 45}{space 1}  -12.69{col 54}{space 3}0.000{col 62}{space 4}-.2948807{col 75}{space 3}-.2159464
+{txt}{space 11}share_stk {c |}{col 22}{res}{space 2}-.0237668{col 34}{space 2} .0317968{col 45}{space 1}   -0.75{col 54}{space 3}0.455{col 62}{space 4} -.086094{col 75}{space 3} .0385605
+{txt}{space 12}1.year_1 {c |}{col 22}{res}{space 2}-.0777554{col 34}{space 2} .0171512{col 45}{space 1}   -4.53{col 54}{space 3}0.000{col 62}{space 4}-.1113746{col 75}{space 3}-.0441361
+{txt}{space 12}1.year_2 {c |}{col 22}{res}{space 2}-.1268465{col 34}{space 2} .0147954{col 45}{space 1}   -8.57{col 54}{space 3}0.000{col 62}{space 4} -.155848{col 75}{space 3} -.097845
+{txt}{space 12}1.year_3 {c |}{col 22}{res}{space 2}-.0780167{col 34}{space 2} .0174162{col 45}{space 1}   -4.48{col 54}{space 3}0.000{col 62}{space 4}-.1121554{col 75}{space 3}-.0438781
+{txt}{space 12}1.year_4 {c |}{col 22}{res}{space 2}-.1767934{col 34}{space 2} .0144095{col 45}{space 1}  -12.27{col 54}{space 3}0.000{col 62}{space 4}-.2050385{col 75}{space 3}-.1485483
+{txt}{space 12}1.year_5 {c |}{col 22}{res}{space 2}-.2421539{col 34}{space 2} .0132336{col 45}{space 1}  -18.30{col 54}{space 3}0.000{col 62}{space 4}-.2680941{col 75}{space 3}-.2162136
+{txt}{space 12}1.year_6 {c |}{col 22}{res}{space 2}-.1981798{col 34}{space 2} .0131799{col 45}{space 1}  -15.04{col 54}{space 3}0.000{col 62}{space 4}-.2240148{col 75}{space 3}-.1723448
+{txt}{space 12}1.year_7 {c |}{col 22}{res}{space 2}-.1288546{col 34}{space 2} .0137087{col 45}{space 1}   -9.40{col 54}{space 3}0.000{col 62}{space 4} -.155726{col 75}{space 3}-.1019831
+{txt}{space 12}1.year_8 {c |}{col 22}{res}{space 2}-.1247396{col 34}{space 2} .0143401{col 45}{space 1}   -8.70{col 54}{space 3}0.000{col 62}{space 4}-.1528487{col 75}{space 3}-.0966306
+{txt}{space 12}1.year_9 {c |}{col 22}{res}{space 2}-.1076216{col 34}{space 2} .0126496{col 45}{space 1}   -8.51{col 54}{space 3}0.000{col 62}{space 4} -.132417{col 75}{space 3}-.0828262
+{txt}{space 11}1.year_10 {c |}{col 22}{res}{space 2}-.0931888{col 34}{space 2} .0154272{col 45}{space 1}   -6.04{col 54}{space 3}0.000{col 62}{space 4}-.1234288{col 75}{space 3}-.0629489
+{txt}{space 11}1.year_11 {c |}{col 22}{res}{space 2}        0{col 34}{txt}  (omitted)
+{space 20} {c |}
+{space 2}year_1#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.1049481{col 34}{space 2} .0519064{col 45}{space 1}   -2.02{col 54}{space 3}0.043{col 62}{space 4}-.2066936{col 75}{space 3}-.0032026
+{txt}{space 20} {c |}
+{space 2}year_2#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1363902{col 34}{space 2} .0487393{col 45}{space 1}    2.80{col 54}{space 3}0.005{col 62}{space 4} .0408528{col 75}{space 3} .2319277
+{txt}{space 20} {c |}
+{space 2}year_3#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1126189{col 34}{space 2} .0506541{col 45}{space 1}    2.22{col 54}{space 3}0.026{col 62}{space 4}  .013328{col 75}{space 3} .2119098
+{txt}{space 20} {c |}
+{space 2}year_4#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1272785{col 34}{space 2} .0519141{col 45}{space 1}    2.45{col 54}{space 3}0.014{col 62}{space 4} .0255179{col 75}{space 3} .2290392
+{txt}{space 20} {c |}
+{space 2}year_5#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1947934{col 34}{space 2} .0441601{col 45}{space 1}    4.41{col 54}{space 3}0.000{col 62}{space 4} .1082319{col 75}{space 3} .2813549
+{txt}{space 20} {c |}
+{space 2}year_6#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1884505{col 34}{space 2} .0390317{col 45}{space 1}    4.83{col 54}{space 3}0.000{col 62}{space 4} .1119416{col 75}{space 3} .2649594
+{txt}{space 20} {c |}
+{space 2}year_7#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2313278{col 34}{space 2} .0402969{col 45}{space 1}    5.74{col 54}{space 3}0.000{col 62}{space 4} .1523388{col 75}{space 3} .3103167
+{txt}{space 20} {c |}
+{space 2}year_8#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1320347{col 34}{space 2} .0464978{col 45}{space 1}    2.84{col 54}{space 3}0.005{col 62}{space 4}  .040891{col 75}{space 3} .2231783
+{txt}{space 20} {c |}
+{space 2}year_9#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}  .167648{col 34}{space 2} .0416209{col 45}{space 1}    4.03{col 54}{space 3}0.000{col 62}{space 4} .0860639{col 75}{space 3} .2492321
+{txt}{space 20} {c |}
+{space 1}year_10#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1945701{col 34}{space 2} .0724967{col 45}{space 1}    2.68{col 54}{space 3}0.007{col 62}{space 4} .0524641{col 75}{space 3} .3366762
+{txt}{space 20} {c |}
+{space 1}year_11#c.share_stk {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}        0{col 34}{txt}  (omitted)
+{space 20} {c |}
+{space 10}share_bond {c |}{col 22}{res}{space 2}-.0766175{col 34}{space 2} .0921698{col 45}{space 1}   -0.83{col 54}{space 3}0.406{col 62}{space 4}-.2572863{col 75}{space 3} .1040513
+{txt}{space 20} {c |}
+{space 1}year_1#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .4284501{col 34}{space 2} .1390682{col 45}{space 1}    3.08{col 54}{space 3}0.002{col 62}{space 4} .1558522{col 75}{space 3} .7010481
+{txt}{space 20} {c |}
+{space 1}year_2#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .3735938{col 34}{space 2} .1416586{col 45}{space 1}    2.64{col 54}{space 3}0.008{col 62}{space 4} .0959183{col 75}{space 3} .6512693
+{txt}{space 20} {c |}
+{space 1}year_3#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1576988{col 34}{space 2}   .16092{col 45}{space 1}    0.98{col 54}{space 3}0.327{col 62}{space 4}-.1577323{col 75}{space 3} .4731299
+{txt}{space 20} {c |}
+{space 1}year_4#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .7957264{col 34}{space 2}  .292086{col 45}{space 1}    2.72{col 54}{space 3}0.006{col 62}{space 4} .2231871{col 75}{space 3} 1.368266
+{txt}{space 20} {c |}
+{space 1}year_5#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .5899373{col 34}{space 2} .1761822{col 45}{space 1}    3.35{col 54}{space 3}0.001{col 62}{space 4} .2445896{col 75}{space 3}  .935285
+{txt}{space 20} {c |}
+{space 1}year_6#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .3296115{col 34}{space 2} .1493054{col 45}{space 1}    2.21{col 54}{space 3}0.027{col 62}{space 4}  .036947{col 75}{space 3} .6222759
+{txt}{space 20} {c |}
+{space 1}year_7#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .4150228{col 34}{space 2} .1371357{col 45}{space 1}    3.03{col 54}{space 3}0.002{col 62}{space 4} .1462131{col 75}{space 3} .6838326
+{txt}{space 20} {c |}
+{space 1}year_8#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .3692653{col 34}{space 2} .1501376{col 45}{space 1}    2.46{col 54}{space 3}0.014{col 62}{space 4} .0749696{col 75}{space 3} .6635609
+{txt}{space 20} {c |}
+{space 1}year_9#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2666809{col 34}{space 2} .1278548{col 45}{space 1}    2.09{col 54}{space 3}0.037{col 62}{space 4} .0160633{col 75}{space 3} .5172985
+{txt}{space 20} {c |}
+year_10#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0908199{col 34}{space 2} .1416154{col 45}{space 1}    0.64{col 54}{space 3}0.521{col 62}{space 4}-.1867708{col 75}{space 3} .3684106
+{txt}{space 20} {c |}
+year_11#c.share_bond {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}        0{col 34}{txt}  (omitted)
+{space 20} {c |}
+{space 12}share_re {c |}{col 22}{res}{space 2}-.0845024{col 34}{space 2} .0445639{col 45}{space 1}   -1.90{col 54}{space 3}0.058{col 62}{space 4}-.1718554{col 75}{space 3} .0028506
+{txt}{space 20} {c |}
+{space 3}year_1#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1183617{col 34}{space 2} .0773343{col 45}{space 1}    1.53{col 54}{space 3}0.126{col 62}{space 4} -.033227{col 75}{space 3} .2699505
+{txt}{space 20} {c |}
+{space 3}year_2#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2440432{col 34}{space 2} .0592123{col 45}{space 1}    4.12{col 54}{space 3}0.000{col 62}{space 4} .1279768{col 75}{space 3} .3601096
+{txt}{space 20} {c |}
+{space 3}year_3#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2492576{col 34}{space 2} .0604084{col 45}{space 1}    4.13{col 54}{space 3}0.000{col 62}{space 4} .1308467{col 75}{space 3} .3676686
+{txt}{space 20} {c |}
+{space 3}year_4#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1619246{col 34}{space 2} .0602042{col 45}{space 1}    2.69{col 54}{space 3}0.007{col 62}{space 4}  .043914{col 75}{space 3} .2799352
+{txt}{space 20} {c |}
+{space 3}year_5#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1295666{col 34}{space 2} .0536003{col 45}{space 1}    2.42{col 54}{space 3}0.016{col 62}{space 4} .0245007{col 75}{space 3} .2346325
+{txt}{space 20} {c |}
+{space 3}year_6#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1871973{col 34}{space 2} .0776743{col 45}{space 1}    2.41{col 54}{space 3}0.016{col 62}{space 4} .0349422{col 75}{space 3} .3394524
+{txt}{space 20} {c |}
+{space 3}year_7#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2331579{col 34}{space 2}  .059713{col 45}{space 1}    3.90{col 54}{space 3}0.000{col 62}{space 4}   .11611{col 75}{space 3} .3502058
+{txt}{space 20} {c |}
+{space 3}year_8#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2721033{col 34}{space 2} .0555868{col 45}{space 1}    4.90{col 54}{space 3}0.000{col 62}{space 4} .1631435{col 75}{space 3}  .381063
+{txt}{space 20} {c |}
+{space 3}year_9#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}  .207721{col 34}{space 2} .0574474{col 45}{space 1}    3.62{col 54}{space 3}0.000{col 62}{space 4} .0951141{col 75}{space 3} .3203279
+{txt}{space 20} {c |}
+{space 2}year_10#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .3143612{col 34}{space 2}  .160554{col 45}{space 1}    1.96{col 54}{space 3}0.050{col 62}{space 4}-.0003526{col 75}{space 3}  .629075
+{txt}{space 20} {c |}
+{space 2}year_11#c.share_re {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}        0{col 34}{txt}  (omitted)
+{space 20} {c |}
+{space 11}share_ira {c |}{col 22}{res}{space 2} .0690861{col 34}{space 2} .0577496{col 45}{space 1}    1.20{col 54}{space 3}0.232{col 62}{space 4}-.0441131{col 75}{space 3} .1822854
+{txt}{space 20} {c |}
+{space 2}year_1#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.1916852{col 34}{space 2} .0629678{col 45}{space 1}   -3.04{col 54}{space 3}0.002{col 62}{space 4} -.315113{col 75}{space 3}-.0682574
+{txt}{space 20} {c |}
+{space 2}year_2#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.0292981{col 34}{space 2}  .063075{col 45}{space 1}   -0.46{col 54}{space 3}0.642{col 62}{space 4} -.152936{col 75}{space 3} .0943397
+{txt}{space 20} {c |}
+{space 2}year_3#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} -.026951{col 34}{space 2} .0920847{col 45}{space 1}   -0.29{col 54}{space 3}0.770{col 62}{space 4} -.207453{col 75}{space 3} .1535511
+{txt}{space 20} {c |}
+{space 2}year_4#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0026179{col 34}{space 2} .0736847{col 45}{space 1}    0.04{col 54}{space 3}0.972{col 62}{space 4}-.1418169{col 75}{space 3} .1470527
+{txt}{space 20} {c |}
+{space 2}year_5#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0371993{col 34}{space 2} .0604051{col 45}{space 1}    0.62{col 54}{space 3}0.538{col 62}{space 4}-.0812052{col 75}{space 3} .1556038
+{txt}{space 20} {c |}
+{space 2}year_6#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0735843{col 34}{space 2} .0638733{col 45}{space 1}    1.15{col 54}{space 3}0.249{col 62}{space 4}-.0516184{col 75}{space 3}  .198787
+{txt}{space 20} {c |}
+{space 2}year_7#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0579292{col 34}{space 2}  .065485{col 45}{space 1}    0.88{col 54}{space 3}0.376{col 62}{space 4}-.0704328{col 75}{space 3} .1862912
+{txt}{space 20} {c |}
+{space 2}year_8#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.0058583{col 34}{space 2} .0583431{col 45}{space 1}   -0.10{col 54}{space 3}0.920{col 62}{space 4}-.1202208{col 75}{space 3} .1085043
+{txt}{space 20} {c |}
+{space 2}year_9#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0155664{col 34}{space 2}  .062669{col 45}{space 1}    0.25{col 54}{space 3}0.804{col 62}{space 4}-.1072757{col 75}{space 3} .1384084
+{txt}{space 20} {c |}
+{space 1}year_10#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.0712962{col 34}{space 2} .0590384{col 45}{space 1}   -1.21{col 54}{space 3}0.227{col 62}{space 4}-.1870217{col 75}{space 3} .0444293
+{txt}{space 20} {c |}
+{space 1}year_11#c.share_ira {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}        0{col 34}{txt}  (omitted)
+{space 20} {c |}
+{space 11}share_bus {c |}{col 22}{res}{space 2} .0357042{col 34}{space 2} .0555867{col 45}{space 1}    0.64{col 54}{space 3}0.521{col 62}{space 4}-.0732555{col 75}{space 3} .1446639
+{txt}{space 20} {c |}
+{space 2}year_1#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.0823989{col 34}{space 2} .0801637{col 45}{space 1}   -1.03{col 54}{space 3}0.304{col 62}{space 4}-.2395337{col 75}{space 3} .0747359
+{txt}{space 20} {c |}
+{space 2}year_2#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0907877{col 34}{space 2} .0727564{col 45}{space 1}    1.25{col 54}{space 3}0.212{col 62}{space 4}-.0518275{col 75}{space 3} .2334029
+{txt}{space 20} {c |}
+{space 2}year_3#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0436534{col 34}{space 2} .0688172{col 45}{space 1}    0.63{col 54}{space 3}0.526{col 62}{space 4}-.0912404{col 75}{space 3} .1785471
+{txt}{space 20} {c |}
+{space 2}year_4#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0669807{col 34}{space 2} .0671095{col 45}{space 1}    1.00{col 54}{space 3}0.318{col 62}{space 4}-.0645655{col 75}{space 3} .1985269
+{txt}{space 20} {c |}
+{space 2}year_5#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2248904{col 34}{space 2} .0752565{col 45}{space 1}    2.99{col 54}{space 3}0.003{col 62}{space 4} .0773746{col 75}{space 3} .3724062
+{txt}{space 20} {c |}
+{space 2}year_6#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1668329{col 34}{space 2} .0625142{col 45}{space 1}    2.67{col 54}{space 3}0.008{col 62}{space 4} .0442942{col 75}{space 3} .2893716
+{txt}{space 20} {c |}
+{space 2}year_7#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .1755834{col 34}{space 2}  .068814{col 45}{space 1}    2.55{col 54}{space 3}0.011{col 62}{space 4} .0406961{col 75}{space 3} .3104707
+{txt}{space 20} {c |}
+{space 2}year_8#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .2984352{col 34}{space 2} .1681301{col 45}{space 1}    1.78{col 54}{space 3}0.076{col 62}{space 4}-.0311291{col 75}{space 3} .6279995
+{txt}{space 20} {c |}
+{space 2}year_9#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2} .0549992{col 34}{space 2} .0659835{col 45}{space 1}    0.83{col 54}{space 3}0.405{col 62}{space 4}-.0743399{col 75}{space 3} .1843384
+{txt}{space 20} {c |}
+{space 1}year_10#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}-.0194754{col 34}{space 2}  .070502{col 45}{space 1}   -0.28{col 54}{space 3}0.782{col 62}{space 4}-.1576716{col 75}{space 3} .1187208
+{txt}{space 20} {c |}
+{space 1}year_11#c.share_bus {c |}
+{space 18}1  {c |}{col 22}{res}{space 2}        0{col 34}{txt}  (omitted)
+{space 20} {c |}
+{space 5}liability_share {c |}{col 22}{res}{space 2} .1655164{col 34}{space 2} .0337068{col 45}{space 1}    4.91{col 54}{space 3}0.000{col 62}{space 4} .0994453{col 75}{space 3} .2315875
+{txt}{space 15}_cons {c |}{col 22}{res}{space 2}-.0429011{col 34}{space 2} .0665689{col 45}{space 1}   -0.64{col 54}{space 3}0.519{col 62}{space 4}-.1733877{col 75}{space 3} .0875856
+{txt}{hline 21}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}  {txt}- exit
+  {hline 238} end eststo {hline}
+r; t=2.23 20:15:16
+
+{com}. 
+. * Joint F-tests for asset shares
+. di as txt ""
+{res}{txt}
+r; t=0.00 20:15:16
+
+{com}. di as txt "--- Joint F-tests: Testing equality of coefficients across years ---"
+{res}{txt}--- Joint F-tests: Testing equality of coefficients across years ---
+r; t=0.00 20:15:16
+
+{com}. di as txt ""
+{res}{txt}
+r; t=0.00 20:15:16
+
+{com}. 
+. di as txt "Test 1: Stock share coefficients equal across years"
+{res}{txt}Test 1: Stock share coefficients equal across years
+r; t=0.00 20:15:16
+
+{com}. quietly test year_1#c.share_stk year_2#c.share_stk year_3#c.share_stk ///
+>     year_4#c.share_stk year_5#c.share_stk year_6#c.share_stk ///
+>     year_7#c.share_stk year_8#c.share_stk year_9#c.share_stk ///
+>     year_10#c.share_stk
+{txt}  {hline 238} begin test {hline}
+  - if "`e(cmd)'" == "anova" | "`e(cmd)'" == "manova" {c -(}
+  = if "regress" == "anova" | "regress" == "manova" {c -(}
+    AnovaTestChooser `0'
+    return add
+    exit
+    {c )-}
+  - if "`e(cmd)'" == "mixed" {c -(}
+  = if "regress" == "mixed" {c -(}
+    MixedTestChooser `0'
+    return add
+    exit
+    {c )-}
+  - if _caller() < 8 {c -(}
+    _test `0'
+    return add
+    exit
+    {c )-}
+  - is_svy
+  - local is_svy = r(is_svy)
+  - if replay() & `is_svy' == 0 {c -(}
+  = if replay() & 0 == 0 {c -(}
+    _test `0'
+    return add
+    exit
+    {c )-}
+  - version 8
+  - WaldTest `is_svy' `0'
+  = WaldTest 0 year_1#c.share_stk year_2#c.share_stk year_3#c.share_stk     year_4#c.share_stk year_5#c.share_stk year_6#c.share_stk     year_7#c.share_stk year_8#c.share_stk year_9#c.share_stk     year_10#c.share_stk
+{bf}{err}year_1#c.share_stk{sf} not found
+{txt}  {hline 240} end test {hline}
+{search r(111), local:r(111);} t=0.00 20:15:16
+
+end of do-file
+
+r; t=2.50 20:15:16
+
+{com}. local rc = _rc
+{txt}r; t=0.00 20:15:16
+
+{com}. di as error ">>> reg_shares_interacted.do returned rc = `rc'"
+{res}{err}>>> reg_shares_interacted.do returned rc = 111
+{txt}r; t=0.00 20:15:16
+
+{com}. log close debug
+      {txt}name:  {res}debug
+       {txt}log:  {res}/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/debug_reg_shares_interacted.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}17 Oct 2025, 20:15:16
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

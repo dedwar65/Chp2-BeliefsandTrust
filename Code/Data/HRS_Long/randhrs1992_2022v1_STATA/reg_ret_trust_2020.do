@@ -2,7 +2,7 @@
 * reg_ret_trust_2020.do
 * Cross-sectional OLS of 2022 returns on 2020 trust variables (Longitudinal dataset)
 * Runs each return measure on each trust variable, with and without controls
-* Returns: r_annual_2022, r_annual_2022_trim, r_annual_2022_excl_res, r_annual_2022_excl_res_trim
+* Returns: r_annual_2022, r_annual_trim_2022, r_annual_excl_2022, r_annual_excl_trim_2022
 * Controls: r15agey_b, raedyrs, r15inlbrf, married_2020, born_us, wealth deciles (wealth_d2..wealth_d10 if present)
 *----------------------------------------------------------------------
 
@@ -27,7 +27,7 @@ di as txt "Using master file: `master'"
 local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
 
 * Return variables: annual and trimmed (with and without residential)
-local ret_vars "r_annual_2022 r_annual_2022_trim r_annual_2022_excl_res r_annual_2022_excl_res_trim"
+local ret_vars "r_annual_2022 r_annual_trim_2022 r_annual_excl_2022 r_annual_excl_trim_2022"
 
 * Quick overlap diagnostics for sample sizes
 quietly count

@@ -1,6 +1,6 @@
 *----------------------------------------------------------------------
 * reg_panel_ret.do
-* Compute asset shares for panel regression analysis (2002-2020)
+* Compute asset shares for panel regression analysis (2000-2020)
 * Based on RAND HRS longitudinal file variables and literature practices
 *----------------------------------------------------------------------
 clear all
@@ -36,15 +36,33 @@ if _rc {
 * Drop all existing asset share variables to allow re-running
 * ---------------------------------------------------------------------
 di as txt "=== Dropping existing asset share variables ==="
-forvalues year = 2002(2)2020 {
+forvalues year = 2000(2)2020 {
     capture drop share_pri_res_`year' share_sec_res_`year' share_re_`year' share_vehicles_`year' share_bus_`year' share_ira_`year' share_stk_`year' share_chck_`year' share_cd_`year' share_bond_`year' share_other_`year' risky_share_`year'
 }
 
 * ---------------------------------------------------------------------
-* Compute asset shares for each wave (2002-2020)
+* Compute asset shares for each wave (2000-2020)
 * Using exact variable names from returns computation files
 * ---------------------------------------------------------------------
-di as txt "=== Computing asset shares for waves 2002-2020 ==="
+di as txt "=== Computing asset shares for waves 2000-2020 ==="
+
+* 2000 (H5 variables)
+di as txt "Computing asset shares for 2000 (Wave 5)"
+
+gen double share_pri_res_2000 = h5atoth / h5atotb if !missing(h5atoth) & !missing(h5atotb) & h5atotb != 0
+gen double share_sec_res_2000 = h5anethb / h5atotb if !missing(h5anethb) & !missing(h5atotb) & h5atotb != 0
+gen double share_re_2000 = h5arles / h5atotb if !missing(h5arles) & !missing(h5atotb) & h5atotb != 0
+gen double share_vehicles_2000 = h5atran / h5atotb if !missing(h5atran) & !missing(h5atotb) & h5atotb != 0
+gen double share_bus_2000 = h5absns / h5atotb if !missing(h5absns) & !missing(h5atotb) & h5atotb != 0
+gen double share_ira_2000 = h5aira / h5atotb if !missing(h5aira) & !missing(h5atotb) & h5atotb != 0
+gen double share_stk_2000 = h5astck / h5atotb if !missing(h5astck) & !missing(h5atotb) & h5atotb != 0
+gen double share_chck_2000 = h5achck / h5atotb if !missing(h5achck) & !missing(h5atotb) & h5atotb != 0
+gen double share_cd_2000 = h5acd / h5atotb if !missing(h5acd) & !missing(h5atotb) & h5atotb != 0
+gen double share_bond_2000 = h5abond / h5atotb if !missing(h5abond) & !missing(h5atotb) & h5atotb != 0
+gen double share_other_2000 = h5aothr / h5atotb if !missing(h5aothr) & !missing(h5atotb) & h5atotb != 0
+gen double risky_share_2000 = (h5astck + h5absns) / h5atotb if !missing(h5astck) & !missing(h5absns) & !missing(h5atotb) & h5atotb != 0
+replace risky_share_2000 = h5astck / h5atotb if missing(h5absns) & !missing(h5astck) & !missing(h5atotb) & h5atotb != 0
+replace risky_share_2000 = h5absns / h5atotb if missing(h5astck) & !missing(h5absns) & !missing(h5atotb) & h5atotb != 0
 
 * 2002 (H6 variables)
 di as txt "Computing asset shares for 2002 (Wave 6)"
@@ -226,6 +244,74 @@ gen double risky_share_2020 = (h15astck + h15absns) / h15atotb if !missing(h15as
 replace risky_share_2020 = h15astck / h15atotb if missing(h15absns) & !missing(h15astck) & !missing(h15atotb) & h15atotb != 0
 replace risky_share_2020 = h15absns / h15atotb if missing(h15astck) & !missing(h15absns) & !missing(h15atotb) & h15atotb != 0
 
+
+* ---------------------------------------------------------------------
+* Compute liability shares for each wave (2000-2020)
+* Liability share = other debt / total net wealth
+* ---------------------------------------------------------------------
+di as txt "=== Computing liability shares for waves 2000-2020 ==="
+
+* Drop existing liability share variables to allow re-running
+forvalues year = 2000(2)2020 {
+    capture drop liability_share_`year'
+}
+
+* 2000 (H5 variables)
+di as txt "Computing liability share for 2000 (Wave 5)"
+gen double liability_share_2000 = h5adebt / h5atotb if !missing(h5adebt) & !missing(h5atotb) & h5atotb != 0
+label var liability_share_2000 "Liability share (other debt / total wealth) 2000"
+
+* 2002 (H6 variables)
+di as txt "Computing liability share for 2002 (Wave 6)"
+gen double liability_share_2002 = h6adebt / h6atotb if !missing(h6adebt) & !missing(h6atotb) & h6atotb != 0
+label var liability_share_2002 "Liability share (other debt / total wealth) 2002"
+
+* 2004 (H7 variables)
+di as txt "Computing liability share for 2004 (Wave 7)"
+gen double liability_share_2004 = h7adebt / h7atotb if !missing(h7adebt) & !missing(h7atotb) & h7atotb != 0
+label var liability_share_2004 "Liability share (other debt / total wealth) 2004"
+
+* 2006 (H8 variables)
+di as txt "Computing liability share for 2006 (Wave 8)"
+gen double liability_share_2006 = h8adebt / h8atotb if !missing(h8adebt) & !missing(h8atotb) & h8atotb != 0
+label var liability_share_2006 "Liability share (other debt / total wealth) 2006"
+
+* 2008 (H9 variables)
+di as txt "Computing liability share for 2008 (Wave 9)"
+gen double liability_share_2008 = h9adebt / h9atotb if !missing(h9adebt) & !missing(h9atotb) & h9atotb != 0
+label var liability_share_2008 "Liability share (other debt / total wealth) 2008"
+
+* 2010 (H10 variables)
+di as txt "Computing liability share for 2010 (Wave 10)"
+gen double liability_share_2010 = h10adebt / h10atotb if !missing(h10adebt) & !missing(h10atotb) & h10atotb != 0
+label var liability_share_2010 "Liability share (other debt / total wealth) 2010"
+
+* 2012 (H11 variables)
+di as txt "Computing liability share for 2012 (Wave 11)"
+gen double liability_share_2012 = h11adebt / h11atotb if !missing(h11adebt) & !missing(h11atotb) & h11atotb != 0
+label var liability_share_2012 "Liability share (other debt / total wealth) 2012"
+
+* 2014 (H12 variables)
+di as txt "Computing liability share for 2014 (Wave 12)"
+gen double liability_share_2014 = h12adebt / h12atotb if !missing(h12adebt) & !missing(h12atotb) & h12atotb != 0
+label var liability_share_2014 "Liability share (other debt / total wealth) 2014"
+
+* 2016 (H13 variables)
+di as txt "Computing liability share for 2016 (Wave 13)"
+gen double liability_share_2016 = h13adebt / h13atotb if !missing(h13adebt) & !missing(h13atotb) & h13atotb != 0
+label var liability_share_2016 "Liability share (other debt / total wealth) 2016"
+
+* 2018 (H14 variables)
+di as txt "Computing liability share for 2018 (Wave 14)"
+gen double liability_share_2018 = h14adebt / h14atotb if !missing(h14adebt) & !missing(h14atotb) & h14atotb != 0
+label var liability_share_2018 "Liability share (other debt / total wealth) 2018"
+
+* 2020 (H15 variables)
+di as txt "Computing liability share for 2020 (Wave 15)"
+gen double liability_share_2020 = h15adebt / h15atotb if !missing(h15adebt) & !missing(h15atotb) & h15atotb != 0
+label var liability_share_2020 "Liability share (other debt / total wealth) 2020"
+
+
 * ---------------------------------------------------------------------
 * Note: Wave dummy variables are not needed in wide-format dataset
 * ---------------------------------------------------------------------
@@ -235,17 +321,22 @@ di as txt "Wave dummies are only needed when converting to long format for panel
 di as txt "Skipping wave dummy creation for now"
 
 * ---------------------------------------------------------------------
-* Compute non-residential wealth and deciles for each wave (2002-2022)
+* Compute non-residential wealth and deciles for each wave (2000-2020)
 * ---------------------------------------------------------------------
 di as txt "=== Computing non-residential wealth and deciles ==="
 
 * Drop existing non-residential wealth variables
-forvalues year = 2002(2)2022 {
+forvalues year = 2000(2)2020 {
     capture drop wealth_nonres_`year' wealth_nonres_decile_`year'
     forvalues d = 1/10 {
         capture drop wealth_nonres_d`d'_`year'
     }
 }
+
+* 2000 (H5 variables)
+di as txt "Computing non-residential wealth for 2000 (Wave 5)"
+gen double wealth_nonres_2000 = h5arles + h5absns + h5aira + h5astck + h5abond + h5achck + h5acd + h5atran + h5aothr - h5adebt if !missing(h5arles) | !missing(h5absns) | !missing(h5aira) | !missing(h5astck) | !missing(h5abond) | !missing(h5achck) | !missing(h5acd) | !missing(h5atran) | !missing(h5aothr) | !missing(h5adebt)
+replace wealth_nonres_2000 = 0 if missing(wealth_nonres_2000) & (!missing(h5arles) | !missing(h5absns) | !missing(h5aira) | !missing(h5astck) | !missing(h5abond) | !missing(h5achck) | !missing(h5acd) | !missing(h5atran) | !missing(h5aothr) | !missing(h5adebt))
 
 * 2002 (H6 variables)
 di as txt "Computing non-residential wealth for 2002 (Wave 6)"
@@ -297,17 +388,13 @@ di as txt "Computing non-residential wealth for 2020 (Wave 15)"
 gen double wealth_nonres_2020 = h15arles + h15absns + h15aira + h15astck + h15abond + h15achck + h15acd + h15atran + h15aothr - h15adebt if !missing(h15arles) | !missing(h15absns) | !missing(h15aira) | !missing(h15astck) | !missing(h15abond) | !missing(h15achck) | !missing(h15acd) | !missing(h15atran) | !missing(h15aothr) | !missing(h15adebt)
 replace wealth_nonres_2020 = 0 if missing(wealth_nonres_2020) & (!missing(h15arles) | !missing(h15absns) | !missing(h15aira) | !missing(h15astck) | !missing(h15abond) | !missing(h15achck) | !missing(h15acd) | !missing(h15atran) | !missing(h15aothr) | !missing(h15adebt))
 
-* 2022 (H16 variables)
-di as txt "Computing non-residential wealth for 2022 (Wave 16)"
-gen double wealth_nonres_2022 = h16arles + h16absns + h16aira + h16astck + h16abond + h16achck + h16acd + h16atran + h16aothr - h16adebt if !missing(h16arles) | !missing(h16absns) | !missing(h16aira) | !missing(h16astck) | !missing(h16abond) | !missing(h16achck) | !missing(h16acd) | !missing(h16atran) | !missing(h16aothr) | !missing(h16adebt)
-replace wealth_nonres_2022 = 0 if missing(wealth_nonres_2022) & (!missing(h16arles) | !missing(h16absns) | !missing(h16aira) | !missing(h16astck) | !missing(h16abond) | !missing(h16achck) | !missing(h16acd) | !missing(h16atran) | !missing(h16aothr) | !missing(h16adebt))
 
 * ---------------------------------------------------------------------
 * Create deciles for non-residential wealth for each wave
 * ---------------------------------------------------------------------
 di as txt "=== Creating non-residential wealth deciles ==="
 
-forvalues year = 2002(2)2022 {
+forvalues year = 2000(2)2020 {
     di as txt "Creating deciles for `year'"
     
     * Create deciles (1-10) for non-residential wealth
@@ -327,9 +414,120 @@ forvalues year = 2002(2)2022 {
 }
 
 * ---------------------------------------------------------------------
+* Create wealth decile dummies for all years (2000-2020) to match wealth variables
+* ---------------------------------------------------------------------
+di as txt "=== Creating wealth decile dummies for all years (2000-2020) ==="
+
+* Drop existing wealth decile dummies to allow re-running
+forvalues year = 2000(2)2020 {
+    forvalues d = 1/10 {
+        capture drop wealth_d`d'_`year'
+    }
+}
+
+* Create wealth decile dummies for each year (2000-2020)
+forvalues year = 2000(2)2020 {
+    di as txt "Creating wealth decile dummies for `year'"
+    
+    * Create dummy variables for each decile
+    forvalues d = 1/10 {
+        gen wealth_d`d'_`year' = (wealth_nonres_decile_`year' == `d') if !missing(wealth_nonres_decile_`year')
+        label var wealth_d`d'_`year' "Wealth decile `d' (`year')"
+    }
+}
+
+* ---------------------------------------------------------------------
+* Create missing 2020 demographic variables
+* ---------------------------------------------------------------------
+di as txt "=== Creating missing 2020 demographic variables ==="
+
+* Age (2020): r15agey_b -> age_2020
+capture confirm variable r15agey_b
+if _rc {
+    di as error "ERROR: r15agey_b not found"
+    exit 198
+}
+capture drop age_2020
+gen double age_2020 = r15agey_b
+label var age_2020 "Respondent age in 2020 (r15agey_b)"
+di as txt "Age (2020) summary:"
+summarize age_2020
+
+* Employment (2020): r15inlbrf -> inlbrf_2020
+capture confirm variable r15inlbrf
+if _rc {
+    di as error "ERROR: r15inlbrf not found"
+    exit 198
+}
+capture drop inlbrf_2020
+clonevar inlbrf_2020 = r15inlbrf
+label var inlbrf_2020 "Labor force status in 2020 (r15inlbrf)"
+di as txt "Employment (2020) distribution:"
+tab inlbrf_2020, missing
+
+* Marital status (2020): r15mstat -> married_2020
+capture confirm variable r15mstat
+if _rc {
+    di as error "ERROR: r15mstat not found"
+    exit 198
+}
+capture drop married_2020
+gen byte married_2020 = .
+replace married_2020 = 1 if inlist(r15mstat, 1, 2)
+replace married_2020 = 0 if inlist(r15mstat, 3, 4, 5, 6, 7, 8)
+label define yesno 0 "no" 1 "yes", replace
+label values married_2020 yesno
+label var married_2020 "Married (r15mstat: 1 or 2) vs not married (3-8)"
+di as txt "Marital status (2020) summary:"
+tab married_2020, missing
+
+* Note: Immigration status is time-invariant - using original rabplace variable
+
+* Create missing 2022 demographic variables to match return years (2022)
+* Age (2022): r15agey_b -> age_2022
+capture confirm variable r15agey_b
+if _rc {
+    di as error "ERROR: r15agey_b not found"
+    exit 198
+}
+capture drop age_2022
+gen double age_2022 = r15agey_b
+label var age_2022 "Respondent age in 2022 (r15agey_b)"
+di as txt "Age (2022) summary:"
+summarize age_2022
+
+* Employment (2022): r15inlbrf -> inlbrf_2022
+capture confirm variable r15inlbrf
+if _rc {
+    di as error "ERROR: r15inlbrf not found"
+    exit 198
+}
+capture drop inlbrf_2022
+clonevar inlbrf_2022 = r15inlbrf
+label var inlbrf_2022 "Labor force status in 2022 (r15inlbrf)"
+di as txt "Employment (2022) distribution:"
+tab inlbrf_2022, missing
+
+* Marital status (2022): r15mstat -> married_2022
+capture confirm variable r15mstat
+if _rc {
+    di as error "ERROR: r15mstat not found"
+    exit 198
+}
+capture drop married_2022
+gen byte married_2022 = .
+replace married_2022 = 1 if inlist(r15mstat, 1, 2)
+replace married_2022 = 0 if inlist(r15mstat, 3, 4, 5, 6, 7, 8)
+label define yesno 0 "no" 1 "yes", replace
+label values married_2022 yesno
+label var married_2022 "Married (r15mstat: 1 or 2) vs not married (3-8)"
+di as txt "Marital status (2022) summary:"
+tab married_2022, missing
+
+* ---------------------------------------------------------------------
 * Save updated dataset
 * ---------------------------------------------------------------------
-di as txt "=== Saving updated analysis dataset with asset shares and non-residential wealth ==="
+di as txt "=== Saving updated analysis dataset with asset shares, non-residential wealth, and 2020 demographics ==="
 save "`out_ana'", replace
 di as txt "Saved: `out_ana'"
 

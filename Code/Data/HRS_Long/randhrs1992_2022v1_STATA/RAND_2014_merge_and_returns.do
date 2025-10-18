@@ -217,7 +217,7 @@ di as txt "[summarize] base_2014"
 summarize base_2014, detail
 
 * Period return and annualization (2-year)
-capture drop num_period_2014 r_period_2014 r_annual_2014 r_annual_2014_trim
+capture drop num_period_2014 r_period_2014 r_annual_2014 r_annual_trim_2014
 gen double num_period_2014 = cond(missing(y_c_2014),0,y_c_2014) + ///
                              cond(missing(cg_total_2014),0,cg_total_2014) - ///
                              cond(missing(flow_total_2014),0,flow_total_2014)
@@ -234,16 +234,16 @@ gen double r_annual_2014 = (1 + r_period_2014)^(1/2) - 1
 replace r_annual_2014 = . if missing(r_period_2014)
 
 * Trim 5% tails
-capture drop r_annual_2014_trim
+capture drop r_annual_trim_2014
 xtile __p_2014 = r_annual_2014 if !missing(r_annual_2014), n(100)
 
-gen double r_annual_2014_trim = r_annual_2014
-replace r_annual_2014_trim = . if __p_2014 <= 5 | __p_2014 > 95
+gen double r_annual_trim_2014 = r_annual_2014
+replace r_annual_trim_2014 = . if __p_2014 <= 5 | __p_2014 > 95
 
 drop __p_2014
 
-di as txt "[summarize] r_period_2014, r_annual_2014, r_annual_2014_trim"
-summarize r_period_2014 r_annual_2014 r_annual_2014_trim
+di as txt "[summarize] r_period_2014, r_annual_2014, r_annual_trim_2014"
+summarize r_period_2014 r_annual_2014 r_annual_trim_2014
 
 * Excluding residential housing
 capture drop cg_total_2014_excl_res flow_total_2014_excl_res
@@ -276,7 +276,7 @@ di as txt "EXCL-RES: cg_total_2014_excl_res and flow_total_2014_excl_res summari
 summarize cg_total_2014_excl_res flow_total_2014_excl_res
 
 * Use SAME base_2014
-capture drop num_period_2014_excl_res r_period_2014_excl_res r_annual_2014_excl_res r_annual_2014_excl_res_trim
+capture drop num_period_2014_excl_res r_period_2014_excl_res r_annual_excl_2014 r_annual_excl_trim_2014
 
 gen double num_period_2014_excl_res = cond(missing(y_c_2014),0,y_c_2014) + ///
                                       cond(missing(cg_total_2014_excl_res),0,cg_total_2014_excl_res) - ///
@@ -290,19 +290,19 @@ drop __num14ex_has
 gen double r_period_2014_excl_res = num_period_2014_excl_res / base_2014
 replace r_period_2014_excl_res = . if base_2014 < 10000
 
-gen double r_annual_2014_excl_res = (1 + r_period_2014_excl_res)^(1/2) - 1
-replace r_annual_2014_excl_res = . if missing(r_period_2014_excl_res)
+gen double r_annual_excl_2014 = (1 + r_period_2014_excl_res)^(1/2) - 1
+replace r_annual_excl_2014 = . if missing(r_period_2014_excl_res)
 
 * Trim 5% for excl-res
-xtile __p_ex14 = r_annual_2014_excl_res if !missing(r_annual_2014_excl_res), n(100)
+xtile __p_ex14 = r_annual_excl_2014 if !missing(r_annual_excl_2014), n(100)
 
-gen double r_annual_2014_excl_res_trim = r_annual_2014_excl_res
-replace r_annual_2014_excl_res_trim = . if __p_ex14 <= 5 | __p_ex14 > 95
+gen double r_annual_excl_trim_2014 = r_annual_excl_2014
+replace r_annual_excl_trim_2014 = . if __p_ex14 <= 5 | __p_ex14 > 95
 
 drop __p_ex14
 
-di as txt "[summarize] r_period_2014_excl_res, r_annual_2014_excl_res, r_annual_2014_excl_res_trim"
-summarize r_period_2014_excl_res r_annual_2014_excl_res r_annual_2014_excl_res_trim
+di as txt "[summarize] r_period_2014_excl_res, r_annual_excl_2014, r_annual_excl_trim_2014"
+summarize r_period_2014_excl_res r_annual_excl_2014 r_annual_excl_trim_2014
 
 * ---------------------------------------------------------------------
 * Prepare 2012 controls inline (married_2012, wealth_*_2012, age_2012, inlbrf_2012)
@@ -401,15 +401,15 @@ quietly count if !missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_
 
 di as txt "  All 5 years (included): " %9.0f r(N)
 
-quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2020_excl_res) & !missing(r_annual_2018_excl_res) & !missing(r_annual_2016_excl_res) & !missing(r_annual_2014_excl_res)
+quietly count if !missing(r_annual_excl_2022) & !missing(r_annual_excl_2020) & !missing(r_annual_excl_2018) & !missing(r_annual_excl_2016) & !missing(r_annual_excl_2014)
 
 di as txt "  All 5 years (excl-res): " %9.0f r(N)
 
-quietly count if !missing(r_annual_2022_trim) & !missing(r_annual_2020_trim) & !missing(r_annual_2018_trim) & !missing(r_annual_2016_trim) & !missing(r_annual_2014_trim)
+quietly count if !missing(r_annual_trim_2022) & !missing(r_annual_trim_2020) & !missing(r_annual_trim_2018) & !missing(r_annual_trim_2016) & !missing(r_annual_trim_2014)
 
 di as txt "  All 5 years (included, trimmed): " %9.0f r(N)
 
-quietly count if !missing(r_annual_2022_excl_res_trim) & !missing(r_annual_2020_excl_res_trim) & !missing(r_annual_2018_excl_res_trim) & !missing(r_annual_2016_excl_res_trim) & !missing(r_annual_2014_excl_res_trim)
+quietly count if !missing(r_annual_excl_trim_2022) & !missing(r_annual_excl_trim_2020) & !missing(r_annual_excl_trim_2018) & !missing(r_annual_excl_trim_2016) & !missing(r_annual_excl_trim_2014)
 
 di as txt "  All 5 years (excl-res, trimmed): " %9.0f r(N)
 

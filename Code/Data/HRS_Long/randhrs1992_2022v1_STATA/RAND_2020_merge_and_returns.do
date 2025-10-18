@@ -206,7 +206,7 @@ di as txt "[summarize] base_2020"
 summarize base_2020, detail
 
 * Period return and annualization (2-year)
-capture drop num_period_2020 r_period_2020 r_annual_2020 r_annual_2020_trim
+capture drop num_period_2020 r_period_2020 r_annual_2020 r_annual_trim_2020
 gen double num_period_2020 = cond(missing(y_c_2020),0,y_c_2020) + ///
                              cond(missing(cg_total_2020),0,cg_total_2020) - ///
                              cond(missing(flow_total_2020),0,flow_total_2020)
@@ -219,14 +219,14 @@ gen double r_annual_2020 = (1 + r_period_2020)^(1/2) - 1
 replace r_annual_2020 = . if missing(r_period_2020)
 
 * Trim 5% tails
-capture drop r_annual_2020_trim
+capture drop r_annual_trim_2020
 xtile __p_2020 = r_annual_2020 if !missing(r_annual_2020), n(100)
-gen double r_annual_2020_trim = r_annual_2020
-replace r_annual_2020_trim = . if __p_2020 <= 5 | __p_2020 > 95
+gen double r_annual_trim_2020 = r_annual_2020
+replace r_annual_trim_2020 = . if __p_2020 <= 5 | __p_2020 > 95
 drop __p_2020
 
-di as txt "[summarize] r_period_2020, r_annual_2020, r_annual_2020_trim"
-summarize r_period_2020 r_annual_2020 r_annual_2020_trim
+di as txt "[summarize] r_period_2020, r_annual_2020, r_annual_trim_2020"
+summarize r_period_2020 r_annual_2020 r_annual_trim_2020
 
 * Excluding residential housing (remove primary and secondary residence from cg and flows)
 capture drop cg_total_2020_excl_res cg_total_2020_excl_res_safe flow_total_2020_excl_res flow_total_2020_excl_res_safe
@@ -257,7 +257,7 @@ di as txt "EXCL-RES: cg_total_2020_excl_res and flow_total_2020_excl_res summari
 summarize cg_total_2020_excl_res flow_total_2020_excl_res
 
 * Use SAME base_2020
-capture drop num_period_2020_excl_res r_period_2020_excl_res r_annual_2020_excl_res r_annual_2020_excl_res_trim
+capture drop num_period_2020_excl_res r_period_2020_excl_res r_annual_excl_2020 r_annual_excl_trim_2020
 gen double num_period_2020_excl_res = cond(missing(y_c_2020),0,y_c_2020) + ///
                                       cond(missing(cg_total_2020_excl_res),0,cg_total_2020_excl_res) - ///
                                       cond(missing(flow_total_2020_excl_res),0,flow_total_2020_excl_res)
@@ -266,17 +266,17 @@ replace num_period_2020_excl_res = . if __num20ex_has == 0
 drop __num20ex_has
 gen double r_period_2020_excl_res = num_period_2020_excl_res / base_2020
 replace r_period_2020_excl_res = . if base_2020 < 10000
-gen double r_annual_2020_excl_res = (1 + r_period_2020_excl_res)^(1/2) - 1
-replace r_annual_2020_excl_res = . if missing(r_period_2020_excl_res)
+gen double r_annual_excl_2020 = (1 + r_period_2020_excl_res)^(1/2) - 1
+replace r_annual_excl_2020 = . if missing(r_period_2020_excl_res)
 
 * Trim 5% for excl-res
-xtile __p_ex20 = r_annual_2020_excl_res if !missing(r_annual_2020_excl_res), n(100)
-gen double r_annual_2020_excl_res_trim = r_annual_2020_excl_res
-replace r_annual_2020_excl_res_trim = . if __p_ex20 <= 5 | __p_ex20 > 95
+xtile __p_ex20 = r_annual_excl_2020 if !missing(r_annual_excl_2020), n(100)
+gen double r_annual_excl_trim_2020 = r_annual_excl_2020
+replace r_annual_excl_trim_2020 = . if __p_ex20 <= 5 | __p_ex20 > 95
 drop __p_ex20
 
-di as txt "[summarize] r_period_2020_excl_res, r_annual_2020_excl_res, r_annual_2020_excl_res_trim"
-summarize r_period_2020_excl_res r_annual_2020_excl_res r_annual_2020_excl_res_trim
+di as txt "[summarize] r_period_2020_excl_res, r_annual_excl_2020, r_annual_excl_trim_2020"
+summarize r_period_2020_excl_res r_annual_excl_2020 r_annual_excl_trim_2020
 
 * ---------------------------------------------------------------------
 * Prepare 2018 controls inline (married_2018, born_us_2018, wealth_*_2018)
@@ -366,13 +366,13 @@ quietly count if !missing(r_annual_2022)
 di as txt "                    N r_annual_2022 = " %9.0f r(N)
 quietly count if !missing(r_period_excl_res)
 di as txt "  2022 excl-res:   N r_period_excl_res = " %9.0f r(N)
-quietly count if !missing(r_annual_2022_excl_res)
-di as txt "                    N r_annual_2022_excl_res = " %9.0f r(N)
+quietly count if !missing(r_annual_excl_2022)
+di as txt "                    N r_annual_excl_2022 = " %9.0f r(N)
 
 * Both annual and trimmed available (2022 included/excl-res)
-quietly count if !missing(r_annual_2022) & !missing(r_annual_2022_trimmed)
+quietly count if !missing(r_annual_2022) & !missing(r_annual_trim_2022)
 di as txt "  2022 included:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
-quietly count if !missing(r_annual_2022_excl_res) & !missing(r_annual_2022_excl_res_trim)
+quietly count if !missing(r_annual_excl_2022) & !missing(r_annual_excl_trim_2022)
 di as txt "  2022 excl-res:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
 
 quietly count if !missing(r_period_2020)
@@ -381,13 +381,13 @@ quietly count if !missing(r_annual_2020)
 di as txt "                    N r_annual_2020 = " %9.0f r(N)
 quietly count if !missing(r_period_2020_excl_res)
 di as txt "  2020 excl-res:   N r_period_2020_excl_res = " %9.0f r(N)
-quietly count if !missing(r_annual_2020_excl_res)
-di as txt "                    N r_annual_2020_excl_res = " %9.0f r(N)
+quietly count if !missing(r_annual_excl_2020)
+di as txt "                    N r_annual_excl_2020 = " %9.0f r(N)
 
 * Both annual and trimmed available (2020 included/excl-res)
-quietly count if !missing(r_annual_2020) & !missing(r_annual_2020_trim)
+quietly count if !missing(r_annual_2020) & !missing(r_annual_trim_2020)
 di as txt "  2020 included:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
-quietly count if !missing(r_annual_2020_excl_res) & !missing(r_annual_2020_excl_res_trim)
+quietly count if !missing(r_annual_excl_2020) & !missing(r_annual_excl_trim_2020)
 di as txt "  2020 excl-res:   N with BOTH r_annual & r_annual_trim = " %9.0f r(N)
 
 save "`out_ana'", replace

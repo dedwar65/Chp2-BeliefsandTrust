@@ -360,23 +360,23 @@ di as txt "Period returns excl-res (r_period_excl_res) summary:"
 summarize r_period_excl_res, detail
 
 * Annualize excl-res
-capture drop r_annual_2022_excl_res
-gen double r_annual_2022_excl_res = (1 + r_period_excl_res)^(1/2) - 1
-replace r_annual_2022_excl_res = . if missing(r_period_excl_res)
+capture drop r_annual_excl_2022
+gen double r_annual_excl_2022 = (1 + r_period_excl_res)^(1/2) - 1
+replace r_annual_excl_2022 = . if missing(r_period_excl_res)
 
-di as txt "Annual returns excl-res (r_annual_2022_excl_res) summary:"
-summarize r_annual_2022_excl_res, detail
+di as txt "Annual returns excl-res (r_annual_excl_2022) summary:"
+summarize r_annual_excl_2022, detail
 
 * 5% trimming excl-res
-capture drop r_annual_2022_excl_res_trim
-gen double r_annual_2022_excl_res_trim = r_annual_2022_excl_res
-quietly _pctile r_annual_2022_excl_res, p(5 95)
+capture drop r_annual_excl_trim_2022
+gen double r_annual_excl_trim_2022 = r_annual_excl_2022
+quietly _pctile r_annual_excl_2022, p(5 95)
 scalar p5_ex = r(r1)
 scalar p95_ex = r(r2)
-replace r_annual_2022_excl_res_trim = . if r_annual_2022_excl_res < p5_ex | r_annual_2022_excl_res > p95_ex
+replace r_annual_excl_trim_2022 = . if r_annual_excl_2022 < p5_ex | r_annual_excl_2022 > p95_ex
 
-di as txt "Trimmed returns excl-res (r_annual_2022_excl_res_trim) summary:"
-summarize r_annual_2022_excl_res_trim, detail
+di as txt "Trimmed returns excl-res (r_annual_excl_trim_2022) summary:"
+summarize r_annual_excl_trim_2022, detail
 
 * Period return: R_period = num_period / base
 gen double r_period = num_period / base
@@ -454,10 +454,10 @@ di as txt "5th percentile: " %12.4f p5
 di as txt "95th percentile: " %12.4f p95
 
 * Create trimmed returns
-gen double r_annual_2022_trimmed = r_annual_2022
-replace r_annual_2022_trimmed = . if r_annual_2022 < p5 | r_annual_2022 > p95
+gen double r_annual_trim_2022 = r_annual_2022
+replace r_annual_trim_2022 = . if r_annual_2022 < p5 | r_annual_2022 > p95
 
-quietly count if !missing(r_annual_2022_trimmed)
+quietly count if !missing(r_annual_trim_2022)
 local n_trimmed = r(N)
 quietly count if !missing(r_annual_2022)
 local n_original = r(N)
@@ -467,7 +467,7 @@ di as txt "Trimmed sample size: `n_trimmed'"
 di as txt "Trimmed sample size: " %4.1f 100*`n_trimmed'/`n_original' "% of original"
 
 di as txt "Trimmed returns summary:"
-summarize r_annual_2022_trimmed, detail
+summarize r_annual_trim_2022, detail
 
 * ---------------------------------------------------------------------
 * Step 9: Simple N diagnostics (included vs excl-res)
@@ -479,8 +479,8 @@ quietly count if !missing(r_annual_2022)
 di as txt "  N r_annual_2022 (included): " r(N)
 quietly count if !missing(r_period_excl_res)
 di as txt "  N r_period_excl_res: " r(N)
-quietly count if !missing(r_annual_2022_excl_res)
-di as txt "  N r_annual_2022_excl_res: " r(N)
+quietly count if !missing(r_annual_excl_2022)
+di as txt "  N r_annual_excl_2022: " r(N)
 
 * ---------------------------------------------------------------------
 * Save results
@@ -504,15 +504,15 @@ di as txt "=== Returns availability diagnostics (2022) ==="
 capture noisily {
     quietly count if !missing(r_annual_2022)
     local N_inc = r(N)
-    quietly count if !missing(r_annual_2022_excl_res)
+    quietly count if !missing(r_annual_excl_2022)
     local N_ex = r(N)
-    quietly count if !missing(r_annual_2022) & !missing(r_annual_2022_excl_res)
+    quietly count if !missing(r_annual_2022) & !missing(r_annual_excl_2022)
     local N_both = r(N)
     di as txt "  Non-missing included: `N_inc'"
     di as txt "  Non-missing excl-res: `N_ex'"
     di as txt "  Non-missing both: `N_both'"
     gen byte has_r22    = !missing(r_annual_2022)
-    gen byte has_r22_ex = !missing(r_annual_2022_excl_res)
+    gen byte has_r22_ex = !missing(r_annual_excl_2022)
     di as txt "  Cross-tab of included vs excl-res availability:"
     tab has_r22 has_r22_ex, missing
     drop has_r22 has_r22_ex
