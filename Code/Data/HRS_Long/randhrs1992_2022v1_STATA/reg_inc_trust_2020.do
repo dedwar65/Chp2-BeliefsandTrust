@@ -32,7 +32,7 @@ di as txt ""
 * Trust variables (2020)
 local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
 
-* Income variables: raw and log versions
+* Income variables: log versions only
 local inc_raw "resp_lab_inc resp_tot_inc"
 
 di as txt "=== Creating log versions of income variables ==="
@@ -46,19 +46,19 @@ foreach v of local inc_raw {
     }
 }
 
-* Define all income variables (raw + log)
-local inc_vars "resp_lab_inc resp_tot_inc ln_resp_lab_inc ln_resp_tot_inc"
+* Define income variables (log only)
+local inc_vars "ln_resp_lab_inc ln_resp_tot_inc"
 
 * Quick overlap diagnostics for sample sizes
 quietly count
 local N_all = r(N)
 
-di as txt "=== Quick overlap check: resp_lab_inc and rv557 ==="
-quietly count if !missing(resp_lab_inc)
-di as txt "  Non-missing resp_lab_inc: " r(N) " of " `N_all'
+di as txt "=== Quick overlap check: ln_resp_lab_inc and rv557 ==="
+quietly count if !missing(ln_resp_lab_inc)
+di as txt "  Non-missing ln_resp_lab_inc: " r(N) " of " `N_all'
 quietly count if !missing(rv557)
 di as txt "  Non-missing rv557:        " r(N) " of " `N_all'
-quietly count if !missing(resp_lab_inc) & !missing(rv557)
+quietly count if !missing(ln_resp_lab_inc) & !missing(rv557)
 di as txt "  Non-missing both:         " r(N) " of " `N_all'
 
 di as txt ""
@@ -128,11 +128,28 @@ foreach t of local trust_vars {
     local outfile "`tables'/trust_income_`t'.tex"
     di as txt "Exporting LaTeX table: `outfile'"
     if "`models_raw'`models_ctl'" != "" {
+        * Short, human column titles for 4 models (log income only)
+        local mt "log Lab" "log Tot" "log Lab" "log Tot"
+        
+        * Short row names (LaTeX-safe)
+        local vlab `t'         "Trust"
+        local vlab2 c.`t'#c.`t' "Trust\$^{2}\$"
+        local vlab3 r15agey_b    "Age"
+        local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
+        local vlab5 raedyrs      "Years of education"
+        local vlab6 r15inlbrf    "In labor force"
+        local vlab7 married_2020 "Married"
+        local vlab8 born_us      "Born in U.S."
+        
         esttab `models_raw' `models_ctl' using "`outfile'", replace ///
-            booktabs label compress se star(* 0.10 ** 0.05 *** 0.01) ///
+            booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
+            compress b(%9.3f) se(%9.3f) ///
+            mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
+            posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
+            varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8') ///
             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
-            title("Income 2020 on Trust `t' (raw and with controls)") ///
-            addnote("Robust SEs in parentheses; age entered quadratically when available" "Controls: `ctrl_in'")
+            title("Log Income (2020) on Trust `t'") ///
+            addnote("Robust SEs in parentheses; Age entered quadratically when available." "Controls (when included): raedyrs, in labor force, married, born in U.S.")
     }
     else {
         di as warn "No models estimated for trust var `t'; skipping export."
@@ -188,11 +205,29 @@ if _rc==0 {
     di as txt "Exporting LaTeX table: `outfile_pca'"
     if "`models_pca_raw'`models_pca_ctl'" != "" {
         local pc1_str : display %6.3f pc1_prop
+        
+        * Short, human column titles for 4 models (log income only)
+        local mt "log Lab" "log Tot" "log Lab" "log Tot"
+        
+        * Short row names (LaTeX-safe)
+        local vlab trust_pca1_z         "Trust PC1"
+        local vlab2 c.trust_pca1_z#c.trust_pca1_z "Trust PC1\$^{2}\$"
+        local vlab3 r15agey_b    "Age"
+        local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
+        local vlab5 raedyrs      "Years of education"
+        local vlab6 r15inlbrf    "In labor force"
+        local vlab7 married_2020 "Married"
+        local vlab8 born_us      "Born in U.S."
+        
         esttab `models_pca_raw' `models_pca_ctl' using "`outfile_pca'", replace ///
-            booktabs label compress se star(* 0.10 ** 0.05 *** 0.01) ///
+            booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
+            compress b(%9.3f) se(%9.3f) ///
+            mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
+            posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
+            varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8') ///
             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
-            title("Income 2020 on Trust PC1 (raw and with controls)") ///
-            addnote("Robust SEs in parentheses; age entered quadratically when available" "Controls: `ctrl_in'" "PC1 variance prop = `pc1_str'")
+            title("Log Income (2020) on Trust PC1") ///
+            addnote("Robust SEs in parentheses; Age entered quadratically when available." "Controls (when included): raedyrs, in labor force, married, born in U.S." "PC1 variance prop = `pc1_str'")
     }
     else {
         di as warn "No PCA models estimated; skipping export."

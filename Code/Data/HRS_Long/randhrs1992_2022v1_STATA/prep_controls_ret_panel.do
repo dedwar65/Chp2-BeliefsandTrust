@@ -525,9 +525,72 @@ di as txt "Marital status (2022) summary:"
 tab married_2022, missing
 
 * ---------------------------------------------------------------------
+* Compute average returns across all 11 years (2002-2022) for complete observations
+* ---------------------------------------------------------------------
+di as txt "=== Computing average returns across all 11 years (2002-2022) ==="
+
+* Drop existing average return variables to allow re-running
+capture drop r_annual_avg r_annual_excl_avg r_annual_trim_avg r_annual_excl_trim_avg
+
+* Create indicator for complete 11-year overlap (included returns)
+gen byte complete_11yr_incl = (!missing(r_annual_2022) & !missing(r_annual_2020) & !missing(r_annual_2018) & !missing(r_annual_2016) & !missing(r_annual_2014) & !missing(r_annual_2012) & !missing(r_annual_2010) & !missing(r_annual_2008) & !missing(r_annual_2006) & !missing(r_annual_2004) & !missing(r_annual_2002))
+
+* Create indicator for complete 11-year overlap (excluded residential returns)
+gen byte complete_11yr_excl = (!missing(r_annual_excl_2022) & !missing(r_annual_excl_2020) & !missing(r_annual_excl_2018) & !missing(r_annual_excl_2016) & !missing(r_annual_excl_2014) & !missing(r_annual_excl_2012) & !missing(r_annual_excl_2010) & !missing(r_annual_excl_2008) & !missing(r_annual_excl_2006) & !missing(r_annual_excl_2004) & !missing(r_annual_excl_2002))
+
+* Create indicator for complete 11-year overlap (included, trimmed returns)
+gen byte complete_11yr_trim = (!missing(r_annual_trim_2022) & !missing(r_annual_trim_2020) & !missing(r_annual_trim_2018) & !missing(r_annual_trim_2016) & !missing(r_annual_trim_2014) & !missing(r_annual_trim_2012) & !missing(r_annual_trim_2010) & !missing(r_annual_trim_2008) & !missing(r_annual_trim_2006) & !missing(r_annual_trim_2004) & !missing(r_annual_trim_2002))
+
+* Create indicator for complete 11-year overlap (excluded residential, trimmed returns)
+gen byte complete_11yr_excl_trim = (!missing(r_annual_excl_trim_2022) & !missing(r_annual_excl_trim_2020) & !missing(r_annual_excl_trim_2018) & !missing(r_annual_excl_trim_2016) & !missing(r_annual_excl_trim_2014) & !missing(r_annual_excl_trim_2012) & !missing(r_annual_excl_trim_2010) & !missing(r_annual_excl_trim_2008) & !missing(r_annual_excl_trim_2006) & !missing(r_annual_excl_trim_2004) & !missing(r_annual_excl_trim_2002))
+
+* Report overlap counts
+quietly count if complete_11yr_incl
+di as txt "  Complete 11-year overlap (included): " r(N)
+quietly count if complete_11yr_excl
+di as txt "  Complete 11-year overlap (excl-res): " r(N)
+quietly count if complete_11yr_trim
+di as txt "  Complete 11-year overlap (included, trimmed): " r(N)
+quietly count if complete_11yr_excl_trim
+di as txt "  Complete 11-year overlap (excl-res, trimmed): " r(N)
+
+* Compute average returns (arithmetic mean) for complete observations
+di as txt "Computing average returns for complete 11-year observations..."
+
+* Average included returns
+gen double r_annual_avg = (r_annual_2022 + r_annual_2020 + r_annual_2018 + r_annual_2016 + r_annual_2014 + r_annual_2012 + r_annual_2010 + r_annual_2008 + r_annual_2006 + r_annual_2004 + r_annual_2002) / 11 if complete_11yr_incl
+label var r_annual_avg "Average annual return (included residential) 2002-2022"
+
+* Average excluded residential returns
+gen double r_annual_excl_avg = (r_annual_excl_2022 + r_annual_excl_2020 + r_annual_excl_2018 + r_annual_excl_2016 + r_annual_excl_2014 + r_annual_excl_2012 + r_annual_excl_2010 + r_annual_excl_2008 + r_annual_excl_2006 + r_annual_excl_2004 + r_annual_excl_2002) / 11 if complete_11yr_excl
+label var r_annual_excl_avg "Average annual return (excluded residential) 2002-2022"
+
+* Average included, trimmed returns
+gen double r_annual_trim_avg = (r_annual_trim_2022 + r_annual_trim_2020 + r_annual_trim_2018 + r_annual_trim_2016 + r_annual_trim_2014 + r_annual_trim_2012 + r_annual_trim_2010 + r_annual_trim_2008 + r_annual_trim_2006 + r_annual_trim_2004 + r_annual_trim_2002) / 11 if complete_11yr_trim
+label var r_annual_trim_avg "Average annual return (included residential, trimmed) 2002-2022"
+
+* Average excluded residential, trimmed returns
+gen double r_annual_excl_trim_avg = (r_annual_excl_trim_2022 + r_annual_excl_trim_2020 + r_annual_excl_trim_2018 + r_annual_excl_trim_2016 + r_annual_excl_trim_2014 + r_annual_excl_trim_2012 + r_annual_excl_trim_2010 + r_annual_excl_trim_2008 + r_annual_excl_trim_2006 + r_annual_excl_trim_2004 + r_annual_excl_trim_2002) / 11 if complete_11yr_excl_trim
+label var r_annual_excl_trim_avg "Average annual return (excluded residential, trimmed) 2002-2022"
+
+* Summary statistics for average returns
+di as txt "Summary statistics for average returns:"
+summarize r_annual_avg r_annual_excl_avg r_annual_trim_avg r_annual_excl_trim_avg
+
+* Count non-missing average returns
+quietly count if !missing(r_annual_avg)
+di as txt "Non-missing r_annual_avg: " r(N)
+quietly count if !missing(r_annual_excl_avg)
+di as txt "Non-missing r_annual_excl_avg: " r(N)
+quietly count if !missing(r_annual_trim_avg)
+di as txt "Non-missing r_annual_trim_avg: " r(N)
+quietly count if !missing(r_annual_excl_trim_avg)
+di as txt "Non-missing r_annual_excl_trim_avg: " r(N)
+
+* ---------------------------------------------------------------------
 * Save updated dataset
 * ---------------------------------------------------------------------
-di as txt "=== Saving updated analysis dataset with asset shares, non-residential wealth, and 2020 demographics ==="
+di as txt "=== Saving updated analysis dataset with asset shares, non-residential wealth, 2020 demographics, and average returns ==="
 save "`out_ana'", replace
 di as txt "Saved: `out_ana'"
 

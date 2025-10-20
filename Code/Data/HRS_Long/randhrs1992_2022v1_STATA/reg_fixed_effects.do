@@ -57,7 +57,7 @@ di as txt "Estimation sample: Min obs per id = " r(min) ", Max = " r(max) ", Mea
 drop n_obs any_miss
 
 eststo clear
-eststo reg3_1: xtreg r_annual age age_sq i.married i.inlbrf ///
+eststo reg3_1: xtreg r_annual i.married i.inlbrf ///
     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
     risky_share year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, fe vce(cluster hhidpn)
@@ -123,7 +123,7 @@ quietly summarize n_obs
 di as txt "Estimation sample: Min obs per id = " r(min) ", Max = " r(max) ", Mean = " r(mean)
 drop n_obs any_miss
 
-eststo reg3_2: xtreg r_annual_trim age age_sq i.married i.inlbrf ///
+eststo reg3_2: xtreg r_annual_trim i.married i.inlbrf ///
     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
     risky_share year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, fe vce(cluster hhidpn)
@@ -174,7 +174,7 @@ quietly summarize n_obs
 di as txt "Estimation sample: Min obs per id = " r(min) ", Max = " r(max) ", Mean = " r(mean)
 drop n_obs any_miss
 
-eststo reg3_3: xtreg r_annual_excl age age_sq i.married i.inlbrf ///
+eststo reg3_3: xtreg r_annual_excl i.married i.inlbrf ///
     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonres_d10 ///
     risky_share year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, fe vce(cluster hhidpn)
@@ -225,7 +225,7 @@ quietly summarize n_obs
 di as txt "Estimation sample: Min obs per id = " r(min) ", Max = " r(max) ", Mean = " r(mean)
 drop n_obs any_miss
 
-eststo reg3_4: xtreg r_annual_excl_trim age age_sq i.married i.inlbrf ///
+eststo reg3_4: xtreg r_annual_excl_trim i.married i.inlbrf ///
     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonres_d10 ///
     risky_share year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, fe vce(cluster hhidpn)
@@ -250,29 +250,59 @@ di as txt "=== Exporting Results                                            ==="
 di as txt "===================================================================="
 
 * Export to LaTeX table
-esttab reg3_1 reg3_2 reg3_3 reg3_4 using "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/fixed_effects.tex", ///
-    replace booktabs ///
-    se star(* 0.10 ** 0.05 *** 0.01) ///
-    label compress ///
-    drop(_cons) ///
-    stats(N N_g r2_w r2_b r2_o, labels("Observations" "Number of groups" "R-sq within" "R-sq between" "R-sq overall")) ///
-    title("Individual Fixed Effects Regressions") ///
-    addnote("Clustered standard errors at individual level in parentheses" ///
-            "*** p<0.01, ** p<0.05, * p<0.10" ///
-            "Individual fixed effects included but not shown" ///
-            "Time-invariant variables (raedyrs, born_us) dropped by fixed effects")
+local tables "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables"
+local outfile "`tables'/fixed_effects.tex"
 
-* Display results in log
-esttab reg3_1 reg3_2 reg3_3 reg3_4, ///
-    se star(* 0.10 ** 0.05 *** 0.01) ///
-    label compress ///
-    stats(N N_g r2_w r2_b r2_o, labels("Observations" "Number of groups" "R-sq within" "R-sq between" "R-sq overall"))
+* Short, human column titles for 4 models
+local mt "Annual" "Annual (trim)" "Excl. res" "Excl. res (trim)"
+
+* Short row names (LaTeX-safe)
+local vlab age "Age"
+local vlab2 age_sq "Age\$^{2}\$"
+local vlab3 1.married "Married"
+local vlab4 1.inlbrf "In labor force"
+local vlab5 1.wealth_d2 "Wealth d2"
+local vlab6 1.wealth_d3 "Wealth d3"
+local vlab7 1.wealth_d4 "Wealth d4"
+local vlab8 1.wealth_d5 "Wealth d5"
+local vlab9 1.wealth_d6 "Wealth d6"
+local vlab10 1.wealth_d7 "Wealth d7"
+local vlab11 1.wealth_d8 "Wealth d8"
+local vlab12 1.wealth_d9 "Wealth d9"
+local vlab13 1.wealth_d10 "Wealth d10"
+local vlab14 1.wealth_nonres_d2 "Non-res wealth d2"
+local vlab15 1.wealth_nonres_d3 "Non-res wealth d3"
+local vlab16 1.wealth_nonres_d4 "Non-res wealth d4"
+local vlab17 1.wealth_nonres_d5 "Non-res wealth d5"
+local vlab18 1.wealth_nonres_d6 "Non-res wealth d6"
+local vlab19 1.wealth_nonres_d7 "Non-res wealth d7"
+local vlab20 1.wealth_nonres_d8 "Non-res wealth d8"
+local vlab21 1.wealth_nonres_d9 "Non-res wealth d9"
+local vlab22 1.wealth_nonres_d10 "Non-res wealth d10"
+local vlab23 risky_share "Risky share"
+
+esttab reg3_1 reg3_2 reg3_3 reg3_4 using "`outfile'", replace ///
+    booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
+    compress b(%9.3f) se(%9.3f) ///
+    mtitles(`mt') ///
+    varlabels(1.married "Married" 1.inlbrf "In labor force" risky_share "Risky share") ///
+    keep(1.married 1.inlbrf risky_share) ///
+    stats(N N_g r2_w r2_b r2_o sigma_u sigma_e rho, labels("Observations" "Number of groups" "R-sq within" "R-sq between" "R-sq overall" "Sigma u" "Sigma e" "Rho")) ///
+    title("Individual Fixed Effects Regressions") ///
+    addnote("Clustered standard errors at individual level in parentheses" "*** p<0.01, ** p<0.05, * p<0.10" "Individual fixed effects included but not shown" "Wealth deciles and year dummies included but not shown")
+
+* Display results in log (summary only)
+di as txt "Fixed Effects 3.1 (Annual returns): N=" e(N) ", Groups=" e(N_g) ", R² within=" %6.3f e(r2_w)
+di as txt "Fixed Effects 3.2 (Annual returns, trimmed): N=" e(N) ", Groups=" e(N_g) ", R² within=" %6.3f e(r2_w)
+di as txt "Fixed Effects 3.3 (Excl. residential): N=" e(N) ", Groups=" e(N_g) ", R² within=" %6.3f e(r2_w)
+di as txt "Fixed Effects 3.4 (Excl. residential, trimmed): N=" e(N) ", Groups=" e(N_g) ", R² within=" %6.3f e(r2_w)
 
 di as txt ""
 di as txt "===================================================================="
 di as txt "=== Individual Fixed Effects Complete                            ==="
 di as txt "===================================================================="
 
-log off
-log close
+capture log off
+capture log close
+quietly di ""   // force _rc = 0 on the last line
 

@@ -1,44 +1,36 @@
 \begin{table}[htbp]\centering
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\caption{Income 2020 on Trust rv559 (raw and with controls)}
-\begin{tabular}{l*{8}{c}}
+\caption{Log Income (2020) on Trust rv559}
+\begin{tabular}{l*{4}{c}}
 \toprule
-                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
-                &\multicolumn{1}{c}{Respondent labor income (sum of 6 components; missing if all missing)}&\multicolumn{1}{c}{Respondent total income (labor + hwicap + hwiother; missing if all missing)}&\multicolumn{1}{c}{log(resp\_lab\_inc)}&\multicolumn{1}{c}{log(resp\_tot\_inc)}&\multicolumn{1}{c}{Respondent labor income (sum of 6 components; missing if all missing)}&\multicolumn{1}{c}{Respondent total income (labor + hwicap + hwiother; missing if all missing)}&\multicolumn{1}{c}{log(resp\_lab\_inc)}&\multicolumn{1}{c}{log(resp\_tot\_inc)}\\
+          &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+          &\multicolumn{1}{c}{log Lab}&\multicolumn{1}{c}{log Tot}&\multicolumn{1}{c}{log Lab}&\multicolumn{1}{c}{log Tot}\\
+& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Trust     &    0.132\sym{***}&    0.198\sym{***}&    0.051         &    0.095\sym{*}  \\
+          &  (0.050)         &  (0.059)         &  (0.044)         &  (0.051)         \\
+Trust$^{2}$&   -0.015\sym{***}&   -0.021\sym{***}&   -0.006         &   -0.010\sym{**} \\
+          &  (0.004)         &  (0.005)         &  (0.004)         &  (0.004)         \\
+Age       &                  &                  &    0.062         &    0.128\sym{**} \\
+          &                  &                  &  (0.043)         &  (0.051)         \\
+Age$^{2}$ &                  &                  &   -0.000         &   -0.001\sym{**} \\
+          &                  &                  &  (0.000)         &  (0.000)         \\
+Years of education&                  &                  &    0.076\sym{***}&    0.097\sym{***}\\
+          &                  &                  &  (0.010)         &  (0.012)         \\
+In labor force&                  &                  &    0.673\sym{***}&    0.853\sym{***}\\
+          &                  &                  &  (0.083)         &  (0.089)         \\
+Married   &                  &                  &    0.108\sym{*}  &    0.226\sym{***}\\
+          &                  &                  &  (0.063)         &  (0.069)         \\
+Born in U.S.&                  &                  &    0.163         &    0.120         \\
+          &                  &                  &  (0.102)         &  (0.115)         \\
+\_cons    &    9.964\sym{***}&   10.055\sym{***}&    6.197\sym{***}&    3.401\sym{*}  \\
+          &  (0.149)         &  (0.183)         &  (1.493)         &  (1.799)         \\
 \midrule
-trust: medicare or medicaid&   5620.2\sym{**} &  12608.3\sym{***}&    0.132\sym{***}&    0.198\sym{***}&   1559.7         &   5681.2         &   0.0508         &   0.0947\sym{*}  \\
-                & (2293.2)         & (4044.3)         & (0.0497)         & (0.0588)         & (2058.6)         & (3542.3)         & (0.0445)         & (0.0505)         \\
-\addlinespace
-trust: medicare or medicaid $\times$ trust: medicare or medicaid&   -622.8\sym{***}&  -1305.3\sym{***}&  -0.0148\sym{***}&  -0.0212\sym{***}&   -185.0         &   -571.9\sym{**} & -0.00556         &  -0.0101\sym{**} \\
-                &  (189.4)         &  (323.7)         &(0.00399)         &(0.00464)         &  (174.0)         &  (289.1)         &(0.00368)         &(0.00414)         \\
-\addlinespace
-r15agey\_b:w15 r age (years) at ivw begmon&                  &                  &                  &                  &    900.8         &    273.0         &   0.0624         &    0.128\sym{**} \\
-                &                  &                  &                  &                  & (1555.2)         & (2666.7)         & (0.0433)         & (0.0509)         \\
-\addlinespace
-r15agey\_b:w15 r age (years) at ivw begmon $\times$ r15agey\_b:w15 r age (years) at ivw begmon&                  &                  &                  &                  &   -5.114         &    1.819         &-0.000400         &-0.000803\sym{**} \\
-                &                  &                  &                  &                  &  (12.18)         &  (20.09)         &(0.000303)         &(0.000355)         \\
-\addlinespace
-raedyrs: r years of education&                  &                  &                  &                  &   3969.8\sym{***}&   6757.2\sym{***}&   0.0763\sym{***}&   0.0965\sym{***}\\
-                &                  &                  &                  &                  &  (560.1)         &  (865.7)         & (0.0103)         & (0.0117)         \\
-\addlinespace
-r15inlbrf:w15 =1 if r is in the labor force&                  &                  &                  &                  &  28197.5\sym{***}&  38301.8\sym{***}&    0.673\sym{***}&    0.853\sym{***}\\
-                &                  &                  &                  &                  & (3485.8)         & (5179.3)         & (0.0828)         & (0.0895)         \\
-\addlinespace
-Married (r15mstat: 1 or 2) vs not married (3-8)&                  &                  &                  &                  &   4944.5         &  17711.5\sym{***}&    0.108\sym{*}  &    0.226\sym{***}\\
-                &                  &                  &                  &                  & (3764.1)         & (5354.9)         & (0.0630)         & (0.0691)         \\
-\addlinespace
-Born in US (1) vs not US (0)&                  &                  &                  &                  &   4688.7         &   2336.1         &    0.163         &    0.120         \\
-                &                  &                  &                  &                  & (3208.7)         & (5592.2)         &  (0.102)         &  (0.115)         \\
-\addlinespace
-Constant        &  31460.7\sym{***}&  37501.9\sym{***}&    9.964\sym{***}&    10.05\sym{***}& -71311.9         & -97005.0         &    6.197\sym{***}&    3.401\sym{*}  \\
-                & (6166.9)         &(10705.2)         &  (0.149)         &  (0.183)         &(47418.4)         &(86505.6)         &  (1.493)         &  (1.799)         \\
-\midrule
-Observations    &     1050         &     1050         &      964         &     1014         &     1038         &     1038         &      955         &     1004         \\
-Adj. R-squared  &  0.00936         &   0.0142         &   0.0207         &   0.0274         &    0.108         &    0.108         &    0.185         &    0.219         \\
+Observations&  964.000         & 1014.000         &  955.000         & 1004.000         \\
+Adj. R-squared&    0.021         &    0.027         &    0.185         &    0.219         \\
 \bottomrule
-\multicolumn{9}{l}{\footnotesize Standard errors in parentheses}\\
-\multicolumn{9}{l}{\footnotesize Robust SEs in parentheses; age entered quadratically when available}\\
-\multicolumn{9}{l}{\footnotesize Controls:  raedyrs r15inlbrf married\_2020 born\_us}\\
-\multicolumn{9}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically when available.}\\
+\multicolumn{5}{l}{\footnotesize Controls (when included): raedyrs, in labor force, married, born in U.S.}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
 \end{tabular}
 \end{table}

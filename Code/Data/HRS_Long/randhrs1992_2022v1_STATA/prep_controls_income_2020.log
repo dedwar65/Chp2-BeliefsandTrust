@@ -1,9 +1,9 @@
----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
-> hrs1992_2022v1_STATA/prep_controls_income_2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
+> _Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- opened on:  20 Oct 2025, 09:54:00
+ opened on:  20 Oct 2025, 15:25:51
 
 . 
 . set more off
@@ -12,11 +12,11 @@
 . * ---------------------------------------------------------------------
 . * File paths
 . * ---------------------------------------------------------------------
-. local inout "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ra
-> ndhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+. local inout "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/H
+> RS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
-. local fallback "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long
-> /randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
+. local fallback "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Dat
+> a/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
 
 . 
 . * ---------------------------------------------------------------------
@@ -25,12 +25,12 @@
 . capture confirm file "`inout'"
 
 . if _rc {
-.     di as txt "Analysis dataset not found; falling back to flows dataset and will wri
-> te unified file."
+.     di as txt "Analysis dataset not found; falling back to flows dataset an
+> d will write unified file."
 .     capture confirm file "`fallback'"
 .     if _rc {
-.         di as error "ERROR: Neither analysis nor flows dataset found. Run long_merge_
-> in.do first."
+.         di as error "ERROR: Neither analysis nor flows dataset found. Run l
+> ong_merge_in.do first."
 .         exit 198
 .     }
 .     use "`fallback'", clear
@@ -240,12 +240,12 @@ not married |      2,922       18.43       18.43
 
 . egen double resp_lab_inc_2022 = rowtotal(`lab_vars')
 
-. replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) & missing(r15i
-> ssdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
+. replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) & mi
+> ssing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
 (3,688 real changes made, 3,688 to missing)
 
-. label var resp_lab_inc_2022 "Respondent labor income (sum of 6 components; missing if
->  all missing)"
+. label var resp_lab_inc_2022 "Respondent labor income (sum of 6 components; 
+> missing if all missing)"
 
 . 
 . di as txt "resp_lab_inc_2022 summary:"
@@ -270,7 +270,8 @@ resp_lab_inc_2022 summary:
 99%       211000        3150400       Kurtosis       829.0084
 
 . 
-. * Total income = labor income + household capital income + other household income
+. * Total income = labor income + household capital income + other household 
+> income
 . local tot_add "h15icap h15iothr"
 
 . foreach v of local tot_add {
@@ -288,14 +289,14 @@ resp_lab_inc_2022 summary:
 >     + cond(missing(h15iothr), 0, h15iothr)
 (3,688 missing values generated)
 
-. * If labor income is missing AND both additions are missing, set total to missing as 
-> well
-. replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h15icap) & miss
-> ing(h15iothr)
+. * If labor income is missing AND both additions are missing, set total to m
+> issing as well
+. replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h15ic
+> ap) & missing(h15iothr)
 (0 real changes made)
 
-. label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + hwiother; miss
-> ing if all missing)"
+. label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + hwio
+> ther; missing if all missing)"
 
 . 
 . di as txt "resp_tot_inc_2022 summary:"
@@ -321,9 +322,11 @@ resp_tot_inc_2022 summary:
 
 . 
 . * ---------------------------------------------------------------------
-. * Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net worth (h15atotb)
+. * Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net worth 
+> (h15atotb)
 . * ---------------------------------------------------------------------
-. di as txt "=== Constructing wealth percentile and deciles from h15atotb (A_2020) ==="
+. di as txt "=== Constructing wealth percentile and deciles from h15atotb (A_
+> 2020) ==="
 === Constructing wealth percentile and deciles from h15atotb (A_2020) ===
 
 . capture confirm variable h15atotb
@@ -347,11 +350,12 @@ resp_tot_inc_2022 summary:
 . gen double wealth_pct_2020 = .
 (15,856 missing values generated)
 
-. replace wealth_pct_2020 = 100 * (wealth_rank_2020 - 1) / (`N_wealth' - 1) if `N_wealt
-> h' > 1 & !missing(wealth_rank_2020)
+. replace wealth_pct_2020 = 100 * (wealth_rank_2020 - 1) / (`N_wealth' - 1) i
+> f `N_wealth' > 1 & !missing(wealth_rank_2020)
 (12,168 real changes made)
 
-. replace wealth_pct_2020 = 50 if `N_wealth' == 1 & !missing(wealth_rank_2020)
+. replace wealth_pct_2020 = 50 if `N_wealth' == 1 & !missing(wealth_rank_2020
+> )
 (0 real changes made)
 
 . label variable wealth_pct_2020 "Wealth percentile (based on h15atotb)"
@@ -367,15 +371,15 @@ Wealth percentile diagnostics:
 
 . tabstat wealth_pct_2020, stats(n mean sd p50 min max) format(%12.4f)
 
-    Variable |            N         Mean           SD          p50          Min
--------------+-----------------------------------------------------------------
-wealth_pct~0 |   12168.0000      50.0000      28.8670      49.9918       0.0000
--------------------------------------------------------------------------------
+    Variable |            N         Mean           SD          p50
+-------------+----------------------------------------------------
+wealth_pct~0 |   12168.0000      50.0000      28.8670      49.9918
+------------------------------------------------------------------
 
-    Variable |          Max
--------------+-------------
-wealth_pct~0 |      99.9959
----------------------------
+    Variable |          Min          Max
+-------------+--------------------------
+wealth_pct~0 |       0.0000      99.9959
+----------------------------------------
 
 . di as txt "[summarize] wealth_pct_2020"
 [summarize] wealth_pct_2020
@@ -433,8 +437,8 @@ Wealth decile distribution:
 . * Create decile dummies wealth_d1-wealth_d10
 . forvalues d = 1/10 {
   2.     capture drop wealth_d`d'_2020
-  3.     gen byte wealth_d`d'_2020 = wealth_decile_2020 == `d' if !missing(wealth_decil
-> e_2020)
+  3.     gen byte wealth_d`d'_2020 = wealth_decile_2020 == `d' if !missing(we
+> alth_decile_2020)
   4.     label values wealth_d`d'_2020 yesno
   5.     label var wealth_d`d'_2020 "Wealth decile `d'"
   6. }
@@ -453,24 +457,25 @@ Wealth decile distribution:
 . * ---------------------------------------------------------------------
 . * Save back to unified analysis dataset
 . * ---------------------------------------------------------------------
-. di as txt "=== Saving unified analysis dataset (includes flows, trust, controls, inco
-> me) ==="
-=== Saving unified analysis dataset (includes flows, trust, controls, income) ===
+. di as txt "=== Saving unified analysis dataset (includes flows, trust, cont
+> rols, income) ==="
+=== Saving unified analysis dataset (includes flows, trust, controls, income)
+>  ===
 
 . save "`inout'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA
-    > /_randhrs1992_2022v1_analysis.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_20
+    > 22v1_STATA/_randhrs1992_2022v1_analysis.dta saved
 
 . di as txt "Saved unified dataset: `inout'"
-Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
-> _Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Cod
+> e/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
-> hrs1992_2022v1_STATA/prep_controls_income_2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
+> _Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- closed on:  20 Oct 2025, 09:54:02
----------------------------------------------------------------------------------------
+ closed on:  20 Oct 2025, 15:25:52
+-----------------------------------------------------------------------------

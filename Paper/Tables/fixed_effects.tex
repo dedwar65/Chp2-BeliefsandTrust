@@ -3,182 +3,30 @@
 \caption{Individual Fixed Effects Regressions}
 \begin{tabular}{l*{4}{c}}
 \toprule
-                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
-                &\multicolumn{1}{c}{r\_annual}&\multicolumn{1}{c}{r\_annual\_trim}&\multicolumn{1}{c}{r\_annual\_excl}&\multicolumn{1}{c}{r\_annual\_excl\_trim}\\
+          &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+          &\multicolumn{1}{c}{Annual"}&\multicolumn{1}{c}{Annual (trim)}&\multicolumn{1}{c}{Excl. res}&\multicolumn{1}{c}{Excl. res (trim)}\\
 \midrule
-age             &  0.00850         &  0.00243         &  0.00597         &  0.00221         \\
-                &(0.00758)         &(0.00521)         &(0.00594)         &(0.00376)         \\
-\addlinespace
-age\_sq          &-0.0000949\sym{***}&-0.0000695\sym{***}&-0.0000585\sym{**} &-0.0000428\sym{***}\\
-                &(0.0000301)         &(0.0000199)         &(0.0000249)         &(0.0000157)         \\
-\addlinespace
-no              &        0         &        0         &        0         &        0         \\
-                &      (.)         &      (.)         &      (.)         &      (.)         \\
-\addlinespace
-yes             &   0.0100         &   0.0208\sym{***}&   0.0113         &   0.0158\sym{***}\\
-                & (0.0103)         &(0.00733)         &(0.00868)         &(0.00581)         \\
-\addlinespace
-0.no            &        0         &        0         &        0         &        0         \\
-                &      (.)         &      (.)         &      (.)         &      (.)         \\
-\addlinespace
-1.yes           &-0.000529         & 0.000169         &  0.00190         &  0.00533         \\
-                &(0.00696)         &(0.00451)         &(0.00556)         &(0.00364)         \\
-\addlinespace
-wealth\_d2=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d2=1     &  -0.0316         &  -0.0360\sym{**} &                  &                  \\
-                & (0.0281)         & (0.0181)         &                  &                  \\
-\addlinespace
-wealth\_d3=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d3=1     &  -0.0602\sym{**} &  -0.0759\sym{***}&                  &                  \\
-                & (0.0290)         & (0.0180)         &                  &                  \\
-\addlinespace
-wealth\_d4=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d4=1     &   -0.154\sym{***}&   -0.108\sym{***}&                  &                  \\
-                & (0.0276)         & (0.0179)         &                  &                  \\
-\addlinespace
-wealth\_d5=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d5=1     &   -0.212\sym{***}&   -0.158\sym{***}&                  &                  \\
-                & (0.0279)         & (0.0181)         &                  &                  \\
-\addlinespace
-wealth\_d6=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d6=1     &   -0.313\sym{***}&   -0.216\sym{***}&                  &                  \\
-                & (0.0283)         & (0.0181)         &                  &                  \\
-\addlinespace
-wealth\_d7=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d7=1     &   -0.423\sym{***}&   -0.293\sym{***}&                  &                  \\
-                & (0.0294)         & (0.0186)         &                  &                  \\
-\addlinespace
-wealth\_d8=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d8=1     &   -0.555\sym{***}&   -0.373\sym{***}&                  &                  \\
-                & (0.0309)         & (0.0190)         &                  &                  \\
-\addlinespace
-wealth\_d9=0     &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d9=1     &   -0.680\sym{***}&   -0.474\sym{***}&                  &                  \\
-                & (0.0328)         & (0.0197)         &                  &                  \\
-\addlinespace
-wealth\_d10=0    &        0         &        0         &                  &                  \\
-                &      (.)         &      (.)         &                  &                  \\
-\addlinespace
-wealth\_d10=1    &   -0.876\sym{***}&   -0.604\sym{***}&                  &                  \\
-                & (0.0382)         & (0.0206)         &                  &                  \\
-\addlinespace
-risky\_share     &   0.0714         &  -0.0407\sym{***}&  -0.0849\sym{***}&  -0.0594\sym{***}\\
-                & (0.0621)         & (0.0151)         & (0.0185)         & (0.0135)         \\
-\addlinespace
-year==  2002.0000&   -0.156         &   -0.217\sym{**} &   -0.106         &   -0.133\sym{**} \\
-                &  (0.133)         & (0.0898)         &  (0.103)         & (0.0647)         \\
-\addlinespace
-year==  2004.0000&   -0.142         &   -0.167\sym{**} &  -0.0924         &   -0.103\sym{*}  \\
-                &  (0.118)         & (0.0800)         & (0.0914)         & (0.0579)         \\
-\addlinespace
-year==  2006.0000&  -0.0626         &   -0.116         &  -0.0410         &  -0.0719         \\
-                &  (0.105)         & (0.0716)         & (0.0813)         & (0.0519)         \\
-\addlinespace
-year==  2008.0000&   -0.165\sym{*}  &   -0.190\sym{***}&  -0.0862         &  -0.0957\sym{**} \\
-                & (0.0924)         & (0.0627)         & (0.0714)         & (0.0454)         \\
-\addlinespace
-year==  2010.0000&   -0.206\sym{**} &   -0.230\sym{***}&   -0.108\sym{*}  &   -0.109\sym{***}\\
-                & (0.0801)         & (0.0540)         & (0.0620)         & (0.0391)         \\
-\addlinespace
-year==  2012.0000&   -0.101         &   -0.139\sym{***}&  -0.0320         &  -0.0551\sym{*}  \\
-                & (0.0647)         & (0.0439)         & (0.0503)         & (0.0317)         \\
-\addlinespace
-year==  2014.0000&  -0.0493         &  -0.0785\sym{**} & -0.00249         &  -0.0297         \\
-                & (0.0534)         & (0.0362)         & (0.0412)         & (0.0262)         \\
-\addlinespace
-year==  2016.0000&  -0.0679\sym{*}  &  -0.0889\sym{***}&  -0.0324         &  -0.0403\sym{**} \\
-                & (0.0407)         & (0.0279)         & (0.0318)         & (0.0205)         \\
-\addlinespace
-year==  2018.0000&  -0.0330         &  -0.0533\sym{***}& -0.00270         &  -0.0181         \\
-                & (0.0279)         & (0.0185)         & (0.0216)         & (0.0136)         \\
-\addlinespace
-year==  2020.0000&  -0.0517\sym{***}&  -0.0657\sym{***}&  -0.0212         &  -0.0239\sym{***}\\
-                & (0.0165)         & (0.0116)         & (0.0131)         &(0.00836)         \\
-\addlinespace
-year==  2022.0000&        0         &        0         &        0         &        0         \\
-                &      (.)         &      (.)         &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d2=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d2=1&                  &                  &  -0.0295         & -0.00402         \\
-                &                  &                  & (0.0209)         &(0.00717)         \\
-\addlinespace
-wealth\_nonres\_d3=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d3=1&                  &                  &  -0.0674\sym{***}&  -0.0410\sym{***}\\
-                &                  &                  & (0.0206)         &(0.00726)         \\
-\addlinespace
-wealth\_nonres\_d4=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d4=1&                  &                  &   -0.137\sym{***}&  -0.0762\sym{***}\\
-                &                  &                  & (0.0206)         &(0.00843)         \\
-\addlinespace
-wealth\_nonres\_d5=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d5=1&                  &                  &   -0.194\sym{***}&   -0.126\sym{***}\\
-                &                  &                  & (0.0213)         &(0.00886)         \\
-\addlinespace
-wealth\_nonres\_d6=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d6=1&                  &                  &   -0.292\sym{***}&   -0.175\sym{***}\\
-                &                  &                  & (0.0214)         &(0.00921)         \\
-\addlinespace
-wealth\_nonres\_d7=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d7=1&                  &                  &   -0.391\sym{***}&   -0.236\sym{***}\\
-                &                  &                  & (0.0222)         &(0.00999)         \\
-\addlinespace
-wealth\_nonres\_d8=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d8=1&                  &                  &   -0.498\sym{***}&   -0.303\sym{***}\\
-                &                  &                  & (0.0230)         & (0.0107)         \\
-\addlinespace
-wealth\_nonres\_d9=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d9=1&                  &                  &   -0.617\sym{***}&   -0.375\sym{***}\\
-                &                  &                  & (0.0244)         & (0.0117)         \\
-\addlinespace
-wealth\_nonres\_d10=0&                  &                  &        0         &        0         \\
-                &                  &                  &      (.)         &      (.)         \\
-\addlinespace
-wealth\_nonres\_d10=1&                  &                  &   -0.786\sym{***}&   -0.482\sym{***}\\
-                &                  &                  & (0.0261)         & (0.0132)         \\
+Married   &    0.014         &    0.025\sym{***}&    0.014         &    0.018\sym{***}\\
+          &  (0.010)         &  (0.007)         &  (0.009)         &  (0.006)         \\
+In labor force&   -0.003         &   -0.002         &    0.000         &    0.004         \\
+          &  (0.007)         &  (0.004)         &  (0.005)         &  (0.004)         \\
+Risky share&    0.067         &   -0.044\sym{***}&   -0.088\sym{***}&   -0.062\sym{***}\\
+          &  (0.062)         &  (0.015)         &  (0.018)         &  (0.013)         \\
 \midrule
-Observations    &    27632         &    18480         &    27951         &    16280         \\
-Number of groups&     2512         &     1680         &     2541         &     1480         \\
-R-sq within     &    0.136         &    0.176         &    0.171         &    0.175         \\
-R-sq between    &  0.00523         &  0.00852         &   0.0306         &   0.0563         \\
-R-sq overall    &   0.0361         &   0.0407         &   0.0228         &  0.00928         \\
+Observations&27632.000         &18480.000         &27951.000         &16280.000         \\
+Number of groups& 2512.000         & 1680.000         & 2541.000         & 1480.000         \\
+R-sq within&    0.136         &    0.175         &    0.171         &    0.174         \\
+R-sq between&    0.002         &    0.001         &    0.034         &    0.077         \\
+R-sq overall&    0.034         &    0.037         &    0.022         &    0.008         \\
+Sigma u   &    0.239         &    0.167         &    0.239         &    0.154         \\
+Sigma e   &    0.339         &    0.191         &    0.268         &    0.133         \\
+Rho       &    0.332         &    0.434         &    0.443         &    0.572         \\
 \bottomrule
 \multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
 \multicolumn{5}{l}{\footnotesize Clustered standard errors at individual level in parentheses}\\
 \multicolumn{5}{l}{\footnotesize *** p<0.01, ** p<0.05, * p<0.10}\\
 \multicolumn{5}{l}{\footnotesize Individual fixed effects included but not shown}\\
-\multicolumn{5}{l}{\footnotesize Time-invariant variables (raedyrs, born\_us) dropped by fixed effects}\\
+\multicolumn{5}{l}{\footnotesize Wealth deciles and year dummies included but not shown}\\
 \multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
 \end{tabular}
 \end{table}
