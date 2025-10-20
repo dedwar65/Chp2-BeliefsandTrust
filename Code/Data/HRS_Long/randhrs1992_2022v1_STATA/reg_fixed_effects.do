@@ -74,7 +74,7 @@ histogram fe_hat, title("Distribution of Individual Fixed Effects") ///
     xtitle("Fixed Effect Coefficient") ///
     ytitle("Density") ///
     normal
-graph export "fixed_effects_hist_reg3_1.png", replace
+graph export "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Figures/fixed_effects_hist_reg3_1.png", replace
 
 * Summary statistics of fixed effects
 summarize fe_hat, detail
@@ -135,7 +135,7 @@ histogram fe_hat, title("Distribution of Individual Fixed Effects") ///
     xtitle("Fixed Effect Coefficient") ///
     ytitle("Density") ///
     normal
-graph export "fixed_effects_hist_reg3_2.png", replace
+graph export "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Figures/fixed_effects_hist_reg3_2.png", replace
 drop fe_hat
 
 di as txt ""
@@ -186,7 +186,7 @@ histogram fe_hat, title("Distribution of Individual Fixed Effects") ///
     xtitle("Fixed Effect Coefficient") ///
     ytitle("Density") ///
     normal
-graph export "fixed_effects_hist_reg3_3.png", replace
+graph export "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Figures/fixed_effects_hist_reg3_3.png", replace
 drop fe_hat
 
 di as txt ""
@@ -237,7 +237,7 @@ histogram fe_hat, title("Distribution of Individual Fixed Effects") ///
     xtitle("Fixed Effect Coefficient") ///
     ytitle("Density") ///
     normal
-graph export "fixed_effects_hist_reg3_4.png", replace
+graph export "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Figures/fixed_effects_hist_reg3_4.png", replace
 drop fe_hat
 
 di as txt ""
@@ -250,7 +250,7 @@ di as txt "=== Exporting Results                                            ==="
 di as txt "===================================================================="
 
 * Export to LaTeX table
-esttab reg3_1 reg3_2 reg3_3 reg3_4 using "fixed_effects.tex", ///
+esttab reg3_1 reg3_2 reg3_3 reg3_4 using "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/fixed_effects.tex", ///
     replace booktabs ///
     se star(* 0.10 ** 0.05 *** 0.01) ///
     label compress ///

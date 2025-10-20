@@ -1,0 +1,44 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Returns 2022 on Trust rv564 (raw and with controls)}
+\begin{tabular}{l*{8}{c}}
+\toprule
+                &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+                &\multicolumn{1}{c}{r\_annual\_2022}&\multicolumn{1}{c}{r\_annual\_trim\_2022}&\multicolumn{1}{c}{r\_annual\_excl\_2022}&\multicolumn{1}{c}{r\_annual\_excl\_trim\_2022}&\multicolumn{1}{c}{r\_annual\_2022}&\multicolumn{1}{c}{r\_annual\_trim\_2022}&\multicolumn{1}{c}{r\_annual\_excl\_2022}&\multicolumn{1}{c}{r\_annual\_excl\_trim\_2022}\\
+\midrule
+trust: mass media&   0.0192         &-0.000160         &   0.0247\sym{*}  &  0.00423         &  0.00899         & -0.00666         &   0.0141         & -0.00170         \\
+                & (0.0215)         & (0.0115)         & (0.0142)         &(0.00670)         & (0.0214)         & (0.0117)         & (0.0148)         &(0.00680)         \\
+\addlinespace
+trust: mass media $\times$ trust: mass media& -0.00270         & 0.000525         & -0.00320\sym{**} & 0.000131         & -0.00142         &  0.00142         & -0.00180         &  0.00101         \\
+                &(0.00276)         &(0.00146)         &(0.00159)         &(0.000815)         &(0.00275)         &(0.00147)         &(0.00166)         &(0.000802)         \\
+\addlinespace
+r15agey\_b:w15 r age (years) at ivw begmon&                  &                  &                  &                  &  -0.0562\sym{**} &  0.00295         & -0.00899         & -0.00753         \\
+                &                  &                  &                  &                  & (0.0272)         & (0.0148)         & (0.0216)         &(0.00896)         \\
+\addlinespace
+r15agey\_b:w15 r age (years) at ivw begmon $\times$ r15agey\_b:w15 r age (years) at ivw begmon&                  &                  &                  &                  & 0.000351\sym{*}  &-0.0000350         &0.0000302         &0.0000512         \\
+                &                  &                  &                  &                  &(0.000192)         &(0.000105)         &(0.000151)         &(0.0000644)         \\
+\addlinespace
+raedyrs: r years of education&                  &                  &                  &                  &  0.00429         &  0.00388         &  0.00302         &  0.00317\sym{*}  \\
+                &                  &                  &                  &                  &(0.00598)         &(0.00326)         &(0.00400)         &(0.00190)         \\
+\addlinespace
+r15inlbrf:w15 =1 if r is in the labor force&                  &                  &                  &                  &   0.0564         &   0.0447\sym{*}  &   0.0605\sym{*}  &   0.0337\sym{**} \\
+                &                  &                  &                  &                  & (0.0415)         & (0.0233)         & (0.0327)         & (0.0141)         \\
+\addlinespace
+Married (r15mstat: 1 or 2) vs not married (3-8)&                  &                  &                  &                  &  -0.0107         &   0.0340         &   0.0141         &   0.0388\sym{***}\\
+                &                  &                  &                  &                  & (0.0421)         & (0.0225)         & (0.0310)         & (0.0136)         \\
+\addlinespace
+Born in US (1) vs not US (0)&                  &                  &                  &                  &  -0.0130         &   0.0125         &   0.0156         &   0.0126         \\
+                &                  &                  &                  &                  & (0.0534)         & (0.0281)         & (0.0397)         & (0.0179)         \\
+\addlinespace
+Constant        &    0.185\sym{***}&    0.142\sym{***}&   0.0832\sym{***}&   0.0469\sym{***}&    2.293\sym{**} &  0.00743         &    0.472         &    0.230         \\
+                & (0.0331)         & (0.0188)         & (0.0246)         & (0.0119)         &  (0.977)         &  (0.515)         &  (0.771)         &  (0.310)         \\
+\midrule
+Observations    &      798         &      723         &      808         &      736         &      792         &      719         &      801         &      729         \\
+Adj. R-squared  &-0.000929         & -0.00120         &  0.00146         &  0.00350         &   0.0330         &   0.0138         &   0.0239         &   0.0265         \\
+\bottomrule
+\multicolumn{9}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{9}{l}{\footnotesize Robust SEs in parentheses; age entered quadratically when available}\\
+\multicolumn{9}{l}{\footnotesize Controls:  raedyrs r15inlbrf married\_2020 born\_us}\\
+\multicolumn{9}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

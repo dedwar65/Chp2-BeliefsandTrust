@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
 > hrs1992_2022v1_STATA/RAND_2016_merge_and_returns.log
   log type:  text
- opened on:  17 Oct 2025, 18:58:49
+ opened on:  20 Oct 2025, 09:54:49
 
 . 
 . set more off
@@ -104,8 +104,8 @@ Checking presence of 2016 flow variables...
 . tempfile raw16_flows
 
 . save "`raw16_flows'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 saved as .dta
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_31054.000003 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_31054.000003 saved as .dta
     format
 
 . restore
@@ -854,5 +854,5 @@ Saved: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/ran
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
 > hrs1992_2022v1_STATA/RAND_2016_merge_and_returns.log
   log type:  text
- closed on:  17 Oct 2025, 18:58:53
+ closed on:  20 Oct 2025, 09:54:55
 ---------------------------------------------------------------------------------------

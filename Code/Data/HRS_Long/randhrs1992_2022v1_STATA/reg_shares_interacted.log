@@ -1,45 +1,36 @@
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/reg_shares_interacted.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/reg_shares_interacted.log
   log type:  text
- opened on:  18 Oct 2025, 12:46:41
-r; t=0.00 12:46:41
+ opened on:  20 Oct 2025, 10:16:26
 
 . 
 . set more off
-r; t=0.00 12:46:41
 
 . log on
 (log already on)
-r; t=0.00 12:46:41
 
 . 
 . * Install estout package if not already installed
 . capture which estout
-r; t=0.00 12:46:41
 
 . if _rc {
 .     ssc install estout, replace
-r; t=0.00 12:46:41
 . }
-r; t=0.00 12:46:41
 
 . 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:41
 
 . di as txt "=== Regression Set 2: Asset Shares × Year Interactions          ==="
 === Regression Set 2: Asset Shares × Year Interactions          ===
-r; t=0.00 12:46:41
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:41
 
 . di as txt ""
 
-r; t=0.00 12:46:41
 
 . 
 . * ---------------------------------------------------------------------
@@ -47,20 +38,16 @@ r; t=0.00 12:46:41
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:41
 
 . di as txt "Regression 2.1: r_annual (including residential)"
 Regression 2.1: r_annual (including residential)
-r; t=0.00 12:46:41
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:41
 
 . 
 . * Load fresh data
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:41
 
 . 
 . * Set panel structure
@@ -69,24 +56,26 @@ r; t=0.00 12:46:41
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.18 12:46:41
 
 . gen age_sq = age^2
 (82,616 missing values generated)
-r; t=0.00 12:46:41
 
 . 
 . eststo clear
-r; t=0.00 12:46:41
 
 . eststo reg2_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us ///
 >     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
 >     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
->     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 yea
+> r_10 year_11) ///
+>     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_
+> 10 year_11) ///
+>     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
 >     liability_share, vce(cluster hhidpn)
 note: 1.year_11 omitted because of collinearity.
 note: 1.year_11#c.share_stk omitted because of collinearity.
@@ -316,135 +305,102 @@ year_11#c.share_bond |
      liability_share |   .1655164   .0337068     4.91   0.000     .0994453    .2315875
                _cons |  -.0429011   .0665689    -0.64   0.519    -.1733877    .0875856
 --------------------------------------------------------------------------------------
-r; t=2.19 12:46:43
 
 . 
 . * Joint F-tests for asset shares
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . di as txt "--- Joint F-tests: Testing equality of coefficients across years ---"
 --- Joint F-tests: Testing equality of coefficients across years ---
-r; t=0.00 12:46:43
 
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . 
-. * Note: These tests check if the interaction coefficients are jointly different from zero
+. * Note: These tests check if the interaction coefficients are jointly different from 
+> zero
 . * which tests whether asset share effects vary significantly across years
 . 
 . di as txt "Test 1: Stock share (main and interactions)"
 Test 1: Stock share (main and interactions)
-r; t=0.00 12:46:43
 
 . quietly test c.share_stk
-r; t=0.00 12:46:43
 
 . local fstat_stk = r(F)
-r; t=0.00 12:46:43
 
 . local p_stk = r(p)
-r; t=0.00 12:46:43
 
 . di as txt "F-statistic: " %6.2f `fstat_stk' "  p-value: " %6.4f `p_stk'
 F-statistic:   0.56  p-value: 0.4548
-r; t=0.00 12:46:43
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . di as txt "Test 2: Bond share (main and interactions)"
 Test 2: Bond share (main and interactions)
-r; t=0.00 12:46:43
 
 . quietly test c.share_bond
-r; t=0.00 12:46:43
 
 . local fstat_bond = r(F)
-r; t=0.00 12:46:43
 
 . local p_bond = r(p)
-r; t=0.00 12:46:43
 
 . di as txt "F-statistic: " %6.2f `fstat_bond' "  p-value: " %6.4f `p_bond'
 F-statistic:   0.69  p-value: 0.4058
-r; t=0.00 12:46:43
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . di as txt "Test 3: Real estate share (main and interactions)"
 Test 3: Real estate share (main and interactions)
-r; t=0.00 12:46:43
 
 . quietly test c.share_re
-r; t=0.00 12:46:43
 
 . local fstat_re = r(F)
-r; t=0.00 12:46:43
 
 . local p_re = r(p)
-r; t=0.00 12:46:43
 
 . di as txt "F-statistic: " %6.2f `fstat_re' "  p-value: " %6.4f `p_re'
 F-statistic:   3.60  p-value: 0.0580
-r; t=0.00 12:46:43
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . di as txt "Test 4: IRA share (main and interactions)"
 Test 4: IRA share (main and interactions)
-r; t=0.00 12:46:43
 
 . quietly test c.share_ira
-r; t=0.00 12:46:43
 
 . local fstat_ira = r(F)
-r; t=0.00 12:46:43
 
 . local p_ira = r(p)
-r; t=0.00 12:46:43
 
 . di as txt "F-statistic: " %6.2f `fstat_ira' "  p-value: " %6.4f `p_ira'
 F-statistic:   1.43  p-value: 0.2316
-r; t=0.00 12:46:43
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . di as txt "Test 5: Business share (main and interactions)"
 Test 5: Business share (main and interactions)
-r; t=0.00 12:46:43
 
 . quietly test c.share_bus
-r; t=0.00 12:46:43
 
 . local fstat_bus = r(F)
-r; t=0.00 12:46:43
 
 . local p_bus = r(p)
-r; t=0.00 12:46:43
 
 . di as txt "F-statistic: " %6.2f `fstat_bus' "  p-value: " %6.4f `p_bus'
 F-statistic:   0.41  p-value: 0.5207
-r; t=0.00 12:46:43
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:43
 
 . 
 . * ---------------------------------------------------------------------
@@ -452,65 +408,52 @@ r; t=0.00 12:46:43
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:43
 
 . di as txt "Regression 2.2: r_annual_trim (including residential, trimmed)"
 Regression 2.2: r_annual_trim (including residential, trimmed)
-r; t=0.00 12:46:43
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:43
 
 . 
 . * Load fresh data and restrict to balanced panel for r_annual_trim
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:43
 
 . 
 . * Count non-missing r_annual_trim per individual
 . bysort hhidpn: egen n_nonmiss = count(r_annual_trim) if !missing(r_annual_trim)
 (109,869 missing values generated)
-r; t=0.05 12:46:43
 
 . bysort hhidpn: egen total_obs = count(r_annual_trim)
-r; t=0.04 12:46:43
 
 . bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
 (55,088 missing values generated)
-r; t=0.07 12:46:43
 
 . 
 . * Keep only individuals with non-missing r_annual_trim in ALL years (11 years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (155,650 observations deleted)
-r; t=0.01 12:46:43
 
 . drop n_nonmiss total_obs max_nonmiss
-r; t=0.00 12:46:43
 
 . 
 . * Verify balanced panel
 . bysort hhidpn: gen n_obs = _N
-r; t=0.00 12:46:43
 
 . summarize n_obs
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
        n_obs |     18,766          11           0         11         11
-r; t=0.00 12:46:43
 
-. di as txt "Sample restricted to individuals with r_annual_trim in all 11 years: " _N " observations"
+. di as txt "Sample restricted to individuals with r_annual_trim in all 11 years: " _N 
+> " observations"
 Sample restricted to individuals with r_annual_trim in all 11 years: 18766 observations
-r; t=0.00 12:46:43
 
 . di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
 Min obs per individual: 11, Max obs per individual: 11
-r; t=0.00 12:46:43
 
 . drop n_obs
-r; t=0.00 12:46:43
 
 . 
 . * Set panel structure
@@ -519,20 +462,23 @@ r; t=0.00 12:46:43
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.00 12:46:43
 
 . gen age_sq = age^2
-r; t=0.00 12:46:43
 
 . 
 . eststo reg2_2: reg r_annual_trim age age_sq raedyrs i.inlbrf i.married i.born_us ///
 >     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
 >     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
->     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 yea
+> r_10 year_11) ///
+>     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_
+> 10 year_11) ///
+>     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
 >     liability_share, vce(cluster hhidpn)
 note: 1.year_11 omitted because of collinearity.
 note: 1.year_11#c.share_stk omitted because of collinearity.
@@ -762,12 +708,10 @@ year_11#c.share_bond |
      liability_share |   .0125956   .0273819     0.46   0.646    -.0411102    .0663013
                _cons |   .1589737   .0758608     2.10   0.036     .0101835    .3077639
 --------------------------------------------------------------------------------------
-r; t=0.54 12:46:44
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:44
 
 . 
 . * ---------------------------------------------------------------------
@@ -775,65 +719,52 @@ r; t=0.00 12:46:44
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:44
 
 . di as txt "Regression 2.3: r_annual_excl (excluding residential)"
 Regression 2.3: r_annual_excl (excluding residential)
-r; t=0.00 12:46:44
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:44
 
 . 
 . * Load fresh data and restrict to balanced panel for r_annual_excl
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:44
 
 . 
 . * Count non-missing r_annual_excl per individual
 . bysort hhidpn: egen n_nonmiss = count(r_annual_excl) if !missing(r_annual_excl)
 (101,997 missing values generated)
-r; t=0.06 12:46:44
 
 . bysort hhidpn: egen total_obs = count(r_annual_excl)
-r; t=0.05 12:46:44
 
 . bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
 (48,719 missing values generated)
-r; t=0.07 12:46:44
 
 . 
 . * Keep only individuals with non-missing r_annual_excl in ALL years (11 years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (145,860 observations deleted)
-r; t=0.01 12:46:44
 
 . drop n_nonmiss total_obs max_nonmiss
-r; t=0.00 12:46:44
 
 . 
 . * Verify balanced panel
 . bysort hhidpn: gen n_obs = _N
-r; t=0.00 12:46:44
 
 . summarize n_obs
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
        n_obs |     28,556          11           0         11         11
-r; t=0.00 12:46:44
 
-. di as txt "Sample restricted to individuals with r_annual_excl in all 11 years: " _N " observations"
+. di as txt "Sample restricted to individuals with r_annual_excl in all 11 years: " _N 
+> " observations"
 Sample restricted to individuals with r_annual_excl in all 11 years: 28556 observations
-r; t=0.00 12:46:44
 
 . di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
 Min obs per individual: 11, Max obs per individual: 11
-r; t=0.00 12:46:44
 
 . drop n_obs
-r; t=0.00 12:46:44
 
 . 
 . * Set panel structure
@@ -842,20 +773,24 @@ r; t=0.00 12:46:44
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.01 12:46:44
 
 . gen age_sq = age^2
-r; t=0.00 12:46:44
 
 . 
 . eststo reg2_3: reg r_annual_excl age age_sq raedyrs i.inlbrf i.married i.born_us ///
->     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
+>     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wea
+> lth_nonres_d6 ///
 >     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonres_d10 ///
->     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 yea
+> r_10 year_11) ///
+>     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_
+> 10 year_11) ///
+>     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
 >     liability_share, vce(cluster hhidpn)
 note: 1.year_11 omitted because of collinearity.
 note: 1.year_11#c.share_stk omitted because of collinearity.
@@ -1085,12 +1020,10 @@ year_11#c.share_bond |
      liability_share |   .0150646   .0311656     0.48   0.629    -.0460474    .0761767
                _cons |   .1998978   .0841398     2.38   0.018     .0349099    .3648857
 --------------------------------------------------------------------------------------
-r; t=0.81 12:46:45
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:45
 
 . 
 . * ---------------------------------------------------------------------
@@ -1098,65 +1031,55 @@ r; t=0.00 12:46:45
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:45
 
 . di as txt "Regression 2.4: r_annual_excl_trim (excluding residential, trimmed)"
 Regression 2.4: r_annual_excl_trim (excluding residential, trimmed)
-r; t=0.00 12:46:45
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:45
 
 . 
 . * Load fresh data and restrict to balanced panel for r_annual_excl_trim
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:45
 
 . 
 . * Count non-missing r_annual_excl_trim per individual
-. bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r_annual_excl_trim)
+. bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r_annual_excl_t
+> rim)
 (109,245 missing values generated)
-r; t=0.05 12:46:45
 
 . bysort hhidpn: egen total_obs = count(r_annual_excl_trim)
-r; t=0.04 12:46:45
 
 . bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
 (53,416 missing values generated)
-r; t=0.07 12:46:45
 
 . 
-. * Keep only individuals with non-missing r_annual_excl_trim in ALL years (11 years total)
+. * Keep only individuals with non-missing r_annual_excl_trim in ALL years (11 years to
+> tal)
 . keep if max_nonmiss == 11 & total_obs == 11
 (157,828 observations deleted)
-r; t=0.00 12:46:45
 
 . drop n_nonmiss total_obs max_nonmiss
-r; t=0.00 12:46:45
 
 . 
 . * Verify balanced panel
 . bysort hhidpn: gen n_obs = _N
-r; t=0.00 12:46:45
 
 . summarize n_obs
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
        n_obs |     16,588          11           0         11         11
-r; t=0.00 12:46:45
 
-. di as txt "Sample restricted to individuals with r_annual_excl_trim in all 11 years: " _N " observations"
-Sample restricted to individuals with r_annual_excl_trim in all 11 years: 16588 observations
-r; t=0.00 12:46:45
+. di as txt "Sample restricted to individuals with r_annual_excl_trim in all 11 years: 
+> " _N " observations"
+Sample restricted to individuals with r_annual_excl_trim in all 11 years: 16588 observa
+> tions
 
 . di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
 Min obs per individual: 11, Max obs per individual: 11
-r; t=0.00 12:46:45
 
 . drop n_obs
-r; t=0.00 12:46:45
 
 . 
 . * Set panel structure
@@ -1165,20 +1088,25 @@ r; t=0.00 12:46:45
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.00 12:46:45
 
 . gen age_sq = age^2
-r; t=0.00 12:46:45
 
 . 
-. eststo reg2_4: reg r_annual_excl_trim age age_sq raedyrs i.inlbrf i.married i.born_us ///
->     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
+. eststo reg2_4: reg r_annual_excl_trim age age_sq raedyrs i.inlbrf i.married i.born_us
+>  ///
+>     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wea
+> lth_nonres_d6 ///
 >     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonres_d10 ///
->     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
->     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) ///
+>     c.share_stk##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bond##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 yea
+> r_10 year_11) ///
+>     c.share_re##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_
+> 10 year_11) ///
+>     c.share_ira##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
+>     c.share_bus##(year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11) ///
 >     liability_share, vce(cluster hhidpn)
 note: 1.year_11 omitted because of collinearity.
 note: 1.year_11#c.share_stk omitted because of collinearity.
@@ -1408,12 +1336,10 @@ year_11#c.share_bond |
      liability_share |  -.0192542   .0299357    -0.64   0.520    -.0779743     .039466
                _cons |   .0894159   .0573837     1.56   0.119    -.0231446    .2019764
 --------------------------------------------------------------------------------------
-r; t=0.50 12:46:46
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:46
 
 . 
 . * ---------------------------------------------------------------------
@@ -1421,19 +1347,17 @@ r; t=0.00 12:46:46
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:46
 
 . di as txt "=== Exporting Results                                            ==="
 === Exporting Results                                            ===
-r; t=0.00 12:46:46
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:46
 
 . 
 . * Export to LaTeX table
-. esttab reg2_1 reg2_2 reg2_3 reg2_4 using "shares_interacted.tex", ///
+. esttab reg2_1 reg2_2 reg2_3 reg2_4 using "/Volumes/SSD PRO/Github-forks/Chp2-Beliefsa
+> ndTrust/Paper/Tables/shares_interacted.tex", ///
 >     replace booktabs ///
 >     se star(* 0.10 ** 0.05 *** 0.01) ///
 >     label compress ///
@@ -1442,87 +1366,76 @@ r; t=0.00 12:46:46
 >     title("Asset Shares × Year Interactions") ///
 >     addnote("Clustered standard errors at individual level in parentheses" ///
 >             "*** p<0.01, ** p<0.05, * p<0.10" ///
->             "Interaction terms between asset shares and year dummies included but not shown" ///
->             "Joint F-tests for coefficient equality across years reported in log file")
-(output written to shares_interacted.tex)
-r; t=0.63 12:46:46
+>             "Interaction terms between asset shares and year dummies included but not
+>  shown" ///
+>             "Joint F-tests for coefficient equality across years reported in log file
+> ")
+(file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/shares_interacted.tex not
+    found)
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/shar
+> es_interacted.tex)
 
 . 
 . * Display summary results in log
 . di as txt ""
 
-r; t=0.00 12:46:46
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:46
 
 . di as txt "=== Summary: Joint F-test Results (from Regression 2.1)         ==="
 === Summary: Joint F-test Results (from Regression 2.1)         ===
-r; t=0.00 12:46:46
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:46
 
 . di as txt ""
 
-r; t=0.00 12:46:46
 
 . di as txt "Asset Share      F-statistic    p-value"
 Asset Share      F-statistic    p-value
-r; t=0.00 12:46:46
 
 . di as txt "----------------------------------------------"
 ----------------------------------------------
-r; t=0.00 12:46:46
 
 . di as txt "Stock            " %6.2f `fstat_stk' "        " %6.4f `p_stk'
 Stock              0.56        0.4548
-r; t=0.00 12:46:46
 
 . di as txt "Bond             " %6.2f `fstat_bond' "        " %6.4f `p_bond'
 Bond               0.69        0.4058
-r; t=0.00 12:46:46
 
 . di as txt "Real Estate      " %6.2f `fstat_re' "        " %6.4f `p_re'
 Real Estate        3.60        0.0580
-r; t=0.00 12:46:46
 
 . di as txt "IRA              " %6.2f `fstat_ira' "        " %6.4f `p_ira'
 IRA                1.43        0.2316
-r; t=0.00 12:46:46
 
 . di as txt "Business         " %6.2f `fstat_bus' "        " %6.4f `p_bus'
 Business           0.41        0.5207
-r; t=0.00 12:46:46
 
 . di as txt ""
 
-r; t=0.00 12:46:46
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:46
 
 . 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:46
 
 . di as txt "=== Asset Shares × Year Interactions Complete                   ==="
 === Asset Shares × Year Interactions Complete                   ===
-r; t=0.00 12:46:46
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:46
 
 . 
 . log off
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/reg_shares_interacted.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/reg_shares_interacted.log
   log type:  text
- paused on:  18 Oct 2025, 12:46:46
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ paused on:  20 Oct 2025, 10:16:33
+---------------------------------------------------------------------------------------

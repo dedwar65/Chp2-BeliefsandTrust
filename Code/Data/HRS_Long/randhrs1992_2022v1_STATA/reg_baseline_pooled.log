@@ -1,45 +1,36 @@
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/reg_baseline_pooled.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/reg_baseline_pooled.log
   log type:  text
- opened on:  18 Oct 2025, 12:46:39
-r; t=0.00 12:46:39
+ opened on:  20 Oct 2025, 10:16:24
 
 . 
 . set more off
-r; t=0.00 12:46:39
 
 . log on
 (log already on)
-r; t=0.00 12:46:39
 
 . 
 . * Install estout package if not already installed
 . capture which estout
-r; t=0.00 12:46:39
 
 . if _rc {
 .     ssc install estout, replace
-r; t=0.00 12:46:39
 . }
-r; t=0.00 12:46:39
 
 . 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:39
 
 . di as txt "=== Regression Set 1: Baseline Pooled OLS                       ==="
 === Regression Set 1: Baseline Pooled OLS                       ===
-r; t=0.00 12:46:39
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:39
 
 . di as txt ""
 
-r; t=0.00 12:46:39
 
 . 
 . * ---------------------------------------------------------------------
@@ -47,20 +38,16 @@ r; t=0.00 12:46:39
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:39
 
 . di as txt "Regression 1.1: r_annual (including residential)"
 Regression 1.1: r_annual (including residential)
-r; t=0.00 12:46:39
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:39
 
 . 
 . * Load fresh data
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.02 12:46:39
 
 . 
 . * Set panel structure
@@ -69,20 +56,18 @@ r; t=0.02 12:46:39
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.18 12:46:39
 
 . gen age_sq = age^2
 (82,616 missing values generated)
-r; t=0.00 12:46:39
 
 . 
 . eststo clear
-r; t=0.00 12:46:39
 
 . eststo reg1_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us ///
 >     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
 >     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, /
+> //
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
@@ -131,12 +116,10 @@ Linear regression                               Number of obs     =     71,264
      year_11 |          0  (omitted)
        _cons |  -.0042106   .0659728    -0.06   0.949    -.1335288    .1251076
 ------------------------------------------------------------------------------
-r; t=0.32 12:46:39
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:39
 
 . 
 . * ---------------------------------------------------------------------
@@ -144,65 +127,52 @@ r; t=0.00 12:46:39
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:39
 
 . di as txt "Regression 1.2: r_annual_trim (including residential, trimmed)"
 Regression 1.2: r_annual_trim (including residential, trimmed)
-r; t=0.00 12:46:39
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:39
 
 . 
 . * Load fresh data and restrict to balanced panel for r_annual_trim
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:39
 
 . 
 . * Count non-missing r_annual_trim per individual
 . bysort hhidpn: egen n_nonmiss = count(r_annual_trim) if !missing(r_annual_trim)
 (109,869 missing values generated)
-r; t=0.07 12:46:40
 
 . bysort hhidpn: egen total_obs = count(r_annual_trim)
-r; t=0.05 12:46:40
 
 . bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
 (55,088 missing values generated)
-r; t=0.07 12:46:40
 
 . 
 . * Keep only individuals with non-missing r_annual_trim in ALL years (11 years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (155,650 observations deleted)
-r; t=0.01 12:46:40
 
 . drop n_nonmiss total_obs max_nonmiss
-r; t=0.00 12:46:40
 
 . 
 . * Verify balanced panel
 . bysort hhidpn: gen n_obs = _N
-r; t=0.00 12:46:40
 
 . summarize n_obs
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
        n_obs |     18,766          11           0         11         11
-r; t=0.00 12:46:40
 
-. di as txt "Sample restricted to individuals with r_annual_trim in all 11 years: " _N " observations"
+. di as txt "Sample restricted to individuals with r_annual_trim in all 11 years: " _N 
+> " observations"
 Sample restricted to individuals with r_annual_trim in all 11 years: 18766 observations
-r; t=0.00 12:46:40
 
 . di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
 Min obs per individual: 11, Max obs per individual: 11
-r; t=0.00 12:46:40
 
 . drop n_obs
-r; t=0.00 12:46:40
 
 . 
 . * Set panel structure
@@ -211,16 +181,15 @@ r; t=0.00 12:46:40
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.01 12:46:40
 
 . gen age_sq = age^2
-r; t=0.00 12:46:40
 
 . 
 . eststo reg1_2: reg r_annual_trim age age_sq raedyrs i.inlbrf i.married i.born_us ///
 >     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
 >     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, /
+> //
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
@@ -269,12 +238,10 @@ r_annual_t~m | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
      year_11 |          0  (omitted)
        _cons |   .1719682   .0761854     2.26   0.024     .0225414     .321395
 ------------------------------------------------------------------------------
-r; t=0.05 12:46:40
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:40
 
 . 
 . * ---------------------------------------------------------------------
@@ -282,65 +249,52 @@ r; t=0.00 12:46:40
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:40
 
 . di as txt "Regression 1.3: r_annual_excl (excluding residential)"
 Regression 1.3: r_annual_excl (excluding residential)
-r; t=0.00 12:46:40
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:40
 
 . 
 . * Load fresh data and restrict to balanced panel for r_annual_excl
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:40
 
 . 
 . * Count non-missing r_annual_excl per individual
 . bysort hhidpn: egen n_nonmiss = count(r_annual_excl) if !missing(r_annual_excl)
 (101,997 missing values generated)
-r; t=0.05 12:46:40
 
 . bysort hhidpn: egen total_obs = count(r_annual_excl)
-r; t=0.05 12:46:40
 
 . bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
 (48,719 missing values generated)
-r; t=0.07 12:46:40
 
 . 
 . * Keep only individuals with non-missing r_annual_excl in ALL years (11 years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (145,860 observations deleted)
-r; t=0.00 12:46:40
 
 . drop n_nonmiss total_obs max_nonmiss
-r; t=0.00 12:46:40
 
 . 
 . * Verify balanced panel
 . bysort hhidpn: gen n_obs = _N
-r; t=0.00 12:46:40
 
 . summarize n_obs
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
        n_obs |     28,556          11           0         11         11
-r; t=0.00 12:46:40
 
-. di as txt "Sample restricted to individuals with r_annual_excl in all 11 years: " _N " observations"
+. di as txt "Sample restricted to individuals with r_annual_excl in all 11 years: " _N 
+> " observations"
 Sample restricted to individuals with r_annual_excl in all 11 years: 28556 observations
-r; t=0.00 12:46:40
 
 . di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
 Min obs per individual: 11, Max obs per individual: 11
-r; t=0.00 12:46:40
 
 . drop n_obs
-r; t=0.00 12:46:40
 
 . 
 . * Set panel structure
@@ -349,16 +303,16 @@ r; t=0.00 12:46:40
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.01 12:46:40
 
 . gen age_sq = age^2
-r; t=0.00 12:46:40
 
 . 
 . eststo reg1_3: reg r_annual_excl age age_sq raedyrs i.inlbrf i.married i.born_us ///
->     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
+>     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wea
+> lth_nonres_d6 ///
 >     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonres_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, /
+> //
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
@@ -407,12 +361,10 @@ Linear regression                               Number of obs     =     28,471
             year_11 |          0  (omitted)
               _cons |   .2058139   .0840003     2.45   0.014     .0410995    .3705283
 -------------------------------------------------------------------------------------
-r; t=0.07 12:46:40
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:40
 
 . 
 . * ---------------------------------------------------------------------
@@ -420,65 +372,55 @@ r; t=0.00 12:46:40
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:40
 
 . di as txt "Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)"
 Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
-r; t=0.00 12:46:40
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:40
 
 . 
 . * Load fresh data and restrict to balanced panel for r_annual_excl_trim
 . use "_randhrs1992_2022v1_panel.dta", clear
-r; t=0.00 12:46:40
 
 . 
 . * Count non-missing r_annual_excl_trim per individual
-. bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r_annual_excl_trim)
+. bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r_annual_excl_t
+> rim)
 (109,245 missing values generated)
-r; t=0.05 12:46:40
 
 . bysort hhidpn: egen total_obs = count(r_annual_excl_trim)
-r; t=0.04 12:46:40
 
 . bysort hhidpn: egen max_nonmiss = max(n_nonmiss)
 (53,416 missing values generated)
-r; t=0.07 12:46:40
 
 . 
-. * Keep only individuals with non-missing r_annual_excl_trim in ALL years (11 years total)
+. * Keep only individuals with non-missing r_annual_excl_trim in ALL years (11 years to
+> tal)
 . keep if max_nonmiss == 11 & total_obs == 11
 (157,828 observations deleted)
-r; t=0.01 12:46:40
 
 . drop n_nonmiss total_obs max_nonmiss
-r; t=0.00 12:46:40
 
 . 
 . * Verify balanced panel
 . bysort hhidpn: gen n_obs = _N
-r; t=0.00 12:46:40
 
 . summarize n_obs
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
        n_obs |     16,588          11           0         11         11
-r; t=0.00 12:46:40
 
-. di as txt "Sample restricted to individuals with r_annual_excl_trim in all 11 years: " _N " observations"
-Sample restricted to individuals with r_annual_excl_trim in all 11 years: 16588 observations
-r; t=0.00 12:46:40
+. di as txt "Sample restricted to individuals with r_annual_excl_trim in all 11 years: 
+> " _N " observations"
+Sample restricted to individuals with r_annual_excl_trim in all 11 years: 16588 observa
+> tions
 
 . di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(max)
 Min obs per individual: 11, Max obs per individual: 11
-r; t=0.00 12:46:40
 
 . drop n_obs
-r; t=0.00 12:46:40
 
 . 
 . * Set panel structure
@@ -487,16 +429,17 @@ r; t=0.00 12:46:40
 Panel variable: hhidpn (strongly balanced)
  Time variable: year, 2002 to 2022, but with gaps
          Delta: 1 unit
-r; t=0.01 12:46:40
 
 . gen age_sq = age^2
-r; t=0.00 12:46:40
 
 . 
-. eststo reg1_4: reg r_annual_excl_trim age age_sq raedyrs i.inlbrf i.married i.born_us ///
->     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wealth_nonres_d6 ///
+. eststo reg1_4: reg r_annual_excl_trim age age_sq raedyrs i.inlbrf i.married i.born_us
+>  ///
+>     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonres_d5 i.wea
+> lth_nonres_d6 ///
 >     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonres_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11, /
+> //
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
@@ -545,12 +488,10 @@ Linear regression                               Number of obs     =     16,547
             year_11 |          0  (omitted)
               _cons |   .1109324   .0579383     1.91   0.056     -.002716    .2245807
 -------------------------------------------------------------------------------------
-r; t=0.05 12:46:40
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:40
 
 . 
 . * ---------------------------------------------------------------------
@@ -558,19 +499,17 @@ r; t=0.00 12:46:40
 . * ---------------------------------------------------------------------
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:40
 
 . di as txt "=== Exporting Results                                            ==="
 === Exporting Results                                            ===
-r; t=0.00 12:46:40
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:40
 
 . 
 . * Export to LaTeX table
-. esttab reg1_1 reg1_2 reg1_3 reg1_4 using "baseline_pooled.tex", ///
+. esttab reg1_1 reg1_2 reg1_3 reg1_4 using "/Volumes/SSD PRO/Github-forks/Chp2-Beliefsa
+> ndTrust/Paper/Tables/baseline_pooled.tex", ///
 >     replace booktabs ///
 >     se star(* 0.10 ** 0.05 *** 0.01) ///
 >     label compress ///
@@ -579,10 +518,13 @@ r; t=0.00 12:46:40
 >     title("Baseline Pooled OLS Regressions") ///
 >     addnote("Clustered standard errors at individual level in parentheses" ///
 >             "*** p<0.01, ** p<0.05, * p<0.10" ///
->             "Columns (1)-(2): Returns including residential wealth; Columns (3)-(4): Returns excluding residential wealth" ///
+>             "Columns (1)-(2): Returns including residential wealth; Columns (3)-(4): 
+> Returns excluding residential wealth" ///
 >             "Wealth deciles: d1 (lowest) is reference category")
-(output written to baseline_pooled.tex)
-r; t=0.31 12:46:41
+(file /Volumes/SSD
+    PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/baseline_pooled.tex not found)
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/base
+> line_pooled.tex)
 
 . 
 . * Display results in log
@@ -772,29 +714,25 @@ Adjusted R-squ~d    0.0412       0.0745       0.0375       0.0334
 --------------------------------------------------------------------
 Standard errors in parentheses
 * p<0.10, ** p<0.05, *** p<0.01
-r; t=0.15 12:46:41
 
 . 
 . di as txt ""
 
-r; t=0.00 12:46:41
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:41
 
 . di as txt "=== Baseline Pooled OLS Complete                                 ==="
 === Baseline Pooled OLS Complete                                 ===
-r; t=0.00 12:46:41
 
 . di as txt "===================================================================="
 ====================================================================
-r; t=0.00 12:46:41
 
 . 
 . log off
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_2022v1_STATA/reg_baseline_pooled.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
+> hrs1992_2022v1_STATA/reg_baseline_pooled.log
   log type:  text
- paused on:  18 Oct 2025, 12:46:41
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ paused on:  20 Oct 2025, 10:16:26
+---------------------------------------------------------------------------------------

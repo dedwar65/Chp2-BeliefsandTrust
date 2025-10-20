@@ -225,7 +225,7 @@ di as txt "=== Exporting Results                                            ==="
 di as txt "===================================================================="
 
 * Export to LaTeX table
-esttab reg2_1 reg2_2 reg2_3 reg2_4 using "shares_interacted.tex", ///
+esttab reg2_1 reg2_2 reg2_3 reg2_4 using "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/shares_interacted.tex", ///
     replace booktabs ///
     se star(* 0.10 ** 0.05 *** 0.01) ///
     label compress ///

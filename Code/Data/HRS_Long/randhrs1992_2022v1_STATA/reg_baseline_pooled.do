@@ -167,7 +167,7 @@ di as txt "=== Exporting Results                                            ==="
 di as txt "===================================================================="
 
 * Export to LaTeX table
-esttab reg1_1 reg1_2 reg1_3 reg1_4 using "baseline_pooled.tex", ///
+esttab reg1_1 reg1_2 reg1_3 reg1_4 using "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tables/baseline_pooled.tex", ///
     replace booktabs ///
     se star(* 0.10 ** 0.05 *** 0.01) ///
     label compress ///

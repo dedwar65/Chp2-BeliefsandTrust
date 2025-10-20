@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
 > hrs1992_2022v1_STATA/reg_ret_panel.log
   log type:  text
- opened on:  17 Oct 2025, 19:10:13
+ opened on:  20 Oct 2025, 10:16:11
 
 . 
 . set more off
@@ -101,8 +101,8 @@ r_annual_excl_trim_2002 r_annual_excl_trim_2004 ... r_annual_excl_trim_2022->r_a
 . tempfile returns_long
 
 . save "`returns_long'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000003 saved as .dta
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_31054.000003 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_31054.000003 saved as .dta
     format
 
 . 
@@ -330,8 +330,8 @@ wealth_d10_2000 wealth_d10_2002 ... wealth_d10_2022->wealth_d10_
 . tempfile controls_long
 
 . save "`controls_long'", replace
-(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000005 not found)
-file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_32628.000005 saved as .dta
+(file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_31054.000005 not found)
+file /var/folders/17/1rg0y2kj74l9p9g301vbhhkw0000gn/T//S_31054.000005 saved as .dta
     format
 
 . 
@@ -547,5 +547,5 @@ Ready for panel regression analysis!
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/rand
 > hrs1992_2022v1_STATA/reg_ret_panel.log
   log type:  text
- closed on:  17 Oct 2025, 19:10:20
+ closed on:  20 Oct 2025, 10:16:20
 ---------------------------------------------------------------------------------------
