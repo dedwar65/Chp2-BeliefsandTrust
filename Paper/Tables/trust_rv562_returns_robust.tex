@@ -1,0 +1,51 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Returns (2022) on Trust rv562 (with risk controls)}
+\begin{tabular}{l*{8}{c}}
+\toprule
+          &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+          &\multicolumn{1}{c}{Annual}&\multicolumn{1}{c}{Annual (trim)}&\multicolumn{1}{c}{Excl. res.}&\multicolumn{1}{c}{Excl. res. (trim)}&\multicolumn{1}{c}{Annual}&\multicolumn{1}{c}{Annual (trim)}&\multicolumn{1}{c}{Excl. res.}&\multicolumn{1}{c}{Excl. res. (trim)}\\
+& \multicolumn{4}{c}{No controls} & \multicolumn{4}{c}{With controls} \\\\ \cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Trust     &    0.022         &    0.001         &    0.004         &    0.012\sym{*}  &    0.010         &   -0.007         &   -0.007         &    0.004         \\
+          &  (0.026)         &  (0.013)         &  (0.020)         &  (0.007)         &  (0.026)         &  (0.013)         &  (0.021)         &  (0.007)         \\
+Trust$^{2}$&   -0.002         &   -0.001         &   -0.000         &   -0.001         &   -0.001         &    0.000         &    0.001         &    0.000         \\
+          &  (0.002)         &  (0.001)         &  (0.002)         &  (0.001)         &  (0.002)         &  (0.001)         &  (0.002)         &  (0.001)         \\
+Age       &                  &                  &                  &                  &   -0.058\sym{**} &    0.012         &   -0.010         &   -0.004         \\
+          &                  &                  &                  &                  &  (0.029)         &  (0.015)         &  (0.020)         &  (0.009)         \\
+Age$^{2}$ &                  &                  &                  &                  &    0.000\sym{*}  &   -0.000         &    0.000         &    0.000         \\
+          &                  &                  &                  &                  &  (0.000)         &  (0.000)         &  (0.000)         &  (0.000)         \\
+1.ragender&                  &                  &                  &                  &    0.000         &    0.000         &    0.000         &    0.000         \\
+          &                  &                  &                  &                  &      (.)         &      (.)         &      (.)         &      (.)         \\
+2.ragender&                  &                  &                  &                  &   -0.030         &   -0.014         &   -0.034         &   -0.001         \\
+          &                  &                  &                  &                  &  (0.035)         &  (0.020)         &  (0.029)         &  (0.014)         \\
+1.race\_eth&                  &                  &                  &                  &    0.000         &    0.000         &    0.000         &    0.000         \\
+          &                  &                  &                  &                  &      (.)         &      (.)         &      (.)         &      (.)         \\
+NH Black  &                  &                  &                  &                  &   -0.048         &   -0.048         &   -0.023         &   -0.033\sym{*}  \\
+          &                  &                  &                  &                  &  (0.063)         &  (0.031)         &  (0.044)         &  (0.019)         \\
+Hispanic  &                  &                  &                  &                  &    0.107         &    0.022         &    0.035         &   -0.005         \\
+          &                  &                  &                  &                  &  (0.088)         &  (0.042)         &  (0.080)         &  (0.025)         \\
+NH Other  &                  &                  &                  &                  &    0.055         &    0.127\sym{**} &    0.010         &    0.021         \\
+          &                  &                  &                  &                  &  (0.076)         &  (0.059)         &  (0.057)         &  (0.029)         \\
+Risky share&                  &                  &                  &                  &   -0.314\sym{***}&   -0.204\sym{***}&   -0.255\sym{***}&   -0.068         \\
+          &                  &                  &                  &                  &  (0.076)         &  (0.061)         &  (0.068)         &  (0.052)         \\
+Years of education&                  &                  &                  &                  &    0.011         &    0.006         &    0.009\sym{*}  &    0.002         \\
+          &                  &                  &                  &                  &  (0.007)         &  (0.004)         &  (0.005)         &  (0.002)         \\
+In labor force&                  &                  &                  &                  &    0.050         &    0.048\sym{**} &    0.050         &    0.033\sym{**} \\
+          &                  &                  &                  &                  &  (0.043)         &  (0.024)         &  (0.034)         &  (0.015)         \\
+Married   &                  &                  &                  &                  &   -0.015         &    0.026         &    0.011         &    0.032\sym{**} \\
+          &                  &                  &                  &                  &  (0.041)         &  (0.023)         &  (0.032)         &  (0.014)         \\
+Born in U.S.&                  &                  &                  &                  &    0.036         &    0.028         &    0.019         &    0.012         \\
+          &                  &                  &                  &                  &  (0.062)         &  (0.034)         &  (0.054)         &  (0.021)         \\
+\_cons    &    0.164\sym{**} &    0.160\sym{***}&    0.096\sym{*}  &    0.018         &    2.227\sym{**} &   -0.312         &    0.493         &    0.133         \\
+          &  (0.066)         &  (0.032)         &  (0.054)         &  (0.014)         &  (1.022)         &  (0.505)         &  (0.708)         &  (0.322)         \\
+\midrule
+Observations&  770.000         &  700.000         &  780.000         &  713.000         &  763.000         &  695.000         &  772.000         &  705.000         \\
+Adj. R-squared&   -0.001         &   -0.001         &   -0.003         &    0.007         &    0.041         &    0.039         &    0.030         &    0.025         \\
+\bottomrule
+\multicolumn{9}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{9}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically when available.}\\
+\multicolumn{9}{l}{\footnotesize Controls (when included): raedyrs, in labor force, married, born in U.S.}\\
+\multicolumn{9}{l}{\footnotesize Includes risky asset share (2020) as control for risk preferences.}\\
+\multicolumn{9}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

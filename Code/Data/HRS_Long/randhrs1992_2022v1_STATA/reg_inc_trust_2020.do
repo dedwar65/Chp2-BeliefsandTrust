@@ -3,7 +3,7 @@
 * Cross-sectional OLS of 2020 income measures on 2020 trust variables
 * Runs each income measure on each trust variable, with and without controls
 * Income: resp_lab_inc, resp_tot_inc, and their logs (created here)
-* Controls: r15agey_b, raedyrs, r15inlbrf, married_2020, born_us
+* Controls: r15agey_b, ragender, raedyrs, r15inlbrf, married_2020, born_us, i.race_eth
 *----------------------------------------------------------------------
 clear all
 capture log close
@@ -63,28 +63,41 @@ di as txt "  Non-missing both:         " r(N) " of " `N_all'
 
 di as txt ""
 
-* Controls: age, education, employment, marital status, immigration
-local ctrl_vars "r15agey_b raedyrs r15inlbrf married_2020 born_us"
+* Controls: age, gender, education, employment, marital status, immigration, race/ethnicity
+local ctrl_vars "r15agey_b ragender raedyrs r15inlbrf married_2020 born_us"
 
 di as txt "Controls to include (if present):"
 di as txt "  `ctrl_vars'"
 
 * Check which controls are actually present
+* Exclude ragender from ctrl_in since it's handled as factor variable i.ragender
+* Also handle race_eth as factor variable separately
 local ctrl_in ""
 local age_quad ""
+local race_factor ""
 foreach c of local ctrl_vars {
     capture confirm variable `c'
     if !_rc {
         if "`c'" == "r15agey_b" {
             local age_quad "c.r15agey_b c.r15agey_b#c.r15agey_b"
         }
+        else if "`c'" == "ragender" {
+            * Skip ragender - handled separately as i.ragender
+        }
         else {
             local ctrl_in "`ctrl_in' `c'"
         }
     }
 }
-
+* Add race/ethnicity as factor variable if available
+capture confirm variable race_eth
+if !_rc {
+    local race_factor "i.race_eth"
+}
 di as txt "Controls actually included: `ctrl_in' with age quad if available"
+if "`race_factor'" != "" {
+    di as txt "Race/ethnicity factor variable included: `race_factor'"
+}
 
 di as txt ""
 * ----------------------------------------------------------------------
@@ -119,7 +132,7 @@ foreach t of local trust_vars {
         quietly count if !missing(`y') & !missing(`t')
         if r(N)==0 continue
         local mname = "`t'_ctl_`y'"
-        eststo `mname': regress `y' c.`t' c.`t'#c.`t' `age_quad' `ctrl_in' if !missing(`y') & !missing(`t'), vce(robust)
+        eststo `mname': regress `y' c.`t' c.`t'#c.`t' `age_quad' i.ragender `race_factor' `ctrl_in' if !missing(`y') & !missing(`t'), vce(robust)
         local models_ctl "`models_ctl' `mname'"
     }
 
@@ -136,17 +149,21 @@ foreach t of local trust_vars {
         local vlab2 c.`t'#c.`t' "Trust\$^{2}\$"
         local vlab3 r15agey_b    "Age"
         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
-        local vlab5 raedyrs      "Years of education"
-        local vlab6 r15inlbrf    "In labor force"
-        local vlab7 married_2020 "Married"
-        local vlab8 born_us      "Born in U.S."
+        local vlab5 ragender     "Female"
+        local vlab6 2.race_eth   "NH Black"
+        local vlab7 3.race_eth   "Hispanic"
+        local vlab8 4.race_eth   "NH Other"
+        local vlab9 raedyrs      "Years of education"
+        local vlab10 r15inlbrf    "In labor force"
+        local vlab11 married_2020 "Married"
+        local vlab12 born_us      "Born in U.S."
         
         esttab `models_raw' `models_ctl' using "`outfile'", replace ///
             booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
             compress b(%9.3f) se(%9.3f) ///
             mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
-            varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8') ///
+            varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
             title("Log Income (2020) on Trust `t'") ///
             addnote("Robust SEs in parentheses; Age entered quadratically when available." "Controls (when included): raedyrs, in labor force, married, born in U.S.")
@@ -196,7 +213,7 @@ if _rc==0 {
         quietly count if !missing(`y') & !missing(trust_pca1_z)
         if r(N)==0 continue
         local mname = "pca_ctl_`y'"
-        eststo `mname': regress `y' c.trust_pca1_z c.trust_pca1_z#c.trust_pca1_z `age_quad' `ctrl_in' if !missing(`y') & !missing(trust_pca1_z), vce(robust)
+        eststo `mname': regress `y' c.trust_pca1_z c.trust_pca1_z#c.trust_pca1_z `age_quad' i.ragender `race_factor' `ctrl_in' if !missing(`y') & !missing(trust_pca1_z), vce(robust)
         local models_pca_ctl "`models_pca_ctl' `mname'"
     }
 
@@ -214,17 +231,21 @@ if _rc==0 {
         local vlab2 c.trust_pca1_z#c.trust_pca1_z "Trust PC1\$^{2}\$"
         local vlab3 r15agey_b    "Age"
         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
-        local vlab5 raedyrs      "Years of education"
-        local vlab6 r15inlbrf    "In labor force"
-        local vlab7 married_2020 "Married"
-        local vlab8 born_us      "Born in U.S."
+        local vlab5 ragender     "Female"
+        local vlab6 2.race_eth   "NH Black"
+        local vlab7 3.race_eth   "Hispanic"
+        local vlab8 4.race_eth   "NH Other"
+        local vlab9 raedyrs      "Years of education"
+        local vlab10 r15inlbrf    "In labor force"
+        local vlab11 married_2020 "Married"
+        local vlab12 born_us      "Born in U.S."
         
         esttab `models_pca_raw' `models_pca_ctl' using "`outfile_pca'", replace ///
             booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
             compress b(%9.3f) se(%9.3f) ///
             mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
-            varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8') ///
+            varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
             title("Log Income (2020) on Trust PC1") ///
             addnote("Robust SEs in parentheses; Age entered quadratically when available." "Controls (when included): raedyrs, in labor force, married, born in U.S." "PC1 variance prop = `pc1_str'")

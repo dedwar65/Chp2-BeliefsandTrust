@@ -1,0 +1,37 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Trust rv557 on Controls}
+\begin{tabular}{l*{1}{c}}
+\toprule
+          &\multicolumn{1}{c}{(1)}\\
+          &\multicolumn{1}{c}{rv557}\\
+\midrule
+Age       &    0.096         \\
+          &  (0.085)         \\
+Age$^{2}$ &   -0.000         \\
+          &  (0.001)         \\
+Years of education&    0.106\sym{***}\\
+          &  (0.030)         \\
+1.ragender&    0.000         \\
+          &      (.)         \\
+2.ragender&    0.182         \\
+          &  (0.145)         \\
+1.race\_eth&    0.000         \\
+          &      (.)         \\
+NH Black  &   -1.549\sym{***}\\
+          &  (0.206)         \\
+Hispanic  &   -0.415\sym{*}  \\
+          &  (0.251)         \\
+NH Other  &   -0.371         \\
+          &  (0.292)         \\
+\_cons    &    0.920         \\
+          &  (2.881)         \\
+\midrule
+Observations& 1053.000         \\
+Adj. R-squared&    0.112         \\
+\bottomrule
+\multicolumn{2}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{2}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically.}\\
+\multicolumn{2}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

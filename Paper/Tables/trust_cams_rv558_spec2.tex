@@ -1,0 +1,47 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Trust rv558 on Controls + CAMS (Spec 2)}
+\begin{tabular}{l*{1}{c}}
+\toprule
+          &\multicolumn{1}{c}{(1)}\\
+          &\multicolumn{1}{c}{rv558}\\
+\midrule
+Age       &    0.167         \\
+          &  (0.248)         \\
+Age$^{2}$ &   -0.001         \\
+          &  (0.002)         \\
+Years of education&    0.063         \\
+          &  (0.053)         \\
+1.ragender&    0.000         \\
+          &      (.)         \\
+2.ragender&   -0.450         \\
+          &  (0.276)         \\
+1.race\_eth&    0.000         \\
+          &      (.)         \\
+NH Black  &    1.152\sym{***}\\
+          &  (0.403)         \\
+Hispanic  &    0.695         \\
+          &  (0.527)         \\
+NH Other  &    0.144         \\
+          &  (0.546)         \\
+cams\_showaffect\_2021&   -0.007         \\
+          &  (0.006)         \\
+cams\_helpothers\_2021&    0.008         \\
+          &  (0.007)         \\
+cams\_volunteer\_2021&    0.020\sym{***}\\
+          &  (0.006)         \\
+cams\_religattend\_2021&   -0.089\sym{**} \\
+          &  (0.037)         \\
+cams\_meetings\_2021&   -0.010         \\
+          &  (0.028)         \\
+\_cons    &   -2.443         \\
+          &  (8.536)         \\
+\midrule
+Observations&  313.000         \\
+Adj. R-squared&    0.082         \\
+\bottomrule
+\multicolumn{2}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{2}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically; adds CAMS controls.}\\
+\multicolumn{2}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

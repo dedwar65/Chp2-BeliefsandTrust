@@ -6,27 +6,39 @@
           &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
           &\multicolumn{1}{c}{log Lab}&\multicolumn{1}{c}{log Tot}&\multicolumn{1}{c}{log Lab}&\multicolumn{1}{c}{log Tot}\\
 & \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Trust     &    0.282\sym{***}&    0.318\sym{***}&    0.153\sym{***}&    0.133\sym{**} \\
-          &  (0.053)         &  (0.057)         &  (0.053)         &  (0.053)         \\
-Trust$^{2}$&   -0.022\sym{***}&   -0.025\sym{***}&   -0.013\sym{***}&   -0.011\sym{***}\\
+Trust     &    0.282\sym{***}&    0.318\sym{***}&    0.119\sym{**} &    0.102\sym{*}  \\
+          &  (0.053)         &  (0.057)         &  (0.054)         &  (0.054)         \\
+Trust$^{2}$&   -0.022\sym{***}&   -0.025\sym{***}&   -0.010\sym{**} &   -0.009\sym{**} \\
           &  (0.004)         &  (0.005)         &  (0.004)         &  (0.004)         \\
-Age       &                  &                  &    0.048         &    0.123\sym{**} \\
-          &                  &                  &  (0.045)         &  (0.052)         \\
+Age       &                  &                  &    0.045         &    0.117\sym{**} \\
+          &                  &                  &  (0.045)         &  (0.051)         \\
 Age$^{2}$ &                  &                  &   -0.000         &   -0.001\sym{**} \\
           &                  &                  &  (0.000)         &  (0.000)         \\
-Years of education&                  &                  &    0.073\sym{***}&    0.098\sym{***}\\
-          &                  &                  &  (0.011)         &  (0.012)         \\
-In labor force&                  &                  &    0.667\sym{***}&    0.849\sym{***}\\
-          &                  &                  &  (0.082)         &  (0.089)         \\
-Married   &                  &                  &    0.098         &    0.243\sym{***}\\
-          &                  &                  &  (0.061)         &  (0.066)         \\
-Born in U.S.&                  &                  &    0.168\sym{*}  &    0.139         \\
-          &                  &                  &  (0.099)         &  (0.115)         \\
-\_cons    &    9.348\sym{***}&    9.447\sym{***}&    6.453\sym{***}&    3.422\sym{*}  \\
-          &  (0.154)         &  (0.164)         &  (1.555)         &  (1.815)         \\
+1.ragender&                  &                  &    0.000         &    0.000         \\
+          &                  &                  &      (.)         &      (.)         \\
+2.ragender&                  &                  &   -0.441\sym{***}&   -0.431\sym{***}\\
+          &                  &                  &  (0.062)         &  (0.069)         \\
+1.race\_eth&                  &                  &    0.000         &    0.000         \\
+          &                  &                  &      (.)         &      (.)         \\
+NH Black  &                  &                  &   -0.247\sym{***}&   -0.245\sym{***}\\
+          &                  &                  &  (0.089)         &  (0.090)         \\
+Hispanic  &                  &                  &   -0.139         &   -0.187\sym{*}  \\
+          &                  &                  &  (0.096)         &  (0.109)         \\
+NH Other  &                  &                  &   -0.144         &   -0.230         \\
+          &                  &                  &  (0.162)         &  (0.183)         \\
+Years of education&                  &                  &    0.071\sym{***}&    0.095\sym{***}\\
+          &                  &                  &  (0.011)         &  (0.011)         \\
+In labor force&                  &                  &    0.603\sym{***}&    0.784\sym{***}\\
+          &                  &                  &  (0.080)         &  (0.087)         \\
+Married   &                  &                  &   -0.024         &    0.131\sym{*}  \\
+          &                  &                  &  (0.064)         &  (0.070)         \\
+Born in U.S.&                  &                  &    0.161         &    0.100         \\
+          &                  &                  &  (0.111)         &  (0.128)         \\
+\_cons    &    9.348\sym{***}&    9.447\sym{***}&    7.279\sym{***}&    4.399\sym{**} \\
+          &  (0.154)         &  (0.164)         &  (1.521)         &  (1.777)         \\
 \midrule
-Observations&  972.000         & 1023.000         &  963.000         & 1013.000         \\
-Adj. R-squared&    0.038         &    0.034         &    0.193         &    0.221         \\
+Observations&  972.000         & 1023.000         &  962.000         & 1012.000         \\
+Adj. R-squared&    0.038         &    0.034         &    0.237         &    0.251         \\
 \bottomrule
 \multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
 \multicolumn{5}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically when available.}\\

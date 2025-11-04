@@ -1,9 +1,9 @@
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
-> _Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- opened on:  20 Oct 2025, 15:25:51
+ opened on:   4 Nov 2025, 09:15:20
 
 . 
 . set more off
@@ -12,11 +12,12 @@
 . * ---------------------------------------------------------------------
 . * File paths
 . * ---------------------------------------------------------------------
-. local inout "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/H
-> RS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+. local inout "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Da
+> ta/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
-. local fallback "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Dat
-> a/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.dta"
+. local fallback "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code
+> /Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_with_flows.
+> dta"
 
 . 
 . * ---------------------------------------------------------------------
@@ -25,12 +26,12 @@
 . capture confirm file "`inout'"
 
 . if _rc {
-.     di as txt "Analysis dataset not found; falling back to flows dataset an
-> d will write unified file."
+.     di as txt "Analysis dataset not found; falling back to flows datase
+> t and will write unified file."
 .     capture confirm file "`fallback'"
 .     if _rc {
-.         di as error "ERROR: Neither analysis nor flows dataset found. Run l
-> ong_merge_in.do first."
+.         di as error "ERROR: Neither analysis nor flows dataset found. R
+> un long_merge_in.do first."
 .         exit 198
 .     }
 .     use "`fallback'", clear
@@ -47,7 +48,7 @@
 Observations:     15856
 
 . di as txt "Variables:    " %9.0f r(k)
-Variables:        19911
+Variables:        19916
 
 . 
 . * ---------------------------------------------------------------------
@@ -79,7 +80,8 @@ Variables:        19911
 
 . label values married_2022 yesno
 
-. label var married_2022 "Married (r15mstat: 1 or 2) vs not married (3-8)"
+. label var married_2022 "Married (r15mstat: 1 or 2) vs not married (3-8)
+> "
 
 . 
 . di as txt "Marital status (r15mstat) distribution:"
@@ -216,6 +218,124 @@ not married |      2,922       18.43       18.43
 
 . 
 . * ---------------------------------------------------------------------
+. * Race/Ethnicity: combined race and ethnicity variable from RARACEM and
+>  RAHISPAN
+. * ---------------------------------------------------------------------
+. di as txt "=== Constructing race/ethnicity variable from raracem and ra
+> hispan ==="
+=== Constructing race/ethnicity variable from raracem and rahispan ===
+
+. local race_vars_found = 0
+
+. capture confirm variable raracem
+
+. if _rc {
+.     di as warn "WARNING: raracem not found; race_eth will not be create
+> d"
+. }
+
+. else {
+.     local race_vars_found = `race_vars_found' + 1
+.     capture confirm variable rahispan
+.     if _rc {
+.         di as warn "WARNING: rahispan not found; race_eth will not be c
+> reated"
+.     }
+.     else {
+.         local race_vars_found = `race_vars_found' + 1
+.         * Check the coding
+.         di as txt "Race (raracem) distribution:"
+Race (raracem) distribution:
+.         tab raracem, missing
+
+  raracem: r race-masked |      Freq.     Percent        Cum.
+-------------------------+-----------------------------------
+       1.white/caucasian |      9,479       59.78       59.78
+2.black/african american |      3,867       24.39       84.17
+                 3.other |      1,957       12.34       96.51
+              .m=missing |        553        3.49      100.00
+-------------------------+-----------------------------------
+                   Total |     15,856      100.00
+.         di as txt "Hispanic (rahispan) distribution:"
+Hispanic (rahispan) distribution:
+.         tab rahispan, missing
+
+   rahispan: r |
+      hispanic |      Freq.     Percent        Cum.
+---------------+-----------------------------------
+0.not hispanic |     12,374       78.04       78.04
+    1.hispanic |      2,968       18.72       96.76
+    .m=missing |        514        3.24      100.00
+---------------+-----------------------------------
+         Total |     15,856      100.00
+.         
+.         * Generate combined race/ethnicity category
+.         * 1 = Non-Hispanic White (reference category - will be omitted)
+.         * 2 = Non-Hispanic Black
+.         * 3 = Hispanic (any race)
+.         * 4 = Non-Hispanic Other
+.         capture drop race_eth
+.         gen byte race_eth = .
+(15,856 missing values generated)
+.         label define raceeth 1 "NH White" 2 "NH Black" 3 "Hispanic" 4 "
+> NH Other"
+.         
+.         * Hispanic: any race (rahispan == 1)
+.         replace race_eth = 3 if rahispan == 1
+(2,968 real changes made)
+.         * Non-Hispanic White (rahispan == 0 & raracem == 1)
+.         replace race_eth = 1 if rahispan == 0 & raracem == 1
+(7,863 real changes made)
+.         * Non-Hispanic Black (rahispan == 0 & raracem == 2)
+.         replace race_eth = 2 if rahispan == 0 & raracem == 2
+(3,771 real changes made)
+.         * Non-Hispanic Other (rahispan == 0 & raracem == 3)
+.         replace race_eth = 4 if rahispan == 0 & raracem == 3
+(730 real changes made)
+.         
+.         label values race_eth raceeth
+.         label var race_eth "Race/ethnicity (1=NH White, 2=NH Black, 3=H
+> ispanic, 4=NH Other)"
+.         
+.         di as txt "Race/ethnicity (race_eth) distribution:"
+Race/ethnicity (race_eth) distribution:
+.         tab race_eth, missing
+
+Race/ethnic |
+  ity (1=NH |
+White, 2=NH |
+     Black, |
+3=Hispanic, |
+4=NH Other) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+   NH White |      7,863       49.59       49.59
+   NH Black |      3,771       23.78       73.37
+   Hispanic |      2,968       18.72       92.09
+   NH Other |        730        4.60       96.70
+          . |        524        3.30      100.00
+------------+-----------------------------------
+      Total |     15,856      100.00
+.         quietly count if !missing(race_eth)
+.         di as txt "Non-missing race_eth count: " r(N)
+Non-missing race_eth count: 15332
+.     }
+. }
+
+. * Final status check
+. capture confirm variable race_eth
+
+. if _rc {
+.     di as warn "FINAL STATUS: race_eth variable was NOT created (source
+>  variables missing)"
+. }
+
+. else {
+.     di as txt "FINAL STATUS: race_eth variable successfully created"
+FINAL STATUS: race_eth variable successfully created
+. }
+
+. 
+. * ---------------------------------------------------------------------
 . * Respondent income aggregates (2020)
 . * ---------------------------------------------------------------------
 . di as txt "=== Constructing respondent income aggregates for 2020 ==="
@@ -240,12 +360,13 @@ not married |      2,922       18.43       18.43
 
 . egen double resp_lab_inc_2022 = rowtotal(`lab_vars')
 
-. replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) & mi
-> ssing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
+. replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) 
+> & missing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r
+> 15igxfr)
 (3,688 real changes made, 3,688 to missing)
 
-. label var resp_lab_inc_2022 "Respondent labor income (sum of 6 components; 
-> missing if all missing)"
+. label var resp_lab_inc_2022 "Respondent labor income (sum of 6 componen
+> ts; missing if all missing)"
 
 . 
 . di as txt "resp_lab_inc_2022 summary:"
@@ -270,8 +391,8 @@ resp_lab_inc_2022 summary:
 99%       211000        3150400       Kurtosis       829.0084
 
 . 
-. * Total income = labor income + household capital income + other household 
-> income
+. * Total income = labor income + household capital income + other househ
+> old income
 . local tot_add "h15icap h15iothr"
 
 . foreach v of local tot_add {
@@ -289,14 +410,14 @@ resp_lab_inc_2022 summary:
 >     + cond(missing(h15iothr), 0, h15iothr)
 (3,688 missing values generated)
 
-. * If labor income is missing AND both additions are missing, set total to m
-> issing as well
-. replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h15ic
-> ap) & missing(h15iothr)
+. * If labor income is missing AND both additions are missing, set total 
+> to missing as well
+. replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h
+> 15icap) & missing(h15iothr)
 (0 real changes made)
 
-. label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + hwio
-> ther; missing if all missing)"
+. label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + 
+> hwiother; missing if all missing)"
 
 . 
 . di as txt "resp_tot_inc_2022 summary:"
@@ -322,11 +443,11 @@ resp_tot_inc_2022 summary:
 
 . 
 . * ---------------------------------------------------------------------
-. * Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net worth 
-> (h15atotb)
+. * Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net wo
+> rth (h15atotb)
 . * ---------------------------------------------------------------------
-. di as txt "=== Constructing wealth percentile and deciles from h15atotb (A_
-> 2020) ==="
+. di as txt "=== Constructing wealth percentile and deciles from h15atotb
+>  (A_2020) ==="
 === Constructing wealth percentile and deciles from h15atotb (A_2020) ===
 
 . capture confirm variable h15atotb
@@ -350,12 +471,12 @@ resp_tot_inc_2022 summary:
 . gen double wealth_pct_2020 = .
 (15,856 missing values generated)
 
-. replace wealth_pct_2020 = 100 * (wealth_rank_2020 - 1) / (`N_wealth' - 1) i
-> f `N_wealth' > 1 & !missing(wealth_rank_2020)
+. replace wealth_pct_2020 = 100 * (wealth_rank_2020 - 1) / (`N_wealth' - 
+> 1) if `N_wealth' > 1 & !missing(wealth_rank_2020)
 (12,168 real changes made)
 
-. replace wealth_pct_2020 = 50 if `N_wealth' == 1 & !missing(wealth_rank_2020
-> )
+. replace wealth_pct_2020 = 50 if `N_wealth' == 1 & !missing(wealth_rank_
+> 2020)
 (0 real changes made)
 
 . label variable wealth_pct_2020 "Wealth percentile (based on h15atotb)"
@@ -437,8 +558,8 @@ Wealth decile distribution:
 . * Create decile dummies wealth_d1-wealth_d10
 . forvalues d = 1/10 {
   2.     capture drop wealth_d`d'_2020
-  3.     gen byte wealth_d`d'_2020 = wealth_decile_2020 == `d' if !missing(we
-> alth_decile_2020)
+  3.     gen byte wealth_d`d'_2020 = wealth_decile_2020 == `d' if !missin
+> g(wealth_decile_2020)
   4.     label values wealth_d`d'_2020 yesno
   5.     label var wealth_d`d'_2020 "Wealth decile `d'"
   6. }
@@ -457,25 +578,26 @@ Wealth decile distribution:
 . * ---------------------------------------------------------------------
 . * Save back to unified analysis dataset
 . * ---------------------------------------------------------------------
-. di as txt "=== Saving unified analysis dataset (includes flows, trust, cont
-> rols, income) ==="
-=== Saving unified analysis dataset (includes flows, trust, controls, income)
->  ===
+. di as txt "=== Saving unified analysis dataset (includes flows, trust, 
+> controls, income) ==="
+=== Saving unified analysis dataset (includes flows, trust, controls, inc
+> ome) ===
 
 . save "`inout'", replace
 file /Volumes/SSD
-    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs1992_20
-    > 22v1_STATA/_randhrs1992_2022v1_analysis.dta saved
+    PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS_Long/randhrs199
+    > 2_2022v1_STATA/_randhrs1992_2022v1_analysis.dta saved
 
 . di as txt "Saved unified dataset: `inout'"
-Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Cod
-> e/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Code/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analys
+> is.dta
 
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
-> _Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- closed on:  20 Oct 2025, 15:25:52
------------------------------------------------------------------------------
+ closed on:   4 Nov 2025, 09:15:21
+-------------------------------------------------------------------------

@@ -8,3 +8,9 @@ s/\([0-9]\)\.year_\([0-9]\+\)#\([a-zA-Z_]*\)/\1.year_\2\\times \3/g
 
 # Replace any remaining # in variable names (but not in \def\sym#1)
 s/\([^\\]\)#\([^1]\)/\1\\times \2/g
+
+
+
+
+
+

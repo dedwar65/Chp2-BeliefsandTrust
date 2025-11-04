@@ -1,10 +1,11 @@
 *----------------------------------------------------------------------
 * prep_controls_income_2020.do
-* Prepare controls (marital, immigration) and respondent income aggregates for 2020
+* Prepare controls (marital, immigration, race/ethnicity) and respondent income aggregates for 2020
 * - Works on unified analysis dataset and writes back to it
 * - Creates:
 *   married_2022 (from r15mstat)
 *   born_us (from rabplacf/rabplace)
+*   race_eth (from raracem and rahispan: 1=NH White, 2=NH Black, 3=Hispanic, 4=NH Other)
 *   resp_lab_inc_2022 (sum: r15earn r15pena r15issdi r15isret r15iunwc r15igxfr)
 *   resp_tot_inc_2022 (resp_lab_inc_2022 + hwicap + hwiother)
 *   wealth_pct_2020, wealth_decile_2020, wealth_d1_2020-wealth_d10_2020 (based on h15atotb)
@@ -103,6 +104,65 @@ quietly count if !missing(born_us)
 di as txt "Non-missing born_us count: " r(N)
 di as txt "Born-in-US dummy summary:"
 tab born_us, missing
+
+* ---------------------------------------------------------------------
+* Race/Ethnicity: combined race and ethnicity variable from RARACEM and RAHISPAN
+* ---------------------------------------------------------------------
+di as txt "=== Constructing race/ethnicity variable from raracem and rahispan ==="
+local race_vars_found = 0
+capture confirm variable raracem
+if _rc {
+    di as warn "WARNING: raracem not found; race_eth will not be created"
+}
+else {
+    local race_vars_found = `race_vars_found' + 1
+    capture confirm variable rahispan
+    if _rc {
+        di as warn "WARNING: rahispan not found; race_eth will not be created"
+    }
+    else {
+        local race_vars_found = `race_vars_found' + 1
+        * Check the coding
+        di as txt "Race (raracem) distribution:"
+        tab raracem, missing
+        di as txt "Hispanic (rahispan) distribution:"
+        tab rahispan, missing
+        
+        * Generate combined race/ethnicity category
+        * 1 = Non-Hispanic White (reference category - will be omitted)
+        * 2 = Non-Hispanic Black
+        * 3 = Hispanic (any race)
+        * 4 = Non-Hispanic Other
+        capture drop race_eth
+        gen byte race_eth = .
+        label define raceeth 1 "NH White" 2 "NH Black" 3 "Hispanic" 4 "NH Other"
+        
+        * Hispanic: any race (rahispan == 1)
+        replace race_eth = 3 if rahispan == 1
+        * Non-Hispanic White (rahispan == 0 & raracem == 1)
+        replace race_eth = 1 if rahispan == 0 & raracem == 1
+        * Non-Hispanic Black (rahispan == 0 & raracem == 2)
+        replace race_eth = 2 if rahispan == 0 & raracem == 2
+        * Non-Hispanic Other (rahispan == 0 & raracem == 3)
+        replace race_eth = 4 if rahispan == 0 & raracem == 3
+        
+        label values race_eth raceeth
+        label var race_eth "Race/ethnicity (1=NH White, 2=NH Black, 3=Hispanic, 4=NH Other)"
+        
+        di as txt "Race/ethnicity (race_eth) distribution:"
+        tab race_eth, missing
+        quietly count if !missing(race_eth)
+        di as txt "Non-missing race_eth count: " r(N)
+    }
+}
+* Final status check
+capture confirm variable race_eth
+if _rc {
+    di as warn "FINAL STATUS: race_eth variable was NOT created (source variables missing)"
+}
+else {
+    di as txt "FINAL STATUS: race_eth variable successfully created"
+}
 
 * ---------------------------------------------------------------------
 * Respondent income aggregates (2020)
