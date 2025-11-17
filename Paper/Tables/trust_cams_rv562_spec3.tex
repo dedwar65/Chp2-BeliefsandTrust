@@ -1,0 +1,43 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Trust rv562 on Controls + r15lbagr (Spec 3)}
+\begin{tabular}{l*{1}{c}}
+\toprule
+          &\multicolumn{1}{c}{(1)}\\
+          &\multicolumn{1}{c}{rv562}\\
+\midrule
+Age       &    0.011         \\
+          &  (0.191)         \\
+Age$^{2}$ &    0.000         \\
+          &  (0.001)         \\
+Years of education&    0.184\sym{***}\\
+          &  (0.053)         \\
+1.ragender&    0.000         \\
+          &      (.)         \\
+2.ragender&   -0.282         \\
+          &  (0.338)         \\
+1.race\_eth&    0.000         \\
+          &      (.)         \\
+NH Black  &   -0.664\sym{*}  \\
+          &  (0.401)         \\
+Hispanic  &   -0.128         \\
+          &  (0.522)         \\
+NH Other  &    0.089         \\
+          &  (0.629)         \\
+Married   &    0.473         \\
+          &  (0.353)         \\
+Log labor income&    0.054         \\
+          &  (0.053)         \\
+r15lbagr  &    0.060         \\
+          &  (0.352)         \\
+\_cons    &    0.877         \\
+          &  (6.779)         \\
+\midrule
+Observations&  323.000         \\
+Adj. R-squared&    0.055         \\
+\bottomrule
+\multicolumn{2}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{2}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically; adds r15lbagr control. Includes married status and log labor income (2020).}\\
+\multicolumn{2}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

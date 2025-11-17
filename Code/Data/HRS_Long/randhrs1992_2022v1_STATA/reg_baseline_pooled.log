@@ -1,9 +1,9 @@
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
-> _Long/randhrs1992_2022v1_STATA/reg_baseline_pooled.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/reg_baseline_pooled.log
   log type:  text
- opened on:  20 Oct 2025, 15:49:33
+ opened on:  17 Nov 2025, 11:41:01
 
 . 
 . set more off
@@ -20,16 +20,16 @@
 . }
 
 . 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
-. di as txt "=== Regression Set 1: Baseline Pooled OLS                       
-> ==="
+. di as txt "=== Regression Set 1: Baseline Pooled OLS                   
+>     ==="
 === Regression Set 1: Baseline Pooled OLS                       ===
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . di as txt ""
@@ -39,15 +39,15 @@
 . * ---------------------------------------------------------------------
 . * Regression 1.1: r_annual (including residential)
 . * ---------------------------------------------------------------------
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . di as txt "Regression 1.1: r_annual (including residential)"
 Regression 1.1: r_annual (including residential)
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . 
@@ -68,96 +68,108 @@ Panel variable: hhidpn (strongly balanced)
 . 
 . eststo clear
 
-. eststo reg1_1: reg r_annual age age_sq raedyrs i.inlbrf i.married i.born_us
->  ///
+. eststo reg1_1: reg r_annual age age_sq raedyrs i.ragender i.race_eth i.
+> inlbrf i.married i.born_us ///
 >     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
 >     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 
-> year_11, ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11, ///
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
-Linear regression                               Number of obs     =     71,26
-> 4
-                                                F(25, 11318)      =     118.6
-> 2
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.041
-> 5
-                                                Root MSE          =     .4671
-> 2
+Linear regression                               Number of obs     =     7
+> 1,189
+                                                F(29, 11297)      =     1
+> 06.72
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .0439
+                                                Root MSE          =     .
+> 46631
 
-                            (Std. err. adjusted for 11,319 clusters in hhidpn
-> )
------------------------------------------------------------------------------
-> -
+                            (Std. err. adjusted for 11,298 clusters in hh
+> idpn)
+-------------------------------------------------------------------------
+> -----
              |               Robust
-    r_annual | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-         age |   .0041748   .0019431     2.15   0.032      .000366    .007983
-> 5
-      age_sq |   -.000047   .0000146    -3.23   0.001    -.0000756   -.000018
-> 5
-     raedyrs |   .0146167   .0006923    21.11   0.000     .0132597    .015973
-> 7
+    r_annual | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+         age |   .0045856   .0019701     2.33   0.020     .0007239    .00
+> 84473
+      age_sq |  -.0000531   .0000148    -3.59   0.000     -.000082   -.00
+> 00241
+     raedyrs |   .0134872   .0007083    19.04   0.000     .0120987    .01
+> 48757
+             |
+    ragender |
+   2.female  |  -.0144537    .003461    -4.18   0.000    -.0212378   -.00
+> 76696
+             |
+    race_eth |
+   NH Black  |  -.0627037   .0060973   -10.28   0.000    -.0746556   -.05
+> 07519
+   Hispanic  |  -.0553789   .0066711    -8.30   0.000    -.0684555   -.04
+> 23024
+   NH Other  |  -.0055724   .0108437    -0.51   0.607    -.0268279     .0
+> 15683
              |
       inlbrf |
-      1.yes  |   .0457017    .003929    11.63   0.000     .0380001    .053403
-> 3
+      1.yes  |   .0437321   .0039615    11.04   0.000     .0359669    .05
+> 14973
              |
      married |
-        yes  |   .0397732     .00416     9.56   0.000     .0316189    .047927
-> 5
+        yes  |   .0341126   .0042621     8.00   0.000     .0257581    .04
+> 24671
              |
      born_us |
-        yes  |   .0005431   .0057331     0.09   0.925    -.0106948     .01178
-> 1
- 1.wealth_d2 |  -.0478304     .01386    -3.45   0.001    -.0749983   -.020662
-> 4
- 1.wealth_d3 |  -.0428844   .0128656    -3.33   0.001    -.0681032   -.017665
-> 6
- 1.wealth_d4 |  -.0303913   .0128261    -2.37   0.018    -.0555326   -.005249
-> 9
- 1.wealth_d5 |  -.0537113   .0119702    -4.49   0.000    -.0771749   -.030247
-> 7
- 1.wealth_d6 |  -.1034939   .0113415    -9.13   0.000    -.1257251   -.081262
-> 6
- 1.wealth_d7 |  -.1364989    .011056   -12.35   0.000    -.1581707   -.114827
-> 2
- 1.wealth_d8 |  -.1640298   .0109559   -14.97   0.000    -.1855053   -.142554
-> 3
- 1.wealth_d9 |  -.1923391   .0110398   -17.42   0.000     -.213979   -.170699
-> 1
-1.wealth_d10 |  -.2434897   .0109381   -22.26   0.000    -.2649302   -.222049
-> 2
-      year_1 |  -.1082782   .0098223   -11.02   0.000    -.1275316   -.089024
-> 8
-      year_2 |  -.0972484   .0090998   -10.69   0.000    -.1150855   -.079411
-> 2
-      year_3 |  -.0557183   .0090419    -6.16   0.000     -.073442   -.037994
-> 6
-      year_4 |  -.1508541   .0083203   -18.13   0.000    -.1671633   -.134544
-> 9
-      year_5 |  -.2018071   .0082449   -24.48   0.000    -.2179685   -.185645
-> 8
-      year_6 |   -.155509   .0077315   -20.11   0.000     -.170664   -.140353
-> 9
-      year_7 |   -.084853   .0079672   -10.65   0.000    -.1004701   -.069235
-> 8
-      year_8 |  -.0905182    .007846   -11.54   0.000    -.1058977   -.075138
-> 8
-      year_9 |  -.0816572   .0077137   -10.59   0.000    -.0967775    -.06653
-> 7
-     year_10 |  -.0760659    .008482    -8.97   0.000     -.092692   -.059439
-> 7
+        yes  |  -.0149236   .0062822    -2.38   0.018    -.0272378   -.00
+> 26094
+ 1.wealth_d2 |  -.0423683    .013791    -3.07   0.002    -.0694011   -.01
+> 53354
+ 1.wealth_d3 |  -.0448939   .0128122    -3.50   0.000     -.070008   -.01
+> 97798
+ 1.wealth_d4 |  -.0353959   .0127876    -2.77   0.006    -.0604618     -.
+> 01033
+ 1.wealth_d5 |  -.0614145   .0119466    -5.14   0.000     -.084832   -.03
+> 79971
+ 1.wealth_d6 |  -.1158918   .0113524   -10.21   0.000    -.1381444   -.09
+> 36391
+ 1.wealth_d7 |  -.1527365   .0111516   -13.70   0.000    -.1745955   -.13
+> 08774
+ 1.wealth_d8 |  -.1827435    .011084   -16.49   0.000    -.2044701   -.16
+> 10168
+ 1.wealth_d9 |  -.2128073   .0112338   -18.94   0.000    -.2348275   -.19
+> 07871
+1.wealth_d10 |  -.2650521   .0111123   -23.85   0.000    -.2868342     -.
+> 24327
+      year_1 |  -.1183729   .0098544   -12.01   0.000    -.1376893   -.09
+> 90565
+      year_2 |  -.1066048   .0091736   -11.62   0.000    -.1245866    -.0
+> 88623
+      year_3 |  -.0646551   .0090737    -7.13   0.000    -.0824411    -.0
+> 46869
+      year_4 |  -.1593078   .0083838   -19.00   0.000    -.1757415   -.14
+> 28741
+      year_5 |  -.2096436   .0083144   -25.21   0.000    -.2259412   -.19
+> 33459
+      year_6 |  -.1591082   .0077522   -20.52   0.000    -.1743038   -.14
+> 39126
+      year_7 |  -.0876284   .0079689   -11.00   0.000    -.1032489    -.0
+> 72008
+      year_8 |  -.0933104   .0078608   -11.87   0.000    -.1087188   -.07
+> 79019
+      year_9 |  -.0824273   .0077155   -10.68   0.000    -.0975509   -.06
+> 73036
+     year_10 |  -.0770511   .0084585    -9.11   0.000    -.0936312    -.0
+> 60471
      year_11 |          0  (omitted)
-       _cons |  -.0042106   .0659728    -0.06   0.949    -.1335288    .125107
-> 6
------------------------------------------------------------------------------
-> -
+       _cons |   .0693413   .0672086     1.03   0.302    -.0623992    .20
+> 10819
+-------------------------------------------------------------------------
+> -----
 
 . 
 . di as txt ""
@@ -167,15 +179,16 @@ Linear regression                               Number of obs     =     71,26
 . * ---------------------------------------------------------------------
 . * Regression 1.2: r_annual_trim (including residential, trimmed)
 . * ---------------------------------------------------------------------
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
-. di as txt "Regression 1.2: r_annual_trim (including residential, trimmed)"
+. di as txt "Regression 1.2: r_annual_trim (including residential, trimme
+> d)"
 Regression 1.2: r_annual_trim (including residential, trimmed)
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . 
@@ -184,8 +197,8 @@ Regression 1.2: r_annual_trim (including residential, trimmed)
 
 . 
 . * Count non-missing r_annual_trim per individual
-. bysort hhidpn: egen n_nonmiss = count(r_annual_trim) if !missing(r_annual_t
-> rim)
+. bysort hhidpn: egen n_nonmiss = count(r_annual_trim) if !missing(r_annu
+> al_trim)
 (109,869 missing values generated)
 
 . bysort hhidpn: egen total_obs = count(r_annual_trim)
@@ -194,8 +207,8 @@ Regression 1.2: r_annual_trim (including residential, trimmed)
 (55,088 missing values generated)
 
 . 
-. * Keep only individuals with non-missing r_annual_trim in ALL years (11 yea
-> rs total)
+. * Keep only individuals with non-missing r_annual_trim in ALL years (11
+>  years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (155,650 observations deleted)
 
@@ -211,13 +224,13 @@ Regression 1.2: r_annual_trim (including residential, trimmed)
 -------------+---------------------------------------------------------
        n_obs |     18,766          11           0         11         11
 
-. di as txt "Sample restricted to individuals with r_annual_trim in all 11 ye
-> ars: " _N " observations"
-Sample restricted to individuals with r_annual_trim in all 11 years: 18766 ob
-> servations
+. di as txt "Sample restricted to individuals with r_annual_trim in all 1
+> 1 years: " _N " observations"
+Sample restricted to individuals with r_annual_trim in all 11 years: 1876
+> 6 observations
 
-. di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(
-> max)
+. di as txt "Min obs per individual: " r(min) ", Max obs per individual: 
+> " r(max)
 Min obs per individual: 11, Max obs per individual: 11
 
 . drop n_obs
@@ -233,96 +246,108 @@ Panel variable: hhidpn (strongly balanced)
 . gen age_sq = age^2
 
 . 
-. eststo reg1_2: reg r_annual_trim age age_sq raedyrs i.inlbrf i.married i.bo
-> rn_us ///
+. eststo reg1_2: reg r_annual_trim age age_sq raedyrs i.ragender i.race_e
+> th i.inlbrf i.married i.born_us ///
 >     i.wealth_d2 i.wealth_d3 i.wealth_d4 i.wealth_d5 i.wealth_d6 ///
 >     i.wealth_d7 i.wealth_d8 i.wealth_d9 i.wealth_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 
-> year_11, ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11, ///
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
-Linear regression                               Number of obs     =     18,72
-> 4
-                                                F(25, 1704)       =      67.0
-> 7
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.075
-> 7
-                                                Root MSE          =     .1985
-> 1
+Linear regression                               Number of obs     =     1
+> 8,724
+                                                F(29, 1704)       =      
+> 58.91
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .0766
+                                                Root MSE          =     .
+> 19844
 
-                             (Std. err. adjusted for 1,705 clusters in hhidpn
-> )
------------------------------------------------------------------------------
-> -
+                             (Std. err. adjusted for 1,705 clusters in hh
+> idpn)
+-------------------------------------------------------------------------
+> -----
              |               Robust
-r_annual_t~m | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-         age |  -.0000785   .0021667    -0.04   0.971    -.0043281    .004171
-> 1
-      age_sq |  -9.08e-06   .0000156    -0.58   0.561    -.0000397    .000021
-> 5
-     raedyrs |   .0073556   .0005618    13.09   0.000     .0062538    .008457
-> 4
+r_annual_t~m | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+         age |  -.0000931   .0021601    -0.04   0.966    -.0043298    .00
+> 41436
+      age_sq |  -.0000101   .0000156    -0.65   0.517    -.0000406    .00
+> 00204
+     raedyrs |    .007094   .0005863    12.10   0.000     .0059441    .00
+> 82439
+             |
+    ragender |
+   2.female  |  -.0071496   .0028806    -2.48   0.013    -.0127995   -.00
+> 14997
+             |
+    race_eth |
+   NH Black  |  -.0192657   .0057836    -3.33   0.001    -.0306094   -.00
+> 79221
+   Hispanic  |  -.0117941    .005302    -2.22   0.026    -.0221932    -.0
+> 01395
+   NH Other  |   .0067568   .0095455     0.71   0.479    -.0119654    .02
+> 54789
              |
       inlbrf |
-      1.yes  |    .014062   .0031871     4.41   0.000      .007811    .020313
-> 1
+      1.yes  |   .0131724   .0032322     4.08   0.000     .0068328     .0
+> 19512
              |
      married |
-        yes  |   .0145328   .0033903     4.29   0.000     .0078833    .021182
-> 4
+        yes  |   .0120169   .0034917     3.44   0.001     .0051685    .01
+> 88653
              |
      born_us |
-        yes  |  -.0124246   .0041588    -2.99   0.003    -.0205815   -.004267
-> 7
- 1.wealth_d2 |  -.0407319   .0172547    -2.36   0.018    -.0745745   -.006889
-> 2
- 1.wealth_d3 |  -.0516675     .01601    -3.23   0.001    -.0830689   -.020266
-> 2
- 1.wealth_d4 |  -.0569969   .0154752    -3.68   0.000    -.0873492   -.026644
-> 5
- 1.wealth_d5 |   -.073523   .0152951    -4.81   0.000    -.1035221   -.043523
-> 9
- 1.wealth_d6 |  -.0925037   .0147285    -6.28   0.000    -.1213915   -.063615
-> 8
- 1.wealth_d7 |  -.1150879    .014912    -7.72   0.000    -.1443355   -.085840
-> 2
- 1.wealth_d8 |  -.1300139   .0148496    -8.76   0.000    -.1591393   -.100888
-> 4
- 1.wealth_d9 |  -.1468146   .0147753    -9.94   0.000    -.1757943   -.117834
-> 8
-1.wealth_d10 |  -.1721161   .0148777   -11.57   0.000    -.2012966   -.142935
-> 7
-      year_1 |  -.0695398    .008664    -8.03   0.000     -.086533   -.052546
-> 7
-      year_2 |  -.0263444   .0079625    -3.31   0.001    -.0419618    -.01072
-> 7
-      year_3 |  -.0008216   .0082828    -0.10   0.921    -.0170671    .015423
-> 9
-      year_4 |  -.0825745    .007571   -10.91   0.000     -.097424    -.06772
-> 5
-      year_5 |  -.1348946   .0075281   -17.92   0.000    -.1496599   -.120129
-> 3
-      year_6 |  -.0918342   .0072857   -12.60   0.000     -.106124   -.077544
-> 3
-      year_7 |  -.0408564   .0071923    -5.68   0.000    -.0549631   -.026749
-> 7
-      year_8 |  -.0610509   .0072146    -8.46   0.000    -.0752012   -.046900
-> 6
-      year_9 |  -.0469418    .007301    -6.43   0.000    -.0612617   -.032621
-> 9
-     year_10 |  -.0632187   .0080812    -7.82   0.000    -.0790689   -.047368
-> 6
+        yes  |  -.0142588    .004367    -3.27   0.001    -.0228239   -.00
+> 56936
+ 1.wealth_d2 |  -.0401217   .0172125    -2.33   0.020    -.0738815   -.00
+> 63619
+ 1.wealth_d3 |  -.0541527    .016029    -3.38   0.001    -.0855912   -.02
+> 27142
+ 1.wealth_d4 |   -.060828   .0155044    -3.92   0.000    -.0912376   -.03
+> 04185
+ 1.wealth_d5 |  -.0778688   .0153146    -5.08   0.000    -.1079062   -.04
+> 78315
+ 1.wealth_d6 |  -.0979218   .0148248    -6.61   0.000    -.1269986    -.0
+> 68845
+ 1.wealth_d7 |  -.1214557   .0150856    -8.05   0.000    -.1510439   -.09
+> 18676
+ 1.wealth_d8 |  -.1369358   .0150311    -9.11   0.000    -.1664171   -.10
+> 74545
+ 1.wealth_d9 |  -.1539448    .014954   -10.29   0.000     -.183275   -.12
+> 46147
+1.wealth_d10 |  -.1792559   .0150355   -11.92   0.000    -.2087458    -.1
+> 49766
+      year_1 |  -.0721574    .008708    -8.29   0.000    -.0892369    -.0
+> 55078
+      year_2 |  -.0287622   .0080039    -3.59   0.000    -.0444608   -.01
+> 30636
+      year_3 |  -.0027232   .0083031    -0.33   0.743    -.0190086    .01
+> 35621
+      year_4 |  -.0843409   .0075946   -11.11   0.000    -.0992365   -.06
+> 94453
+      year_5 |  -.1363877   .0075416   -18.08   0.000    -.1511794    -.1
+> 21596
+      year_6 |  -.0926807   .0072922   -12.71   0.000    -.1069832   -.07
+> 83781
+      year_7 |  -.0415822   .0071944    -5.78   0.000    -.0556929   -.02
+> 74715
+      year_8 |  -.0615649   .0072164    -8.53   0.000     -.075719   -.04
+> 74109
+      year_9 |  -.0471501   .0073005    -6.46   0.000    -.0614691   -.03
+> 28312
+     year_10 |  -.0632931   .0080773    -7.84   0.000    -.0791356   -.04
+> 74506
      year_11 |          0  (omitted)
-       _cons |   .1719682   .0761854     2.26   0.024     .0225414     .32139
-> 5
------------------------------------------------------------------------------
-> -
+       _cons |   .1984378   .0767415     2.59   0.010     .0479204    .34
+> 89553
+-------------------------------------------------------------------------
+> -----
 
 . 
 . di as txt ""
@@ -332,15 +357,15 @@ r_annual_t~m | Coefficient  std. err.      t    P>|t|     [95% conf. interval
 . * ---------------------------------------------------------------------
 . * Regression 1.3: r_annual_excl (excluding residential)
 . * ---------------------------------------------------------------------
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . di as txt "Regression 1.3: r_annual_excl (excluding residential)"
 Regression 1.3: r_annual_excl (excluding residential)
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . 
@@ -349,8 +374,8 @@ Regression 1.3: r_annual_excl (excluding residential)
 
 . 
 . * Count non-missing r_annual_excl per individual
-. bysort hhidpn: egen n_nonmiss = count(r_annual_excl) if !missing(r_annual_e
-> xcl)
+. bysort hhidpn: egen n_nonmiss = count(r_annual_excl) if !missing(r_annu
+> al_excl)
 (101,997 missing values generated)
 
 . bysort hhidpn: egen total_obs = count(r_annual_excl)
@@ -359,8 +384,8 @@ Regression 1.3: r_annual_excl (excluding residential)
 (48,719 missing values generated)
 
 . 
-. * Keep only individuals with non-missing r_annual_excl in ALL years (11 yea
-> rs total)
+. * Keep only individuals with non-missing r_annual_excl in ALL years (11
+>  years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (145,860 observations deleted)
 
@@ -376,13 +401,13 @@ Regression 1.3: r_annual_excl (excluding residential)
 -------------+---------------------------------------------------------
        n_obs |     28,556          11           0         11         11
 
-. di as txt "Sample restricted to individuals with r_annual_excl in all 11 ye
-> ars: " _N " observations"
-Sample restricted to individuals with r_annual_excl in all 11 years: 28556 ob
-> servations
+. di as txt "Sample restricted to individuals with r_annual_excl in all 1
+> 1 years: " _N " observations"
+Sample restricted to individuals with r_annual_excl in all 11 years: 2855
+> 6 observations
 
-. di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(
-> max)
+. di as txt "Min obs per individual: " r(min) ", Max obs per individual: 
+> " r(max)
 Min obs per individual: 11, Max obs per individual: 11
 
 . drop n_obs
@@ -398,98 +423,110 @@ Panel variable: hhidpn (strongly balanced)
 . gen age_sq = age^2
 
 . 
-. eststo reg1_3: reg r_annual_excl age age_sq raedyrs i.inlbrf i.married i.bo
-> rn_us ///
->     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonre
-> s_d5 i.wealth_nonres_d6 ///
->     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonre
-> s_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 
-> year_11, ///
+. eststo reg1_3: reg r_annual_excl age age_sq raedyrs i.ragender i.race_e
+> th i.inlbrf i.married i.born_us ///
+>     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_n
+> onres_d5 i.wealth_nonres_d6 ///
+>     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_n
+> onres_d10 ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11, ///
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
-Linear regression                               Number of obs     =     28,47
-> 1
-                                                F(25, 2594)       =      32.5
-> 5
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.038
-> 3
-                                                Root MSE          =     .2835
-> 7
+Linear regression                               Number of obs     =     2
+> 8,471
+                                                F(29, 2594)       =      
+> 29.15
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .0416
+                                                Root MSE          =      
+> .2831
 
-                             (Std. err. adjusted for 2,595 clusters in hhidpn
-> )
------------------------------------------------------------------------------
-> -
+                             (Std. err. adjusted for 2,595 clusters in hh
+> idpn)
+-------------------------------------------------------------------------
+> -----
              |               Robust
-r_annual_e~l | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-         age |  -.0042196   .0023456    -1.80   0.072     -.008819    .000379
-> 8
-      age_sq |   .0000266   .0000169     1.57   0.116    -6.54e-06    .000059
-> 7
-     raedyrs |    .010018   .0007518    13.33   0.000     .0085439    .011492
-> 2
+r_annual_e~l | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+         age |  -.0038683   .0023562    -1.64   0.101    -.0084884    .00
+> 07519
+      age_sq |   .0000221   .0000169     1.30   0.192    -.0000111    .00
+> 00554
+     raedyrs |   .0089607   .0007635    11.74   0.000     .0074635    .01
+> 04579
+             |
+    ragender |
+   2.female  |  -.0087243    .003695    -2.36   0.018    -.0159697    -.0
+> 01479
+             |
+    race_eth |
+   NH Black  |  -.0476388   .0069418    -6.86   0.000    -.0612509   -.03
+> 40268
+   Hispanic  |    -.05594   .0068554    -8.16   0.000    -.0693827   -.04
+> 24973
+   NH Other  |   .0131511   .0151644     0.87   0.386    -.0165846    .04
+> 28867
              |
       inlbrf |
-      1.yes  |   .0231557   .0039145     5.92   0.000     .0154797    .030831
-> 6
+      1.yes  |   .0224297   .0039837     5.63   0.000     .0146181    .03
+> 02413
              |
      married |
-        yes  |   .0055651   .0043588     1.28   0.202     -.002982    .014112
-> 3
+        yes  |   .0016297   .0045459     0.36   0.720    -.0072843    .01
+> 05437
              |
      born_us |
-        yes  |   .0016527   .0063708     0.26   0.795    -.0108397     .01414
-> 5
-1.wealth_n~2 |  -.0454476   .0194213    -2.34   0.019    -.0835305   -.007364
-> 8
-1.wealth_n~3 |  -.0396754   .0193561    -2.05   0.040    -.0776303   -.001720
-> 4
-1.wealth_n~4 |  -.0590506   .0188681    -3.13   0.002    -.0960487   -.022052
-> 6
-1.wealth_n~5 |  -.0651696   .0190117    -3.43   0.001    -.1024492   -.027890
-> 1
-1.wealth_n~6 |  -.1097431    .018299    -6.00   0.000    -.1456252   -.073861
-> 1
-1.wealth_n~7 |  -.1308777   .0181979    -7.19   0.000    -.1665615   -.095193
-> 9
-1.wealth_n~8 |  -.1527185   .0181036    -8.44   0.000    -.1882174   -.117219
-> 5
-1.wealth_n~9 |  -.1690386   .0183405    -9.22   0.000    -.2050021   -.133075
-> 1
-1.wealth_n~0 |  -.1989124   .0182443   -10.90   0.000    -.2346874   -.163137
-> 5
-      year_1 |  -.0355158   .0104722    -3.39   0.001    -.0560504   -.014981
-> 2
-      year_2 |  -.0227996   .0095022    -2.40   0.016    -.0414323   -.004166
-> 9
-      year_3 |   .0107864   .0096179     1.12   0.262    -.0080732    .029645
-> 9
-      year_4 |  -.0343339   .0087617    -3.92   0.000    -.0515146   -.017153
-> 3
-      year_5 |  -.0592548   .0086056    -6.89   0.000    -.0761294   -.042380
-> 2
-      year_6 |  -.0305352   .0082212    -3.71   0.000    -.0466559   -.014414
-> 5
-      year_7 |  -.0007037   .0077984    -0.09   0.928    -.0159955     .01458
-> 8
-      year_8 |   -.032332    .008199    -3.94   0.000    -.0484092   -.016254
-> 7
-      year_9 |  -.0151212   .0086686    -1.74   0.081    -.0321193    .001876
-> 9
-     year_10 |  -.0268185   .0092805    -2.89   0.004    -.0450164   -.008620
-> 5
+        yes  |  -.0099705   .0063499    -1.57   0.116    -.0224218    .00
+> 24808
+1.wealth_n~2 |   -.041541   .0193249    -2.15   0.032    -.0794349   -.00
+> 36471
+1.wealth_n~3 |  -.0462142   .0193595    -2.39   0.017    -.0841759   -.00
+> 82526
+1.wealth_n~4 |  -.0699011   .0189755    -3.68   0.000    -.1071098   -.03
+> 26924
+1.wealth_n~5 |   -.077461   .0190846    -4.06   0.000    -.1148837   -.04
+> 00383
+1.wealth_n~6 |  -.1245873   .0185043    -6.73   0.000    -.1608721   -.08
+> 83026
+1.wealth_n~7 |  -.1481832   .0184702    -8.02   0.000    -.1844009   -.11
+> 19654
+1.wealth_n~8 |  -.1711859   .0184451    -9.28   0.000    -.2073545   -.13
+> 50172
+1.wealth_n~9 |  -.1884415   .0186968   -10.08   0.000    -.2251037   -.15
+> 17794
+1.wealth_n~0 |  -.2186504   .0186084   -11.75   0.000    -.2551392   -.18
+> 21615
+      year_1 |  -.0412493   .0105898    -3.90   0.000    -.0620146   -.02
+> 04841
+      year_2 |  -.0280953   .0096244    -2.92   0.004    -.0469676   -.00
+> 92229
+      year_3 |    .006467   .0096899     0.67   0.505    -.0125337    .02
+> 54678
+      year_4 |  -.0382754   .0088602    -4.32   0.000    -.0556491   -.02
+> 09016
+      year_5 |  -.0627631   .0086674    -7.24   0.000    -.0797588   -.04
+> 57674
+      year_6 |  -.0323655   .0082465    -3.92   0.000     -.048536    -.0
+> 16195
+      year_7 |  -.0023139   .0078025    -0.30   0.767    -.0176137     .0
+> 12986
+      year_8 |  -.0335423    .008204    -4.09   0.000    -.0496293   -.01
+> 74552
+      year_9 |   -.015647   .0086632    -1.81   0.071    -.0326346    .00
+> 13406
+     year_10 |  -.0271909   .0092628    -2.94   0.003    -.0453541   -.00
+> 90277
      year_11 |          0  (omitted)
-       _cons |   .2058139   .0840003     2.45   0.014     .0410995    .370528
-> 3
------------------------------------------------------------------------------
-> -
+       _cons |   .2619812   .0854377     3.07   0.002     .0944483    .42
+> 95142
+-------------------------------------------------------------------------
+> -----
 
 . 
 . di as txt ""
@@ -499,16 +536,16 @@ r_annual_e~l | Coefficient  std. err.      t    P>|t|     [95% conf. interval
 . * ---------------------------------------------------------------------
 . * Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
 . * ---------------------------------------------------------------------
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
-. di as txt "Regression 1.4: r_annual_excl_trim (excluding residential, trimm
-> ed)"
+. di as txt "Regression 1.4: r_annual_excl_trim (excluding residential, t
+> rimmed)"
 Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . 
@@ -517,8 +554,8 @@ Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
 
 . 
 . * Count non-missing r_annual_excl_trim per individual
-. bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r_ann
-> ual_excl_trim)
+. bysort hhidpn: egen n_nonmiss = count(r_annual_excl_trim) if !missing(r
+> _annual_excl_trim)
 (109,245 missing values generated)
 
 . bysort hhidpn: egen total_obs = count(r_annual_excl_trim)
@@ -527,8 +564,8 @@ Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
 (53,416 missing values generated)
 
 . 
-. * Keep only individuals with non-missing r_annual_excl_trim in ALL years (1
-> 1 years total)
+. * Keep only individuals with non-missing r_annual_excl_trim in ALL year
+> s (11 years total)
 . keep if max_nonmiss == 11 & total_obs == 11
 (157,828 observations deleted)
 
@@ -544,13 +581,13 @@ Regression 1.4: r_annual_excl_trim (excluding residential, trimmed)
 -------------+---------------------------------------------------------
        n_obs |     16,588          11           0         11         11
 
-. di as txt "Sample restricted to individuals with r_annual_excl_trim in all 
-> 11 years: " _N " observations"
-Sample restricted to individuals with r_annual_excl_trim in all 11 years: 165
-> 88 observations
+. di as txt "Sample restricted to individuals with r_annual_excl_trim in 
+> all 11 years: " _N " observations"
+Sample restricted to individuals with r_annual_excl_trim in all 11 years:
+>  16588 observations
 
-. di as txt "Min obs per individual: " r(min) ", Max obs per individual: " r(
-> max)
+. di as txt "Min obs per individual: " r(min) ", Max obs per individual: 
+> " r(max)
 Min obs per individual: 11, Max obs per individual: 11
 
 . drop n_obs
@@ -566,98 +603,110 @@ Panel variable: hhidpn (strongly balanced)
 . gen age_sq = age^2
 
 . 
-. eststo reg1_4: reg r_annual_excl_trim age age_sq raedyrs i.inlbrf i.married
->  i.born_us ///
->     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_nonre
-> s_d5 i.wealth_nonres_d6 ///
->     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_nonre
-> s_d10 ///
->     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 
-> year_11, ///
+. eststo reg1_4: reg r_annual_excl_trim age age_sq raedyrs i.ragender i.r
+> ace_eth i.inlbrf i.married i.born_us ///
+>     i.wealth_nonres_d2 i.wealth_nonres_d3 i.wealth_nonres_d4 i.wealth_n
+> onres_d5 i.wealth_nonres_d6 ///
+>     i.wealth_nonres_d7 i.wealth_nonres_d8 i.wealth_nonres_d9 i.wealth_n
+> onres_d10 ///
+>     year_1 year_2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year
+> _10 year_11, ///
 >     vce(cluster hhidpn)
 note: year_11 omitted because of collinearity.
 
-Linear regression                               Number of obs     =     16,54
-> 7
-                                                F(25, 1506)       =      21.6
-> 7
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.034
-> 9
-                                                Root MSE          =     .1423
-> 4
+Linear regression                               Number of obs     =     1
+> 6,547
+                                                F(29, 1506)       =      
+> 19.93
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .0371
+                                                Root MSE          =     .
+> 14219
 
-                             (Std. err. adjusted for 1,507 clusters in hhidpn
-> )
------------------------------------------------------------------------------
-> -
+                             (Std. err. adjusted for 1,507 clusters in hh
+> idpn)
+-------------------------------------------------------------------------
+> -----
              |               Robust
-r_annual_e~m | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-         age |  -.0024067   .0016256    -1.48   0.139    -.0055954    .000782
-> 1
-      age_sq |    .000013   .0000115     1.13   0.257    -9.50e-06    .000035
-> 5
-     raedyrs |   .0055427   .0004227    13.11   0.000     .0047135    .006371
-> 8
+r_annual_e~m | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+         age |  -.0022907   .0016366    -1.40   0.162    -.0055009    .00
+> 09196
+      age_sq |    .000011   .0000115     0.95   0.342    -.0000117    .00
+> 00336
+     raedyrs |    .005264   .0004569    11.52   0.000     .0043677    .00
+> 61603
+             |
+    ragender |
+   2.female  |  -.0063643   .0023876    -2.67   0.008    -.0110477   -.00
+> 16809
+             |
+    race_eth |
+   NH Black  |  -.0216529   .0040301    -5.37   0.000    -.0295581   -.01
+> 37476
+   Hispanic  |  -.0158197   .0042503    -3.72   0.000    -.0241569   -.00
+> 74825
+   NH Other  |  -.0058963   .0066793    -0.88   0.378    -.0189981    .00
+> 72055
              |
       inlbrf |
-      1.yes  |   .0159285   .0025903     6.15   0.000     .0108474    .021009
-> 6
+      1.yes  |   .0151599   .0026121     5.80   0.000     .0100362    .02
+> 02835
              |
      married |
-        yes  |   .0141929   .0026526     5.35   0.000     .0089897    .019396
-> 1
+        yes  |    .012057   .0027802     4.34   0.000     .0066036    .01
+> 75104
              |
      born_us |
-        yes  |  -.0031754   .0033312    -0.95   0.341    -.0097097    .003358
-> 9
-1.wealth_n~2 |  -.0026275    .006927    -0.38   0.705     -.016215    .010960
-> 1
-1.wealth_n~3 |  -.0205262     .00664    -3.09   0.002    -.0335508   -.007501
-> 5
-1.wealth_n~4 |  -.0217741   .0072015    -3.02   0.003       -.0359   -.007648
-> 1
-1.wealth_n~5 |   -.038868   .0073046    -5.32   0.000    -.0531963   -.024539
-> 7
-1.wealth_n~6 |  -.0496776    .006977    -7.12   0.000    -.0633632    -.03599
-> 2
-1.wealth_n~7 |  -.0559612   .0071295    -7.85   0.000     -.069946   -.041976
-> 4
-1.wealth_n~8 |  -.0624017   .0071579    -8.72   0.000    -.0764422   -.048361
-> 1
-1.wealth_n~9 |  -.0643331   .0071711    -8.97   0.000    -.0783995   -.050266
-> 6
-1.wealth_n~0 |  -.0790568   .0073178   -10.80   0.000     -.093411   -.064702
-> 6
-      year_1 |  -.0434986   .0068632    -6.34   0.000     -.056961   -.030036
-> 1
-      year_2 |  -.0151915   .0062024    -2.45   0.014    -.0273577   -.003025
-> 2
-      year_3 |  -.0010853   .0061972    -0.18   0.861    -.0132413    .011070
-> 7
-      year_4 |  -.0282434   .0056913    -4.96   0.000     -.039407   -.017079
-> 7
-      year_5 |  -.0470386   .0053722    -8.76   0.000    -.0575764   -.036500
-> 9
-      year_6 |  -.0328249   .0053218    -6.17   0.000    -.0432638   -.022386
-> 1
-      year_7 |    -.01082   .0052775    -2.05   0.041     -.021172    -.00046
-> 8
-      year_8 |  -.0251834   .0053032    -4.75   0.000    -.0355858   -.014780
-> 9
-      year_9 |  -.0188097   .0055078    -3.42   0.001    -.0296135   -.008005
-> 9
-     year_10 |  -.0245352    .005868    -4.18   0.000    -.0360455   -.013024
-> 9
+        yes  |  -.0069822   .0036951    -1.89   0.059    -.0142302    .00
+> 02658
+1.wealth_n~2 |  -.0017676   .0068769    -0.26   0.797    -.0152568    .01
+> 17217
+1.wealth_n~3 |  -.0232334   .0066197    -3.51   0.000    -.0362183   -.01
+> 02485
+1.wealth_n~4 |  -.0264563    .007192    -3.68   0.000    -.0405638   -.01
+> 23488
+1.wealth_n~5 |  -.0443222   .0074157    -5.98   0.000    -.0588684    -.0
+> 29776
+1.wealth_n~6 |  -.0562269   .0070824    -7.94   0.000    -.0701192   -.04
+> 23346
+1.wealth_n~7 |  -.0636699   .0072675    -8.76   0.000    -.0779254   -.04
+> 94143
+1.wealth_n~8 |  -.0710378   .0073374    -9.68   0.000    -.0854305   -.05
+> 66452
+1.wealth_n~9 |  -.0734828   .0073565    -9.99   0.000     -.087913   -.05
+> 90527
+1.wealth_n~0 |  -.0884595   .0074769   -11.83   0.000    -.1031257   -.07
+> 37933
+      year_1 |  -.0467938   .0069118    -6.77   0.000    -.0603515   -.03
+> 32361
+      year_2 |  -.0182846   .0062684    -2.92   0.004    -.0305802   -.00
+> 59889
+      year_3 |  -.0035643   .0062019    -0.57   0.566    -.0157296     .0
+> 08601
+      year_4 |  -.0305476   .0057096    -5.35   0.000    -.0417473   -.01
+> 93479
+      year_5 |  -.0490635   .0053975    -9.09   0.000    -.0596509    -.0
+> 38476
+      year_6 |  -.0338928   .0053341    -6.35   0.000    -.0443559   -.02
+> 34297
+      year_7 |  -.0117421   .0052676    -2.23   0.026    -.0220746   -.00
+> 14095
+      year_8 |   -.025932   .0053072    -4.89   0.000    -.0363423   -.01
+> 55217
+      year_9 |  -.0190885   .0055047    -3.47   0.001    -.0298862   -.00
+> 82908
+     year_10 |   -.024683    .005855    -4.22   0.000    -.0361679   -.01
+> 31981
      year_11 |          0  (omitted)
-       _cons |   .1109324   .0579383     1.91   0.056     -.002716    .224580
-> 7
------------------------------------------------------------------------------
-> -
+       _cons |   .1373918   .0588639     2.33   0.020     .0219278    .25
+> 28558
+-------------------------------------------------------------------------
+> -----
 
 . 
 . di as txt ""
@@ -667,22 +716,22 @@ r_annual_e~m | Coefficient  std. err.      t    P>|t|     [95% conf. interval
 . * ---------------------------------------------------------------------
 . * Export results
 . * ---------------------------------------------------------------------
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
-. di as txt "=== Exporting Results                                           
->  ==="
+. di as txt "=== Exporting Results                                       
+>      ==="
 === Exporting Results                                            ===
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . 
 . * Export to LaTeX table
-. local tables "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/Tabl
-> es"
+. local tables "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/
+> Tables"
 
 . local outfile "`tables'/baseline_pooled.tex"
 
@@ -691,103 +740,278 @@ r_annual_e~m | Coefficient  std. err.      t    P>|t|     [95% conf. interval
 . local mt "Annual" "Annual (trim)" "Excl. res" "Excl. res (trim)"
 
 . 
-. * Short row names (LaTeX-safe)
+. * Short row names (LaTeX-safe) - only variables to display in table
 . local vlab age "Age"
 
 . local vlab2 age_sq "Age\$^{2}\$"
 
 . local vlab3 raedyrs "Years of education"
 
-. local vlab4 1.inlbrf "In labor force"
+. local vlab4 2.ragender "Female"
 
-. local vlab5 1.married "Married"
+. local vlab5 2.race_eth "NH Black"
 
-. local vlab6 1.born_us "Born in U.S."
+. local vlab6 3.race_eth "Hispanic"
 
-. local vlab7 1.wealth_d2 "Wealth d2"
+. local vlab7 4.race_eth "NH Other"
 
-. local vlab8 1.wealth_d3 "Wealth d3"
+. local vlab8 1.inlbrf "Employed"
 
-. local vlab9 1.wealth_d4 "Wealth d4"
+. local vlab9 1.married "Married"
 
-. local vlab10 1.wealth_d5 "Wealth d5"
-
-. local vlab11 1.wealth_d6 "Wealth d6"
-
-. local vlab12 1.wealth_d7 "Wealth d7"
-
-. local vlab13 1.wealth_d8 "Wealth d8"
-
-. local vlab14 1.wealth_d9 "Wealth d9"
-
-. local vlab15 1.wealth_d10 "Wealth d10"
-
-. local vlab16 1.wealth_nonres_d2 "Non-res wealth d2"
-
-. local vlab17 1.wealth_nonres_d3 "Non-res wealth d3"
-
-. local vlab18 1.wealth_nonres_d4 "Non-res wealth d4"
-
-. local vlab19 1.wealth_nonres_d5 "Non-res wealth d5"
-
-. local vlab20 1.wealth_nonres_d6 "Non-res wealth d6"
-
-. local vlab21 1.wealth_nonres_d7 "Non-res wealth d7"
-
-. local vlab22 1.wealth_nonres_d8 "Non-res wealth d8"
-
-. local vlab23 1.wealth_nonres_d9 "Non-res wealth d9"
-
-. local vlab24 1.wealth_nonres_d10 "Non-res wealth d10"
+. local vlab10 1.born_us "Born in U.S."
 
 . 
 . esttab reg1_1 reg1_2 reg1_3 reg1_4 using "`outfile'", replace ///
 >     booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
 >     compress b(%9.3f) se(%9.3f) ///
 >     mtitles(`mt') ///
->     varlabels(age "Age" age_sq "Age$^{2}$" raedyrs "Years of education" 1.i
-> nlbrf "In labor force" 1.married "Married" 1.born_us "Born in U.S.") ///
->     keep(age age_sq raedyrs 1.inlbrf 1.married 1.born_us) ///
->     nocons ///
->     stats(N r2 r2_a, labels("Observations" "R-squared" "Adjusted R-squared"
-> )) ///
+>     varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `v
+> lab8' `vlab9' `vlab10') ///
+>     drop(_cons 0.inlbrf 0.married 0.born_us 0.wealth_d2 0.wealth_d3 0.w
+> ealth_d4 0.wealth_d5 0.wealth_d6 0.wealth_d7 0.wealth_d8 0.wealth_d9 0.
+> wealth_d10 0.wealth_nonres_d2 0.wealth_nonres_d3 0.wealth_nonres_d4 0.w
+> ealth_nonres_d5 0.wealth_nonres_d6 0.wealth_nonres_d7 0.wealth_nonres_d
+> 8 0.wealth_nonres_d9 0.wealth_nonres_d10 1.ragender 1.race_eth 1.wealth
+> _d2 1.wealth_d3 1.wealth_d4 1.wealth_d5 1.wealth_d6 1.wealth_d7 1.wealt
+> h_d8 1.wealth_d9 1.wealth_d10 1.wealth_nonres_d2 1.wealth_nonres_d3 1.w
+> ealth_nonres_d4 1.wealth_nonres_d5 1.wealth_nonres_d6 1.wealth_nonres_d
+> 7 1.wealth_nonres_d8 1.wealth_nonres_d9 1.wealth_nonres_d10 year_1 year
+> _2 year_3 year_4 year_5 year_6 year_7 year_8 year_9 year_10 year_11) //
+> /
+>     stats(N r2 r2_a, labels("Observations" "R-squared" "Adjusted R-squa
+> red")) ///
 >     title("Baseline Pooled OLS Regressions") ///
->     addnote("Clustered standard errors at individual level in parentheses" 
-> "*** p<0.01, ** p<0.05, * p<0.10" "Wealth deciles and other controls includ
-> ed but not shown; see text")
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/baseline_pooled.tex)
+>     addnote("Clustered standard errors at individual level in parenthes
+> es" "*** p<0.01, ** p<0.05, * p<0.10" "Columns (1)-(2): Returns includi
+> ng residential wealth; Columns (3)-(4): Returns excluding residential w
+> ealth" "Wealth deciles: d1 (lowest) is reference category")
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/baseline_pooled.tex)
 
 . 
-. * Display results in log (summary only)
-. di as txt "Regression 1.1 (Annual returns): N=" e(N) ", R²=" %6.3f e(r2)
-Regression 1.1 (Annual returns): N=16547, R²= 0.035
+. * Display results in log
+. esttab reg1_1 reg1_2 reg1_3 reg1_4, ///
+>     se star(* 0.10 ** 0.05 *** 0.01) ///
+>     label compress ///
+>     stats(N r2 r2_a, labels("Observations" "R-squared" "Adjusted R-squa
+> red"))
 
-. di as txt "Regression 1.2 (Annual returns, trimmed): N=" e(N) ", R²=" %6.3f
->  e(r2)
-Regression 1.2 (Annual returns, trimmed): N=16547, R²= 0.035
+--------------------------------------------------------------------
+                       (1)          (2)          (3)          (4)   
+                  r_annual    r~al_trim    r_annu~cl    r~cl_trim   
+--------------------------------------------------------------------
+age                0.00459**  -0.0000931     -0.00387     -0.00229   
+                 (0.00197)    (0.00216)    (0.00236)    (0.00164)   
 
-. di as txt "Regression 1.3 (Excl. residential): N=" e(N) ", R²=" %6.3f e(r2)
-Regression 1.3 (Excl. residential): N=16547, R²= 0.035
+age_sq           -0.0000531*** -0.0000101    0.0000221    0.0000110   
+                 (0.0000148)    (0.0000156)    (0.0000169)    (0.0000115)
+>    
 
-. di as txt "Regression 1.4 (Excl. residential, trimmed): N=" e(N) ", R²=" %6
-> .3f e(r2)
-Regression 1.4 (Excl. residential, trimmed): N=16547, R²= 0.035
+raedyrs: r yea~n    0.0135***   0.00709***   0.00896***   0.00526***
+                 (0.000708)    (0.000586)    (0.000764)    (0.000457)   
+
+1.male                   0            0            0            0   
+                       (.)          (.)          (.)          (.)   
+
+2.female           -0.0145***  -0.00715**   -0.00872**   -0.00636***
+                 (0.00346)    (0.00288)    (0.00369)    (0.00239)   
+
+NH White                 0            0            0            0   
+                       (.)          (.)          (.)          (.)   
+
+NH Black           -0.0627***   -0.0193***   -0.0476***   -0.0217***
+                 (0.00610)    (0.00578)    (0.00694)    (0.00403)   
+
+Hispanic           -0.0554***   -0.0118**    -0.0559***   -0.0158***
+                 (0.00667)    (0.00530)    (0.00686)    (0.00425)   
+
+NH Other          -0.00557      0.00676       0.0132     -0.00590   
+                  (0.0108)    (0.00955)     (0.0152)    (0.00668)   
+
+0.no                     0            0            0            0   
+                       (.)          (.)          (.)          (.)   
+
+1.yes               0.0437***    0.0132***    0.0224***    0.0152***
+                 (0.00396)    (0.00323)    (0.00398)    (0.00261)   
+
+no                       0            0            0            0   
+                       (.)          (.)          (.)          (.)   
+
+yes                 0.0341***    0.0120***   0.00163       0.0121***
+                 (0.00426)    (0.00349)    (0.00455)    (0.00278)   
+
+no                       0            0            0            0   
+                       (.)          (.)          (.)          (.)   
+
+yes                -0.0149**    -0.0143***  -0.00997     -0.00698*  
+                 (0.00628)    (0.00437)    (0.00635)    (0.00370)   
+
+wealth_d2=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d2=1        -0.0424***   -0.0401**                           
+                  (0.0138)     (0.0172)                             
+
+wealth_d3=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d3=1        -0.0449***   -0.0542***                          
+                  (0.0128)     (0.0160)                             
+
+wealth_d4=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d4=1        -0.0354***   -0.0608***                          
+                  (0.0128)     (0.0155)                             
+
+wealth_d5=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d5=1        -0.0614***   -0.0779***                          
+                  (0.0119)     (0.0153)                             
+
+wealth_d6=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d6=1         -0.116***   -0.0979***                          
+                  (0.0114)     (0.0148)                             
+
+wealth_d7=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d7=1         -0.153***    -0.121***                          
+                  (0.0112)     (0.0151)                             
+
+wealth_d8=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d8=1         -0.183***    -0.137***                          
+                  (0.0111)     (0.0150)                             
+
+wealth_d9=0              0            0                             
+                       (.)          (.)                             
+
+wealth_d9=1         -0.213***    -0.154***                          
+                  (0.0112)     (0.0150)                             
+
+wealth_d10=0             0            0                             
+                       (.)          (.)                             
+
+wealth_d10=1        -0.265***    -0.179***                          
+                  (0.0111)     (0.0150)                             
+
+year==  2..0000     -0.118***   -0.0722***   -0.0412***   -0.0468***
+                 (0.00985)    (0.00871)     (0.0106)    (0.00691)   
+
+year==  2..0000     -0.107***   -0.0288***   -0.0281***   -0.0183***
+                 (0.00917)    (0.00800)    (0.00962)    (0.00627)   
+
+year==  2..0000    -0.0647***  -0.00272      0.00647     -0.00356   
+                 (0.00907)    (0.00830)    (0.00969)    (0.00620)   
+
+year==  2..0000     -0.159***   -0.0843***   -0.0383***   -0.0305***
+                 (0.00838)    (0.00759)    (0.00886)    (0.00571)   
+
+year==  2..0000     -0.210***    -0.136***   -0.0628***   -0.0491***
+                 (0.00831)    (0.00754)    (0.00867)    (0.00540)   
+
+year==  2..0000     -0.159***   -0.0927***   -0.0324***   -0.0339***
+                 (0.00775)    (0.00729)    (0.00825)    (0.00533)   
+
+year==  2..0000    -0.0876***   -0.0416***  -0.00231      -0.0117** 
+                 (0.00797)    (0.00719)    (0.00780)    (0.00527)   
+
+year==  2..0000    -0.0933***   -0.0616***   -0.0335***   -0.0259***
+                 (0.00786)    (0.00722)    (0.00820)    (0.00531)   
+
+year==  2..0000    -0.0824***   -0.0472***   -0.0156*     -0.0191***
+                 (0.00772)    (0.00730)    (0.00866)    (0.00550)   
+
+year==  2..0000    -0.0771***   -0.0633***   -0.0272***   -0.0247***
+                 (0.00846)    (0.00808)    (0.00926)    (0.00586)   
+
+year==  2..0000          0            0            0            0   
+                       (.)          (.)          (.)          (.)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                             -0.0415**   -0.00177   
+                                            (0.0193)    (0.00688)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                             -0.0462**    -0.0232***
+                                            (0.0194)    (0.00662)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                             -0.0699***   -0.0265***
+                                            (0.0190)    (0.00719)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                             -0.0775***   -0.0443***
+                                            (0.0191)    (0.00742)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                              -0.125***   -0.0562***
+                                            (0.0185)    (0.00708)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                              -0.148***   -0.0637***
+                                            (0.0185)    (0.00727)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                              -0.171***   -0.0710***
+                                            (0.0184)    (0.00734)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                              -0.188***   -0.0735***
+                                            (0.0187)    (0.00736)   
+
+wealth_nonres_~0                                   0            0   
+                                                 (.)          (.)   
+
+wealth_nonres_~1                              -0.219***   -0.0885***
+                                            (0.0186)    (0.00748)   
+
+Constant            0.0693        0.198***     0.262***     0.137** 
+                  (0.0672)     (0.0767)     (0.0854)     (0.0589)   
+--------------------------------------------------------------------
+Observations         71189        18724        28471        16547   
+R-squared           0.0439       0.0766       0.0416       0.0371   
+Adjusted R-squ~d    0.0435       0.0751       0.0406       0.0354   
+--------------------------------------------------------------------
+Standard errors in parentheses
+* p<0.10, ** p<0.05, *** p<0.01
 
 . 
 . di as txt ""
 
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
-. di as txt "=== Baseline Pooled OLS Complete                                
->  ==="
+. di as txt "=== Baseline Pooled OLS Complete                            
+>      ==="
 === Baseline Pooled OLS Complete                                 ===
 
-. di as txt "================================================================
-> ===="
+. di as txt "============================================================
+> ========"
 ====================================================================
 
 . 

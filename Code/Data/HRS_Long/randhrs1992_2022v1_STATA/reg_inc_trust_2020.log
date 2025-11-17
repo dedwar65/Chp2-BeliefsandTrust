@@ -1,9 +1,9 @@
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
-> _Long/randhrs1992_2022v1_STATA/reg_inc_trust_2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/reg_inc_trust_2020.log
   log type:  text
- opened on:   3 Nov 2025, 15:48:52
+ opened on:  17 Nov 2025, 11:40:48
 
 . 
 . set more off
@@ -18,8 +18,8 @@
 
 . 
 . * Master dataset with all computed variables
-. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/
-> HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/D
+> ata/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
 
 . capture confirm file "`master'"
 
@@ -31,8 +31,9 @@
 . use "`master'", clear
 
 . di as txt "Using master file: `master'"
-Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Da
-> ta/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Cod
+> e/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.d
+> ta
 
 . 
 . di as txt ""
@@ -43,27 +44,87 @@ Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Da
 
 . 
 . * Income variables: log versions only
-. local inc_raw "resp_lab_inc resp_tot_inc"
-
-. 
+. * Priority: resp_lab_inc_2020 and resp_tot_inc_2020 (constructed from R
+> 15/2020 wave components)
+. * Note: We use shorter log variable names (without _2020 suffix) to kee
+> p estimate names within Stata limits
 . di as txt "=== Creating log versions of income variables ==="
 === Creating log versions of income variables ===
 
-. foreach v of local inc_raw {
-  2.     capture confirm variable `v'
-  3.     if !_rc {
-  4.         local lnname = substr("ln_`v'", 1, .)
-  5.         capture drop ln_`v'
-  6.         gen double ln_`v' = ln(`v') if `v' > 0
-  7.         label var ln_`v' "log(`v')"
-  8.     }
-  9. }
-(4,705 missing values generated)
-(4,147 missing values generated)
+. 
+. local inc_vars ""
 
 . 
-. * Define income variables (log only)
-. local inc_vars "ln_resp_lab_inc ln_resp_tot_inc"
+. * Check for resp_lab_inc_2020 and create log version (using shorter nam
+> e for compatibility)
+. * Note: Using ln(var + 1) convention to handle zeros
+. capture confirm variable resp_lab_inc_2020
+
+. if !_rc {
+.     capture drop ln_resp_lab_inc
+.     gen double ln_resp_lab_inc = ln(resp_lab_inc_2020 + 1)
+(3,688 missing values generated)
+.     label var ln_resp_lab_inc "log(resp_lab_inc + 1) - 2020 wave"
+.     local inc_vars "`inc_vars' ln_resp_lab_inc"
+.     di as txt "Log labor income (ln_resp_lab_inc) created from resp_lab
+> _inc_2020 (2020 wave data, using +1)"
+Log labor income (ln_resp_lab_inc) created from resp_lab_inc_2020 (2020 w
+> ave data, using +1)
+. }
+
+. else {
+.     * Fallback: check for resp_lab_inc (no suffix)
+.     capture confirm variable resp_lab_inc
+.     if !_rc {
+.         capture drop ln_resp_lab_inc
+.         gen double ln_resp_lab_inc = ln(resp_lab_inc + 1)
+.         label var ln_resp_lab_inc "log(resp_lab_inc + 1)"
+.         local inc_vars "`inc_vars' ln_resp_lab_inc"
+.         di as txt "Log labor income (ln_resp_lab_inc) created from resp
+> _lab_inc (using +1)"
+.     }
+. }
+
+. 
+. * Check for resp_tot_inc_2020 and create log version (using shorter nam
+> e for compatibility)
+. * Note: Using ln(var + 1) convention to handle zeros
+. capture confirm variable resp_tot_inc_2020
+
+. if !_rc {
+.     capture drop ln_resp_tot_inc
+.     gen double ln_resp_tot_inc = ln(resp_tot_inc_2020 + 1)
+(3,688 missing values generated)
+.     label var ln_resp_tot_inc "log(resp_tot_inc + 1) - 2020 wave"
+.     if "`inc_vars'" != "" {
+.         local inc_vars "`inc_vars' ln_resp_tot_inc"
+.     }
+.     else {
+.         local inc_vars "ln_resp_tot_inc"
+.     }
+.     di as txt "Log total income (ln_resp_tot_inc) created from resp_tot
+> _inc_2020 (2020 wave data, using +1)"
+Log total income (ln_resp_tot_inc) created from resp_tot_inc_2020 (2020 w
+> ave data, using +1)
+. }
+
+. else {
+.     * Fallback: check for resp_tot_inc (no suffix)
+.     capture confirm variable resp_tot_inc
+.     if !_rc {
+.         capture drop ln_resp_tot_inc
+.         gen double ln_resp_tot_inc = ln(resp_tot_inc + 1)
+.         label var ln_resp_tot_inc "log(resp_tot_inc + 1)"
+.         if "`inc_vars'" != "" {
+.             local inc_vars "`inc_vars' ln_resp_tot_inc"
+.         }
+.         else {
+.             local inc_vars "ln_resp_tot_inc"
+.         }
+.         di as txt "Log total income (ln_resp_tot_inc) created from resp
+> _tot_inc (using +1)"
+.     }
+. }
 
 . 
 . * Quick overlap diagnostics for sample sizes
@@ -78,7 +139,7 @@ Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Da
 . quietly count if !missing(ln_resp_lab_inc)
 
 . di as txt "  Non-missing ln_resp_lab_inc: " r(N) " of " `N_all'
-  Non-missing ln_resp_lab_inc: 11151 of 15856
+  Non-missing ln_resp_lab_inc: 12168 of 15856
 
 . quietly count if !missing(rv557)
 
@@ -88,16 +149,17 @@ Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Da
 . quietly count if !missing(ln_resp_lab_inc) & !missing(rv557)
 
 . di as txt "  Non-missing both:         " r(N) " of " `N_all'
-  Non-missing both:         972 of 15856
+  Non-missing both:         1059 of 15856
 
 . 
 . di as txt ""
 
 
 . 
-. * Controls: age, gender, education, employment, marital status, immigration
-> , race/ethnicity
-. local ctrl_vars "r15agey_b ragender raedyrs r15inlbrf married_2020 born_us"
+. * Controls: age, gender, education, employment, marital status, immigra
+> tion, race/ethnicity
+. local ctrl_vars "r15agey_b ragender raedyrs r15inlbrf married_2020 born
+> _us"
 
 . 
 . di as txt "Controls to include (if present):"
@@ -108,8 +170,8 @@ Controls to include (if present):
 
 . 
 . * Check which controls are actually present
-. * Exclude ragender from ctrl_in since it's handled as factor variable i.rag
-> ender
+. * Exclude ragender from ctrl_in since it's handled as factor variable i
+> .ragender
 . * Also handle race_eth as factor variable separately
 . local ctrl_in ""
 
@@ -139,10 +201,10 @@ Controls to include (if present):
 .     local race_factor "i.race_eth"
 . }
 
-. di as txt "Controls actually included: `ctrl_in' with age quad if available
-> "
-Controls actually included:  raedyrs r15inlbrf married_2020 born_us with age 
-> quad if available
+. di as txt "Controls actually included: `ctrl_in' with age quad if avail
+> able"
+Controls actually included:  raedyrs r15inlbrf married_2020 born_us with 
+> age quad if available
 
 . if "`race_factor'" != "" {
 .     di as txt "Race/ethnicity factor variable included: `race_factor'"
@@ -153,10 +215,12 @@ Race/ethnicity factor variable included: i.race_eth
 . di as txt ""
 
 
-. * ----------------------------------------------------------------------
-. * Collect and export: one LaTeX table per trust variable (8 columns: 4 raw 
-> + 4 +controls)
-. * ----------------------------------------------------------------------
+. * ---------------------------------------------------------------------
+> -
+. * Collect and export: one LaTeX table per trust variable (8 columns: 4 
+> raw + 4 +controls)
+. * ---------------------------------------------------------------------
+> -
 . foreach t of local trust_vars {
   2.     capture confirm variable `t'
   3.     if _rc {
@@ -175,8 +239,8 @@ Race/ethnicity factor variable included: i.race_eth
  13.         quietly count if !missing(`y') & !missing(`t')
  14.         if r(N)==0 continue
  15.         local mname = "`t'_raw_`y'"
- 16.         eststo `mname': regress `y' c.`t' c.`t'#c.`t' if !missing(`y') &
->  !missing(`t'), vce(robust)
+ 16.         eststo `mname': regress `y' c.`t' c.`t'#c.`t' if !missing(`y
+> ') & !missing(`t'), vce(robust)
  17.         local models_raw "`models_raw' `mname'"
  18.     }
  19. 
@@ -187,1514 +251,1547 @@ Race/ethnicity factor variable included: i.race_eth
  22.         quietly count if !missing(`y') & !missing(`t')
  23.         if r(N)==0 continue
  24.         local mname = "`t'_ctl_`y'"
- 25.         eststo `mname': regress `y' c.`t' c.`t'#c.`t' `age_quad' i.ragen
-> der `race_factor' `ctrl_in' if !missing(`y') & !missing(`t'), vce(robust)
+ 25.         eststo `mname': regress `y' c.`t' c.`t'#c.`t' `age_quad' i.r
+> agender `race_factor' `ctrl_in' if !missing(`y') & !missing(`t'), vce(r
+> obust)
  26.         local models_ctl "`models_ctl' `mname'"
  27.     }
  28. 
 .     * Export table for this trust variable -> Paper/Tables
-.     local tables "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/
-> Tables"
+.     local tables "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pa
+> per/Tables"
  29.     local outfile "`tables'/trust_income_`t'.tex"
  30.     di as txt "Exporting LaTeX table: `outfile'"
  31.     if "`models_raw'`models_ctl'" != "" {
  32.         * Short, human column titles for 4 models (log income only)
 .         local mt "log Lab" "log Tot" "log Lab" "log Tot"
  33.         
+.         * Create trust variable label based on which variable it is
+.         local trust_label ""
+ 34.         if "`t'" == "rv557" local trust_label "Trust in others - 557
+> "
+ 35.         else if "`t'" == "rv558" local trust_label "Trust in Social 
+> Security - 558"
+ 36.         else if "`t'" == "rv559" local trust_label "Trust in Medicar
+> e/Medicaid - 559"
+ 37.         else if "`t'" == "rv560" local trust_label "Trust in Banks -
+>  560"
+ 38.         else if "`t'" == "rv561" local trust_label "Trust in Financi
+> al Advisors - 561"
+ 39.         else if "`t'" == "rv562" local trust_label "Trust in Mutual 
+> Funds - 562"
+ 40.         else if "`t'" == "rv563" local trust_label "Trust in Insuran
+> ce Companies - 563"
+ 41.         else if "`t'" == "rv564" local trust_label "Trust in Mass Me
+> dia - 564"
+ 42.         else local trust_label "Trust `t'"
+ 43.         
 .         * Short row names (LaTeX-safe)
-.         local vlab `t'         "Trust"
- 34.         local vlab2 c.`t'#c.`t' "Trust\$^{2}\$"
- 35.         local vlab3 r15agey_b    "Age"
- 36.         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
- 37.         local vlab5 ragender     "Female"
- 38.         local vlab6 2.race_eth   "NH Black"
- 39.         local vlab7 3.race_eth   "Hispanic"
- 40.         local vlab8 4.race_eth   "NH Other"
- 41.         local vlab9 raedyrs      "Years of education"
- 42.         local vlab10 r15inlbrf    "In labor force"
- 43.         local vlab11 married_2020 "Married"
- 44.         local vlab12 born_us      "Born in U.S."
- 45.         
+.         local vlab `t'         "`trust_label'"
+ 44.         local vlab2 c.`t'#c.`t' "Trust\$^{2}\$"
+ 45.         local vlab3 r15agey_b    "Age"
+ 46.         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
+ 47.         local vlab5 2.ragender     "Female"
+ 48.         local vlab6 2.race_eth   "NH Black"
+ 49.         local vlab7 3.race_eth   "Hispanic"
+ 50.         local vlab8 4.race_eth   "NH Other"
+ 51.         local vlab9 raedyrs      "Years of education"
+ 52.         local vlab10 r15inlbrf    "In labor force"
+ 53.         local vlab11 married_2020 "Married"
+ 54.         local vlab12 born_us      "Born in U.S."
+ 55.         
 .         esttab `models_raw' `models_ctl' using "`outfile'", replace ///
 >             booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
 >             compress b(%9.3f) se(%9.3f) ///
 >             mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
->             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c
-> }{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
->             varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7
-> ' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
+>             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{
+> 2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
+>             varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `v
+> lab7' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
+>             drop(1.ragender 1.race_eth) ///
 >             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
 >             title("Log Income (2020) on Trust `t'") ///
->             addnote("Robust SEs in parentheses; Age entered quadratically w
-> hen available." "Controls (when included): raedyrs, in labor force, married
-> , born in U.S.")
- 46.     }
- 47.     else {
- 48.         di as warn "No models estimated for trust var `t'; skipping expo
-> rt."
- 49.     }
- 50. }
+>             addnote("Robust SEs in parentheses; Age entered quadratical
+> ly when available." "Controls (when included): raedyrs, in labor force,
+>  married, born in U.S.")
+ 56.     }
+ 57.     else {
+ 58.         di as warn "No models estimated for trust var `t'; skipping 
+> export."
+ 59.     }
+ 60. }
 
-Linear regression                               Number of obs     =        97
-> 2
-                                                F(2, 969)         =      14.2
-> 9
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.039
-> 7
-                                                Root MSE          =     1.029
-> 7
+Linear regression                               Number of obs     =      
+> 1,059
+                                                F(2, 1056)        =      
+>  3.68
+                                                Prob > F          =     0
+> .0256
+                                                R-squared         =     0
+> .0084
+                                                Root MSE          =     2
+> .9436
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv557 |    .281747   .0529641     5.32   0.000     .1778095    .385684
-> 5
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv557 |   .2822269   .1347662     2.09   0.036      .017787    .54
+> 66668
              |
      c.rv557#|
-     c.rv557 |   -.022206   .0044415    -5.00   0.000    -.0309221   -.013489
-> 8
+     c.rv557 |   -.018022   .0115953    -1.55   0.120    -.0407745    .00
+> 47305
              |
-       _cons |   9.347961   .1535787    60.87   0.000     9.046576    9.64934
-> 6
------------------------------------------------------------------------------
-> -
+       _cons |   8.320085   .3810503    21.83   0.000     7.572383    9.0
+> 67787
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,02
-> 3
-                                                F(2, 1020)        =      16.1
-> 2
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.035
-> 5
-                                                Root MSE          =     1.223
-> 6
+Linear regression                               Number of obs     =      
+> 1,059
+                                                F(2, 1056)        =      
+>  9.64
+                                                Prob > F          =     0
+> .0001
+                                                R-squared         =     0
+> .0367
+                                                Root MSE          =     2
+> .1953
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv557 |   .3180437   .0566552     5.61   0.000     .2068698    .429217
-> 7
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv557 |    .500548   .1268396     3.95   0.000     .2516617    .74
+> 94343
              |
      c.rv557#|
-     c.rv557 |  -.0247226   .0047738    -5.18   0.000    -.0340901    -.01535
-> 5
+     c.rv557 |  -.0351557   .0103303    -3.40   0.001    -.0554258   -.01
+> 48855
              |
-       _cons |   9.446706   .1636514    57.72   0.000     9.125574    9.76783
-> 7
------------------------------------------------------------------------------
-> -
+       _cons |   8.424651     .37559    22.43   0.000     7.687663    9.1
+> 61639
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        96
-> 2
-                                                F(12, 949)        =      29.5
-> 2
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.246
-> 2
-                                                Root MSE          =     .9179
-> 8
+Linear regression                               Number of obs     =      
+> 1,046
+                                                F(12, 1033)       =      
+>  6.87
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1020
+                                                Root MSE          =      
+> 2.789
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv557 |   .1186624   .0538228     2.20   0.028      .013037    .224287
-> 8
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv557 |   .0129019    .132535     0.10   0.922    -.2471666    .27
+> 29704
              |
      c.rv557#|
-     c.rv557 |  -.0098494    .004393    -2.24   0.025    -.0184706   -.001228
-> 2
+     c.rv557 |  -.0000249   .0112641    -0.00   0.998     -.022128    .02
+> 20782
              |
-   r15agey_b |   .0454896    .044652     1.02   0.309    -.0421385    .133117
-> 8
+   r15agey_b |   .1779249    .118975     1.50   0.135    -.0555353    .41
+> 13852
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0003269   .0003125    -1.05   0.296    -.0009402    .000286
-> 4
+ c.r15agey_b |  -.0008577   .0008429    -1.02   0.309    -.0025118    .00
+> 07963
              |
     ragender |
-   2.female  |   -.440753   .0617215    -7.14   0.000    -.5618793   -.319626
-> 7
+   2.female  |  -.5438069   .1874536    -2.90   0.004    -.9116401   -.17
+> 59736
              |
     race_eth |
-   NH Black  |  -.2467265   .0890049    -2.77   0.006    -.4213956   -.072057
-> 3
-   Hispanic  |  -.1386607   .0958159    -1.45   0.148    -.3266963    .049374
-> 9
-   NH Other  |  -.1438748   .1617671    -0.89   0.374    -.4613374    .173587
-> 8
+   NH Black  |  -.0920204   .2278493    -0.40   0.686    -.5391207      .
+> 35508
+   Hispanic  |   .1206644    .278479     0.43   0.665    -.4257847    .66
+> 71136
+   NH Other  |  -.1296506   .4517013    -0.29   0.774    -1.016007    .75
+> 67062
              |
-     raedyrs |   .0711595   .0107341     6.63   0.000     .0500943    .092224
-> 7
-   r15inlbrf |   .6032377   .0797909     7.56   0.000     .4466506    .759824
-> 8
-married_2020 |  -.0236879   .0636167    -0.37   0.710    -.1485336    .101157
-> 8
-     born_us |   .1613989   .1112954     1.45   0.147    -.0570146    .379812
-> 4
-       _cons |   7.278906   1.520613     4.79   0.000     4.294754    10.2630
-> 6
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1035302   .0309776     3.34   0.001     .0427439    .16
+> 43165
+   r15inlbrf |   .9732707     .22309     4.36   0.000     .5355094    1.4
+> 11032
+married_2020 |  -.3060011   .1867744    -1.64   0.102    -.6725017    .06
+> 04994
+     born_us |   1.053469    .320989     3.28   0.001     .4236045    1.6
+> 83334
+       _cons |  -.9123879   4.136776    -0.22   0.825    -9.029831    7.2
+> 05055
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,01
-> 2
-                                                F(12, 999)        =      36.8
-> 9
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.260
-> 4
-                                                Root MSE          =     1.073
-> 9
+Linear regression                               Number of obs     =      
+> 1,046
+                                                F(12, 1033)       =      
+> 15.38
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1894
+                                                Root MSE          =     1
+> .9919
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv557 |   .1023329   .0543739     1.88   0.060    -.0043672     .20903
-> 3
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv557 |   .1312379   .1213417     1.08   0.280    -.1068664    .36
+> 93422
              |
      c.rv557#|
-     c.rv557 |  -.0088768   .0044892    -1.98   0.048    -.0176861   -.000067
-> 6
+     c.rv557 |  -.0091652   .0095683    -0.96   0.338    -.0279407    .00
+> 96102
              |
-   r15agey_b |   .1170271   .0509691     2.30   0.022     .0170083    .217045
-> 8
+   r15agey_b |   .1508251   .0816303     1.85   0.065    -.0093551    .31
+> 10053
              |
  c.r15agey_b#|
- c.r15agey_b |   -.000777   .0003562    -2.18   0.029    -.0014759   -.000078
-> 1
+ c.r15agey_b |  -.0008931   .0005733    -1.56   0.120    -.0020181    .00
+> 02318
              |
     ragender |
-   2.female  |  -.4312588   .0686361    -6.28   0.000    -.5659462   -.296571
-> 4
+   2.female  |  -.4164078   .1369632    -3.04   0.002    -.6851656     -.
+> 14765
              |
     race_eth |
-   NH Black  |  -.2446065   .0902237    -2.71   0.007    -.4216563   -.067556
-> 8
-   Hispanic  |   -.186936   .1091637    -1.71   0.087    -.4011525    .027280
-> 4
-   NH Other  |  -.2298386   .1825203    -1.26   0.208    -.5880057    .128328
-> 5
+   NH Black  |  -.5846405   .1756593    -3.33   0.001    -.9293303   -.23
+> 99507
+   Hispanic  |  -.4183441   .2112969    -1.98   0.048    -.8329641    -.0
+> 03724
+   NH Other  |  -.4588669    .318954    -1.44   0.151    -1.084739    .16
+> 70048
              |
-     raedyrs |   .0948078    .011409     8.31   0.000     .0724195    .117196
-> 1
-   r15inlbrf |    .784151   .0866669     9.05   0.000      .614081     .95422
-> 1
-married_2020 |   .1314515   .0696468     1.89   0.059    -.0052193    .268122
-> 3
-     born_us |   .0996159   .1275708     0.78   0.435    -.1507215    .349953
-> 4
-       _cons |   4.399448   1.777228     2.48   0.013     .9119207    7.88697
-> 6
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv557.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv557.tex)
+     raedyrs |   .1515242   .0250627     6.05   0.000     .1023446    .20
+> 07039
+   r15inlbrf |    .992207   .1591708     6.23   0.000      .679872    1.3
+> 04542
+married_2020 |  -.0393699   .1337464    -0.29   0.769    -.3018156    .22
+> 30758
+     born_us |    .461098   .2368424     1.95   0.052    -.0036492    .92
+> 58452
+       _cons |   1.257254   2.859678     0.44   0.660    -4.354188    6.8
+> 68695
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv557.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv557.tex)
 
-Linear regression                               Number of obs     =        96
-> 6
-                                                F(2, 963)         =      10.0
-> 4
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.018
-> 2
-                                                Root MSE          =      1.03
-> 6
+Linear regression                               Number of obs     =      
+> 1,052
+                                                F(2, 1049)        =      
+>  1.51
+                                                Prob > F          =     0
+> .2217
+                                                R-squared         =     0
+> .0043
+                                                Root MSE          =     2
+> .9431
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv558 |   .1632611   .0533849     3.06   0.002     .0584969    .268025
-> 3
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv558 |   .2588161   .1502587     1.72   0.085    -.0360258     .5
+> 53658
              |
      c.rv558#|
-     c.rv558 |  -.0158024    .004197    -3.77   0.000    -.0240387    -.00756
-> 6
+     c.rv558 |  -.0190517   .0117125    -1.63   0.104    -.0420342    .00
+> 39308
              |
-       _cons |   9.824228   .1626641    60.40   0.000     9.505011    10.1434
-> 5
------------------------------------------------------------------------------
-> -
+       _cons |    8.53859   .4527451    18.86   0.000     7.650201    9.4
+> 26979
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,01
-> 6
-                                                F(2, 1013)        =      17.2
-> 8
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.030
-> 4
-                                                Root MSE          =     1.226
-> 8
+Linear regression                               Number of obs     =      
+> 1,052
+                                                F(2, 1049)        =      
+>  6.37
+                                                Prob > F          =     0
+> .0018
+                                                R-squared         =     0
+> .0173
+                                                Root MSE          =     2
+> .2218
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv558 |   .2531965   .0658711     3.84   0.000      .123937    .382455
-> 9
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv558 |   .4139764   .1280981     3.23   0.001     .1626187    .66
+> 53341
              |
      c.rv558#|
-     c.rv558 |  -.0244622   .0050941    -4.80   0.000    -.0344583   -.014466
-> 1
+     c.rv558 |  -.0341762   .0098115    -3.48   0.001    -.0534285   -.01
+> 49239
              |
-       _cons |   9.872472   .2062024    47.88   0.000      9.46784    10.2771
-> 1
------------------------------------------------------------------------------
-> -
+       _cons |   8.954307    .397732    22.51   0.000     8.173866    9.7
+> 34748
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        95
-> 6
-                                                F(12, 943)        =      29.8
-> 0
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.241
-> 6
-                                                Root MSE          =     .9162
-> 9
+Linear regression                               Number of obs     =      
+> 1,039
+                                                F(12, 1026)       =      
+>  6.96
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1032
+                                                Root MSE          =     2
+> .7806
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv558 |   .0718776   .0482583     1.49   0.137    -.0228286    .166583
-> 7
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv558 |   .1012447   .1431699     0.71   0.480    -.1796946     .3
+> 82184
              |
      c.rv558#|
-     c.rv558 |  -.0062065   .0038342    -1.62   0.106    -.0137311    .001318
-> 1
+     c.rv558 |  -.0072846   .0112588    -0.65   0.518    -.0293775    .01
+> 48084
              |
-   r15agey_b |   .0483943   .0441542     1.10   0.273    -.0382575    .135046
-> 2
+   r15agey_b |   .1760138   .1184155     1.49   0.137    -.0563504     .4
+> 08378
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0003421   .0003091    -1.11   0.269    -.0009488    .000264
-> 5
+ c.r15agey_b |  -.0008392   .0008386    -1.00   0.317    -.0024848    .00
+> 08064
              |
     ragender |
-   2.female  |  -.4391603   .0624466    -7.03   0.000    -.5617107     -.3166
-> 1
+   2.female  |  -.5403749   .1870267    -2.89   0.004    -.9073734   -.17
+> 33764
              |
     race_eth |
-   NH Black  |  -.2619842   .0868214    -3.02   0.003    -.4323698   -.091598
-> 6
-   Hispanic  |  -.1406944   .0956708    -1.47   0.142    -.3284466    .047057
-> 8
-   NH Other  |  -.1412886   .1642619    -0.86   0.390    -.4636498    .181072
-> 6
+   NH Black  |   -.105932    .224326    -0.47   0.637    -.5461222    .33
+> 42582
+   Hispanic  |   .0680908   .2759863     0.25   0.805    -.4734713    .60
+> 96529
+   NH Other  |  -.1664723   .4493336    -0.37   0.711     -1.04819    .71
+> 52454
              |
-     raedyrs |   .0746394   .0105525     7.07   0.000     .0539303    .095348
-> 4
-   r15inlbrf |   .6063486   .0816571     7.43   0.000      .446098    .766599
-> 2
-married_2020 |  -.0245264   .0643278    -0.38   0.703    -.1507685    .101715
-> 7
-     born_us |   .1648972    .114395     1.44   0.150     -.059601    .389395
-> 3
-       _cons |   7.243504   1.507497     4.80   0.000     4.285068    10.2019
-> 4
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1044883   .0309421     3.38   0.001     .0437713    .16
+> 52054
+   r15inlbrf |   .9964859   .2222551     4.48   0.000     .5603595    1.4
+> 32612
+married_2020 |  -.2898323   .1866532    -1.55   0.121     -.656098    .07
+> 64333
+     born_us |   .9526445   .3096089     3.08   0.002     .3451054    1.5
+> 60184
+       _cons |  -1.014728   4.123688    -0.25   0.806    -9.106554    7.0
+> 77098
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,00
-> 5
-                                                F(12, 992)        =      37.1
-> 5
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.263
-> 1
-                                                Root MSE          =     1.071
-> 9
+Linear regression                               Number of obs     =      
+> 1,039
+                                                F(12, 1026)       =      
+> 15.76
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1898
+                                                Root MSE          =     1
+> .9956
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv558 |   .1355155   .0572461     2.37   0.018     .0231782    .247852
-> 8
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv558 |   .1932972   .1092604     1.77   0.077    -.0211022    .40
+> 76966
              |
      c.rv558#|
-     c.rv558 |  -.0126625   .0045304    -2.80   0.005    -.0215528   -.003772
-> 2
+     c.rv558 |  -.0140303   .0085054    -1.65   0.099    -.0307202    .00
+> 26596
              |
-   r15agey_b |   .1142094   .0497641     2.30   0.022     .0165544    .211864
-> 4
+   r15agey_b |   .1461819   .0803302     1.82   0.069    -.0114483    .30
+> 38122
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0007519   .0003488    -2.16   0.031    -.0014363   -.000067
-> 4
+ c.r15agey_b |    -.00086    .000565    -1.52   0.128    -.0019686    .00
+> 02487
              |
     ragender |
-   2.female  |  -.4445409   .0696726    -6.38   0.000    -.5812634   -.307818
-> 4
+   2.female  |  -.4097018   .1380275    -2.97   0.003    -.6805503   -.13
+> 88533
              |
     race_eth |
-   NH Black  |  -.2297159   .0882509    -2.60   0.009    -.4028957    -.05653
-> 6
-   Hispanic  |  -.1761698   .1095675    -1.61   0.108    -.3911804    .038840
-> 9
-   NH Other  |  -.2189269   .1865958    -1.17   0.241    -.5850947    .147240
-> 9
+   NH Black  |  -.6069375   .1704941    -3.56   0.000    -.9414945   -.27
+> 23805
+   Hispanic  |  -.4207656   .2166616    -1.94   0.052    -.8459161    .00
+> 43849
+   NH Other  |  -.4332057    .323136    -1.34   0.180    -1.067289    .20
+> 08774
              |
-     raedyrs |   .0937132   .0113841     8.23   0.000     .0713734     .11605
-> 3
-   r15inlbrf |   .7807946   .0871211     8.96   0.000     .6098318    .951757
-> 5
-married_2020 |   .1270421   .0727316     1.75   0.081    -.0156835    .269767
-> 6
-     born_us |    .098553   .1282596     0.77   0.442    -.1531383    .350244
-> 3
-       _cons |   4.470499   1.771495     2.52   0.012     .9941914    7.94680
-> 7
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv558.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv558.tex)
+     raedyrs |   .1523403   .0249992     6.09   0.000     .1032849    .20
+> 13956
+   r15inlbrf |   1.009048   .1573865     6.41   0.000     .7002118    1.3
+> 17884
+married_2020 |  -.0097883   .1330739    -0.07   0.941    -.2709164    .25
+> 13398
+     born_us |   .4742017   .2408689     1.97   0.049     .0015497    .94
+> 68537
+       _cons |    1.20972   2.832408     0.43   0.669    -4.348254    6.7
+> 67695
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv558.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv558.tex)
 
-Linear regression                               Number of obs     =        96
-> 4
-                                                F(2, 961)         =      12.9
-> 3
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.022
-> 7
-                                                Root MSE          =     1.035
-> 9
+Linear regression                               Number of obs     =      
+> 1,050
+                                                F(2, 1047)        =      
+>  0.72
+                                                Prob > F          =     0
+> .4882
+                                                R-squared         =     0
+> .0016
+                                                Root MSE          =     2
+> .9492
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv559 |   .1323551   .0496653     2.66   0.008     .0348901    .229820
-> 2
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv559 |   .1745787   .1588504     1.10   0.272    -.1371227    .48
+> 62801
              |
      c.rv559#|
-     c.rv559 |  -.0147771   .0039879    -3.71   0.000    -.0226031    -.00695
-> 1
+     c.rv559 |   -.014495    .012315    -1.18   0.239    -.0386599      .
+> 00967
              |
-       _cons |   9.963537   .1492907    66.74   0.000     9.670564    10.2565
-> 1
------------------------------------------------------------------------------
-> -
+       _cons |   8.848857   .4801305    18.43   0.000     7.906729    9.7
+> 90985
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,01
-> 4
-                                                F(2, 1011)        =      17.8
-> 2
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.029
-> 3
-                                                Root MSE          =      1.22
-> 2
+Linear regression                               Number of obs     =      
+> 1,050
+                                                F(2, 1047)        =      
+>  5.47
+                                                Prob > F          =     0
+> .0043
+                                                R-squared         =     0
+> .0151
+                                                Root MSE          =     2
+> .2219
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv559 |   .1983101    .058763     3.37   0.001     .0829987    .313621
-> 5
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv559 |   .4068612   .1437409     2.83   0.005     .1248082    .68
+> 89141
              |
      c.rv559#|
-     c.rv559 |  -.0212411   .0046402    -4.58   0.000    -.0303468   -.012135
-> 5
+     c.rv559 |  -.0339801   .0109015    -3.12   0.002    -.0553714   -.01
+> 25888
              |
-       _cons |   10.05455   .1831848    54.89   0.000     9.695085    10.4140
-> 2
------------------------------------------------------------------------------
-> -
+       _cons |    8.96677   .4486675    19.99   0.000      8.08638     9.
+> 84716
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        95
-> 4
-                                                F(12, 941)        =      29.2
-> 2
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.240
-> 0
-                                                Root MSE          =     .9192
-> 7
+Linear regression                               Number of obs     =      
+> 1,037
+                                                F(12, 1024)       =      
+>  6.91
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1023
+                                                Root MSE          =     2
+> .7839
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv559 |   .0395095   .0425764     0.93   0.354    -.0440462    .123065
-> 3
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv559 |   .0156362   .1462245     0.11   0.915    -.2712978    .30
+> 25702
              |
      c.rv559#|
-     c.rv559 |   -.004725   .0035271    -1.34   0.181    -.0116469    .002196
-> 8
+     c.rv559 |  -.0018951   .0115158    -0.16   0.869    -.0244922    .02
+> 07021
              |
-   r15agey_b |   .0580346   .0431618     1.34   0.179    -.0266699    .142739
-> 1
+   r15agey_b |   .1906304   .1202419     1.59   0.113    -.0453184    .42
+> 65792
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0004103   .0003026    -1.36   0.175    -.0010042    .000183
-> 6
+ c.r15agey_b |   -.000939   .0008522    -1.10   0.271    -.0026112    .00
+> 07332
              |
     ragender |
-   2.female  |  -.4384772   .0623044    -7.04   0.000    -.5607489   -.316205
-> 4
+   2.female  |   -.544422    .186616    -2.92   0.004    -.9106153   -.17
+> 82286
              |
     race_eth |
-   NH Black  |  -.2626224   .0869541    -3.02   0.003    -.4332688    -.09197
-> 6
-   Hispanic  |   -.131944   .0952966    -1.38   0.167    -.3189624    .055074
-> 5
-   NH Other  |  -.1445196   .1651953    -0.87   0.382    -.4687133    .179674
-> 2
+   NH Black  |  -.1115519   .2233565    -0.50   0.618    -.5498405    .32
+> 67368
+   Hispanic  |   .0565616   .2777461     0.20   0.839    -.4884549    .60
+> 15781
+   NH Other  |  -.1673441   .4490361    -0.37   0.709     -1.04848     .7
+> 13792
              |
-     raedyrs |   .0737693   .0105719     6.98   0.000     .0530221    .094516
-> 6
-   r15inlbrf |   .6057663   .0811125     7.47   0.000      .446584    .764948
-> 7
-married_2020 |  -.0216186   .0657217    -0.33   0.742    -.1505966    .107359
-> 5
-     born_us |   .1583046   .1157918     1.37   0.172    -.0689354    .385544
-> 6
-       _cons |   7.056196   1.478923     4.77   0.000     4.153828    9.95856
-> 5
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1036297   .0309057     3.35   0.001     .0429839    .16
+> 42755
+   r15inlbrf |   .9971302    .222301     4.49   0.000     .5609126    1.4
+> 33348
+married_2020 |  -.2850213   .1845749    -1.54   0.123    -.6472095    .07
+> 71669
+     born_us |   .9546746   .3115259     3.06   0.002     .3433725    1.5
+> 65977
+       _cons |  -1.241577    4.17012    -0.30   0.766    -9.424535    6.9
+> 41381
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,00
-> 3
-                                                F(12, 990)        =      38.1
-> 4
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.259
-> 8
-                                                Root MSE          =     1.069
-> 3
+Linear regression                               Number of obs     =      
+> 1,037
+                                                F(12, 1024)       =      
+> 15.60
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1882
+                                                Root MSE          =     1
+> .9953
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv559 |   .0842592   .0498986     1.69   0.092    -.0136599    .182178
-> 3
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv559 |    .177944   .1217129     1.46   0.144    -.0608912    .41
+> 67792
              |
      c.rv559#|
-     c.rv559 |  -.0094345   .0040896    -2.31   0.021    -.0174599   -.001409
-> 2
+     c.rv559 |  -.0124442   .0094062    -1.32   0.186    -.0309018    .00
+> 60133
              |
-   r15agey_b |   .1204809   .0499122     2.41   0.016     .0225351    .218426
-> 7
+   r15agey_b |   .1511771   .0801737     1.89   0.060    -.0061465    .30
+> 85006
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0007889   .0003488    -2.26   0.024    -.0014733   -.000104
-> 5
+ c.r15agey_b |  -.0008893   .0005634    -1.58   0.115    -.0019948    .00
+> 02162
              |
     ragender |
-   2.female  |  -.4426569   .0689125    -6.42   0.000    -.5778883   -.307425
-> 5
+   2.female  |  -.4133628   .1378279    -3.00   0.003    -.6838201   -.14
+> 29054
              |
     race_eth |
-   NH Black  |  -.2342663   .0866657    -2.70   0.007    -.4043359   -.064196
-> 7
-   Hispanic  |  -.1601785   .1100512    -1.46   0.146    -.3761388    .055781
-> 9
-   NH Other  |  -.2151793   .1865627    -1.15   0.249    -.5812831    .150924
-> 5
+   NH Black  |  -.6170898   .1694263    -3.64   0.000    -.9495522   -.28
+> 46273
+   Hispanic  |  -.4218136   .2192465    -1.92   0.055    -.8520374    .00
+> 84102
+   NH Other  |  -.4032539   .3249709    -1.24   0.215    -1.040939     .2
+> 34431
              |
-     raedyrs |   .0935429   .0113725     8.23   0.000      .071226    .115859
-> 8
-   r15inlbrf |   .7850604    .087253     9.00   0.000     .6138384    .956282
-> 4
-married_2020 |   .1081493    .073109     1.48   0.139    -.0353172    .251615
-> 8
-     born_us |   .0868525    .130062     0.67   0.504    -.1683763    .342081
-> 3
-       _cons |   4.403513   1.771981     2.49   0.013     .9262418    7.88078
-> 3
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv559.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv559.tex)
+     raedyrs |   .1507686   .0249412     6.04   0.000     .1018269    .19
+> 97103
+   r15inlbrf |   1.019467   .1578891     6.46   0.000     .7096434     1.
+> 32929
+married_2020 |  -.0134134   .1328586    -0.10   0.920    -.2741196    .24
+> 72929
+     born_us |   .4839352   .2436338     1.99   0.047     .0058568    .96
+> 20137
+       _cons |   1.032409   2.833058     0.36   0.716    -4.526855    6.5
+> 91672
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv559.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv559.tex)
 
-Linear regression                               Number of obs     =        96
-> 5
-                                                F(2, 962)         =      11.2
-> 8
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.022
-> 1
-                                                Root MSE          =     1.040
-> 3
+Linear regression                               Number of obs     =      
+> 1,050
+                                                F(2, 1047)        =      
+>  3.26
+                                                Prob > F          =     0
+> .0389
+                                                R-squared         =     0
+> .0087
+                                                Root MSE          =     2
+> .9259
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv560 |   .1979675   .0435147     4.55   0.000     .1125729    .283362
-> 2
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv560 |   .2930894   .1289074     2.27   0.023     .0401431    .54
+> 60358
              |
      c.rv560#|
-     c.rv560 |  -.0175525   .0036959    -4.75   0.000    -.0248054   -.010299
-> 6
+     c.rv560 |  -.0204014   .0107246    -1.90   0.057    -.0414455    .00
+> 06427
              |
-       _cons |   9.686668   .1227905    78.89   0.000       9.4457    9.92763
-> 6
------------------------------------------------------------------------------
-> -
+       _cons |   8.409731   .3654252    23.01   0.000     7.692682     9.
+> 12678
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,01
-> 5
-                                                F(2, 1012)        =       8.4
-> 5
-                                                Prob > F          =     0.000
-> 2
-                                                R-squared         =     0.014
-> 7
-                                                Root MSE          =     1.237
-> 8
+Linear regression                               Number of obs     =      
+> 1,050
+                                                F(2, 1047)        =      
+>  6.69
+                                                Prob > F          =     0
+> .0013
+                                                R-squared         =     0
+> .0243
+                                                Root MSE          =     2
+> .1954
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv560 |   .1937311   .0473796     4.09   0.000     .1007576    .286704
-> 6
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv560 |   .4089551   .1130778     3.62   0.000     .1870701    .63
+> 08401
              |
      c.rv560#|
-     c.rv560 |  -.0167333    .004141    -4.04   0.000    -.0248592   -.008607
-> 4
+     c.rv560 |  -.0311207   .0091964    -3.38   0.001    -.0491662   -.01
+> 30752
              |
-       _cons |   9.890464   .1280719    77.23   0.000     9.639147    10.1417
-> 8
------------------------------------------------------------------------------
-> -
+       _cons |   8.877157   .3298826    26.91   0.000     8.229851    9.5
+> 24463
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        95
-> 5
-                                                F(12, 942)        =      29.4
-> 7
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.240
-> 9
-                                                Root MSE          =     .9224
-> 4
+Linear regression                               Number of obs     =      
+> 1,037
+                                                F(12, 1024)       =      
+>  6.72
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1046
+                                                Root MSE          =     2
+> .7679
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv560 |   .0716141   .0399108     1.79   0.073    -.0067102    .149938
-> 5
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv560 |   .0781051   .1205921     0.65   0.517    -.1585308    .31
+> 47409
              |
      c.rv560#|
-     c.rv560 |  -.0060423   .0033943    -1.78   0.075    -.0127036    .000619
-> 1
+     c.rv560 |  -.0052573   .0103645    -0.51   0.612    -.0255954    .01
+> 50808
              |
-   r15agey_b |   .0531795   .0431261     1.23   0.218    -.0314548    .137813
-> 7
+   r15agey_b |   .1874614   .1196379     1.57   0.117     -.047302    .42
+> 22248
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0003828   .0003021    -1.27   0.205    -.0009756      .0002
-> 1
+ c.r15agey_b |  -.0009339   .0008495    -1.10   0.272    -.0026008     .0
+> 00733
              |
     ragender |
-   2.female  |   -.445537   .0618426    -7.20   0.000    -.5669023   -.324171
-> 7
+   2.female  |  -.5193616   .1885627    -2.75   0.006    -.8893751   -.14
+> 93481
              |
     race_eth |
-   NH Black  |   -.256288   .0861736    -2.97   0.003    -.4254025   -.087173
-> 5
-   Hispanic  |  -.1367315   .0956489    -1.43   0.153    -.3244411    .050978
-> 1
-   NH Other  |  -.1269061   .1638664    -0.77   0.439    -.4484916    .194679
-> 5
+   NH Black  |  -.0641984   .2184155    -0.29   0.769    -.4927915    .36
+> 43946
+   Hispanic  |   .1383289   .2798957     0.49   0.621    -.4109057    .68
+> 75636
+   NH Other  |  -.1093069   .4507652    -0.24   0.808    -.9938361    .77
+> 52222
              |
-     raedyrs |   .0712309   .0107255     6.64   0.000     .0501822    .092279
-> 6
-   r15inlbrf |   .6095086   .0805376     7.57   0.000     .4514547    .767562
-> 5
-married_2020 |  -.0209755   .0647578    -0.32   0.746    -.1480618    .106110
-> 7
-     born_us |   .1828688    .115831     1.58   0.115    -.0444478    .410185
-> 4
-       _cons |   7.129303   1.482582     4.81   0.000     4.219757    10.0388
-> 5
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1000475   .0310002     3.23   0.001     .0392163    .16
+> 08788
+   r15inlbrf |   .9737348   .2208631     4.41   0.000     .5403388    1.4
+> 07131
+married_2020 |  -.3309907   .1852482    -1.79   0.074    -.6945001    .03
+> 25186
+     born_us |   1.090186   .3254424     3.35   0.001     .4515756    1.7
+> 28796
+       _cons |  -1.348476   4.174107    -0.32   0.747    -9.539257    6.8
+> 42304
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,00
-> 4
-                                                F(12, 991)        =      36.8
-> 0
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.256
-> 1
-                                                Root MSE          =     1.077
-> 8
+Linear regression                               Number of obs     =      
+> 1,037
+                                                F(12, 1024)       =      
+> 15.43
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1910
+                                                Root MSE          =     1
+> .9766
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv560 |   .0248343   .0405577     0.61   0.540    -.0547545    .104423
-> 1
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv560 |   .0777724   .0970744     0.80   0.423    -.1127152    .26
+> 82599
              |
      c.rv560#|
-     c.rv560 |  -.0017311   .0036007    -0.48   0.631    -.0087969    .005334
-> 8
+     c.rv560 |  -.0049053   .0083347    -0.59   0.556    -.0212603    .01
+> 14497
              |
-   r15agey_b |   .1242852   .0509053     2.44   0.015     .0243906    .224179
-> 8
+   r15agey_b |   .1704098   .0814847     2.09   0.037     .0105138    .33
+> 03058
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0008329   .0003563    -2.34   0.020    -.0015322   -.000133
-> 7
+ c.r15agey_b |  -.0010299   .0005742    -1.79   0.073    -.0021566    .00
+> 00968
              |
     ragender |
-   2.female  |   -.438799   .0687382    -6.38   0.000    -.5736882   -.303909
-> 9
+   2.female  |  -.4103468   .1374706    -2.98   0.003     -.680103   -.14
+> 05905
              |
     race_eth |
-   NH Black  |  -.2532059   .0864089    -2.93   0.003    -.4227713   -.083640
-> 4
-   Hispanic  |  -.1889629   .1097132    -1.72   0.085    -.4042599     .02633
-> 4
-   NH Other  |  -.2152409   .1843864    -1.17   0.243    -.5770735    .146591
-> 7
+   NH Black  |  -.5783896   .1651226    -3.50   0.000    -.9024069   -.25
+> 43723
+   Hispanic  |  -.4140362   .2156572    -1.92   0.055    -.8372168    .00
+> 91444
+   NH Other  |  -.4215995   .3241407    -1.30   0.194    -1.057655    .21
+> 44565
              |
-     raedyrs |    .096544   .0116703     8.27   0.000     .0736425    .119445
-> 4
-   r15inlbrf |   .7882763    .088288     8.93   0.000     .6150234    .961529
-> 1
-married_2020 |   .1377905   .0713759     1.93   0.054    -.0022748    .277855
-> 9
-     born_us |   .1085946   .1315903     0.83   0.409     -.149633    .366822
-> 3
-       _cons |   4.302925   1.784368     2.41   0.016     .8013516    7.80449
-> 8
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv560.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv560.tex)
+     raedyrs |   .1509348   .0254696     5.93   0.000     .1009562    .20
+> 09134
+   r15inlbrf |   1.030408   .1550549     6.65   0.000     .7261466     1.
+> 33467
+married_2020 |  -.0361989   .1313307    -0.28   0.783    -.2939068    .22
+> 15091
+     born_us |   .4901687   .2426537     2.02   0.044     .0140133    .96
+> 63241
+       _cons |   .6893809    2.88392     0.24   0.811    -4.969687    6.3
+> 48449
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv560.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv560.tex)
 
-Linear regression                               Number of obs     =        94
-> 8
-                                                F(2, 945)         =      16.6
-> 7
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.030
-> 6
-                                                Root MSE          =      1.00
-> 9
+Linear regression                               Number of obs     =      
+> 1,032
+                                                F(2, 1029)        =      
+>  4.83
+                                                Prob > F          =     0
+> .0082
+                                                R-squared         =     0
+> .0101
+                                                Root MSE          =     2
+> .9268
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv561 |   .1903667   .0334814     5.69   0.000     .1246602    .256073
-> 1
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv561 |   .3131165   .1016277     3.08   0.002     .1136954    .51
+> 25377
              |
      c.rv561#|
-     c.rv561 |   -.017034   .0033613    -5.07   0.000    -.0236304   -.010437
-> 5
+     c.rv561 |  -.0312314   .0102385    -3.05   0.002    -.0513222   -.01
+> 11406
              |
-       _cons |   9.745654   .0762152   127.87   0.000     9.596083    9.89522
-> 4
------------------------------------------------------------------------------
-> -
+       _cons |   8.791355   .2337358    37.61   0.000     8.332701    9.2
+> 50008
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        99
-> 7
-                                                F(2, 994)         =      15.3
-> 0
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.023
-> 5
-                                                Root MSE          =     1.211
-> 1
+Linear regression                               Number of obs     =      
+> 1,032
+                                                F(2, 1029)        =      
+>  7.63
+                                                Prob > F          =     0
+> .0005
+                                                R-squared         =     0
+> .0203
+                                                Root MSE          =     2
+> .2048
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv561 |    .195606   .0381819     5.12   0.000     .1206797    .270532
-> 4
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv561 |   .2972048   .0815971     3.64   0.000     .1370891    .45
+> 73206
              |
      c.rv561#|
-     c.rv561 |  -.0167582   .0039626    -4.23   0.000    -.0245343   -.008982
-> 1
+     c.rv561 |  -.0230826     .00746    -3.09   0.002    -.0377212    -.0
+> 08444
              |
-       _cons |   9.928663   .0801584   123.86   0.000     9.771363    10.0859
-> 6
------------------------------------------------------------------------------
-> -
+       _cons |   9.283214    .204778    45.33   0.000     8.881384    9.6
+> 85044
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        93
-> 8
-                                                F(12, 925)        =      29.7
-> 9
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.246
-> 9
-                                                Root MSE          =      .894
-> 9
+Linear regression                               Number of obs     =      
+> 1,019
+                                                F(12, 1006)       =      
+>  7.37
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1097
+                                                Root MSE          =     2
+> .7626
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv561 |   .0684554   .0323921     2.11   0.035     .0048849    .132025
-> 9
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv561 |   .1910061   .1008855     1.89   0.059    -.0069639    .38
+> 89762
              |
      c.rv561#|
-     c.rv561 |  -.0058568   .0031205    -1.88   0.061    -.0119808    .000267
-> 2
+     c.rv561 |  -.0221473   .0103791    -2.13   0.033    -.0425144   -.00
+> 17801
              |
-   r15agey_b |    .029932   .0351507     0.85   0.395    -.0390524    .098916
-> 4
+   r15agey_b |   .1944198   .1223229     1.59   0.112    -.0456175    .43
+> 44571
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0002285   .0002517    -0.91   0.364    -.0007224    .000265
-> 4
+ c.r15agey_b |  -.0009828   .0008674    -1.13   0.257    -.0026849    .00
+> 07194
              |
     ragender |
-   2.female  |  -.4382892   .0621724    -7.05   0.000    -.5603045   -.316273
-> 9
+   2.female  |  -.4961926   .1902522    -2.61   0.009    -.8695293   -.12
+> 28559
              |
     race_eth |
-   NH Black  |  -.2286106   .0812955    -2.81   0.005    -.3881555   -.069065
-> 6
-   Hispanic  |  -.1296052   .0943644    -1.37   0.170    -.3147983     .05558
-> 8
-   NH Other  |  -.1495855    .165672    -0.90   0.367    -.4747222    .175551
-> 1
+   NH Black  |  -.1073888   .2220376    -0.48   0.629    -.5430986     .3
+> 28321
+   Hispanic  |   .0928711   .2817091     0.33   0.742    -.4599336    .64
+> 56758
+   NH Other  |  -.2583629   .4525825    -0.57   0.568    -1.146477     .6
+> 29751
              |
-     raedyrs |   .0731494   .0106489     6.87   0.000     .0522505    .094048
-> 3
-   r15inlbrf |   .5516872   .0726575     7.59   0.000     .4090944    .694279
-> 9
-married_2020 |  -.0003369   .0629458    -0.01   0.996    -.1238701    .123196
-> 3
-     born_us |   .2112757   .1174492     1.80   0.072    -.0192222    .441773
-> 6
-       _cons |   7.968479    1.22041     6.53   0.000     5.573385    10.3635
-> 7
------------------------------------------------------------------------------
-> -
+     raedyrs |   .0981802   .0314117     3.13   0.002     .0365403      .
+> 15982
+   r15inlbrf |   .9031615   .2219211     4.07   0.000     .4676801    1.3
+> 38643
+married_2020 |  -.3558692   .1859055    -1.91   0.056    -.7206762    .00
+> 89379
+     born_us |   1.120647   .3288254     3.41   0.001     .4753843    1.7
+> 65909
+       _cons |  -1.494737   4.281901    -0.35   0.727    -9.897217    6.9
+> 07743
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        98
-> 6
-                                                F(12, 973)        =      38.0
-> 8
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.259
-> 1
-                                                Root MSE          =      1.05
-> 7
+Linear regression                               Number of obs     =      
+> 1,019
+                                                F(12, 1006)       =      
+> 15.33
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1905
+                                                Root MSE          =     1
+> .9813
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv561 |   .0586679   .0343092     1.71   0.088    -.0086607    .125996
-> 5
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv561 |   .0650119   .0715136     0.91   0.364     -.075321    .20
+> 53447
              |
      c.rv561#|
-     c.rv561 |  -.0048963   .0035794    -1.37   0.172    -.0119204    .002127
-> 9
+     c.rv561 |  -.0048871   .0066808    -0.73   0.465     -.017997    .00
+> 82228
              |
-   r15agey_b |   .1024351   .0464357     2.21   0.028     .0113094    .193560
-> 7
+   r15agey_b |   .1613616   .0817032     1.97   0.049     .0010334    .32
+> 16897
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0006898   .0003265    -2.11   0.035    -.0013306   -.000049
-> 1
+ c.r15agey_b |  -.0009676   .0005751    -1.68   0.093    -.0020961    .00
+> 01609
              |
     ragender |
-   2.female  |  -.4332701   .0697603    -6.21   0.000    -.5701681   -.296372
-> 1
+   2.female  |  -.4025154   .1394828    -2.89   0.004    -.6762261   -.12
+> 88048
              |
     race_eth |
-   NH Black  |  -.2257394   .0828161    -2.73   0.007    -.3882581   -.063220
-> 7
-   Hispanic  |   -.181328   .1096732    -1.65   0.099    -.3965512    .033895
-> 2
-   NH Other  |  -.2427289   .1855498    -1.31   0.191    -.6068527     .12139
-> 5
+   NH Black  |  -.5603739   .1686668    -3.32   0.001    -.8913529   -.22
+> 93948
+   Hispanic  |   -.420509   .2186957    -1.92   0.055    -.8496611     .0
+> 08643
+   NH Other  |  -.4651137    .325866    -1.43   0.154    -1.104569    .17
+> 43412
              |
-     raedyrs |   .0968548   .0115214     8.41   0.000      .074245    .119464
-> 5
-   r15inlbrf |   .7317621   .0852112     8.59   0.000     .5645433    .898980
-> 9
-married_2020 |   .1457429    .069909     2.08   0.037     .0085531    .282932
-> 8
-     born_us |   .1488521   .1333837     1.12   0.265    -.1129008     .41060
-> 5
-       _cons |   5.043083   1.652248     3.05   0.002     1.800702    8.28546
-> 4
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv561.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv561.tex)
+     raedyrs |   .1531081   .0252893     6.05   0.000     .1034822     .2
+> 02734
+   r15inlbrf |    .996292   .1574123     6.33   0.000     .6873978    1.3
+> 05186
+married_2020 |  -.0226486   .1327321    -0.17   0.865    -.2831122     .2
+> 37815
+     born_us |   .5274961   .2459985     2.14   0.032     .0447671    1.0
+> 10225
+       _cons |   1.051921   2.894039     0.36   0.716    -4.627123    6.7
+> 30965
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv561.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv561.tex)
 
-Linear regression                               Number of obs     =        92
-> 1
-                                                F(2, 918)         =      22.0
-> 4
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.041
-> 6
-                                                Root MSE          =     1.030
-> 1
+Linear regression                               Number of obs     =      
+> 1,002
+                                                F(2, 999)         =      
+>  2.39
+                                                Prob > F          =     0
+> .0925
+                                                R-squared         =     0
+> .0051
+                                                Root MSE          =     2
+> .9363
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv562 |   .2038636   .0346125     5.89   0.000     .1359348    .271792
-> 4
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv562 |   .1800541   .0971632     1.85   0.064    -.0106133    .37
+> 07215
              |
      c.rv562#|
-     c.rv562 |  -.0164206   .0036027    -4.56   0.000    -.0234911   -.009350
-> 2
+     c.rv562 |  -.0132318   .0095363    -1.39   0.166    -.0319453    .00
+> 54818
              |
-       _cons |   9.657798   .0767602   125.82   0.000     9.507152    9.80844
-> 4
------------------------------------------------------------------------------
-> -
+       _cons |   8.852704   .2272443    38.96   0.000     8.406773    9.2
+> 98635
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        96
-> 8
-                                                F(2, 965)         =      20.6
-> 5
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.033
-> 4
-                                                Root MSE          =     1.229
-> 6
+Linear regression                               Number of obs     =      
+> 1,002
+                                                F(2, 999)         =      
+> 10.11
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .0256
+                                                Root MSE          =     2
+> .2118
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv562 |   .2136364   .0390534     5.47   0.000      .136997    .290275
-> 7
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv562 |   .2904753   .0823582     3.53   0.000     .1288604    .45
+> 20902
              |
      c.rv562#|
-     c.rv562 |  -.0168022   .0040599    -4.14   0.000    -.0247695   -.008834
-> 9
+     c.rv562 |  -.0201112   .0077898    -2.58   0.010    -.0353975    -.0
+> 04825
              |
-       _cons |   9.829458   .0806072   121.94   0.000     9.671273    9.98764
-> 4
------------------------------------------------------------------------------
-> -
+       _cons |   9.209113   .2006678    45.89   0.000     8.815334    9.6
+> 02892
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        91
-> 1
-                                                F(12, 898)        =      30.3
-> 8
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.253
-> 7
-                                                Root MSE          =      .915
-> 1
+Linear regression                               Number of obs     =      
+>   989
+                                                F(12, 976)        =      
+>  6.43
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1019
+                                                Root MSE          =     2
+> .7762
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv562 |   .0611119   .0329953     1.85   0.064     -.003645    .125868
-> 9
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv562 |   .0118853   .0999492     0.12   0.905    -.1842549    .20
+> 80254
              |
      c.rv562#|
-     c.rv562 |  -.0036569   .0033005    -1.11   0.268    -.0101345    .002820
-> 6
+     c.rv562 |   .0015182   .0097051     0.16   0.876    -.0175269    .02
+> 05634
              |
-   r15agey_b |   .0599044   .0443677     1.35   0.177     -.027172    .146980
-> 8
+   r15agey_b |   .1719769   .1198268     1.44   0.152    -.0631709    .40
+> 71247
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0004389    .000311    -1.41   0.159    -.0010493    .000171
-> 5
+ c.r15agey_b |  -.0008466   .0008519    -0.99   0.321    -.0025184    .00
+> 08252
              |
     ragender |
-   2.female  |  -.4284194   .0630839    -6.79   0.000    -.5522285   -.304610
-> 4
+   2.female  |   -.546371   .1915822    -2.85   0.004    -.9223313   -.17
+> 04106
              |
     race_eth |
-   NH Black  |  -.2604895   .0892493    -2.92   0.004     -.435651   -.085328
-> 1
-   Hispanic  |  -.1411822   .0955452    -1.48   0.140    -.3287001    .046335
-> 6
-   NH Other  |  -.1036173   .1675433    -0.62   0.536    -.4324392    .225204
-> 7
+   NH Black  |  -.1590326   .2306305    -0.69   0.491    -.6116213     .2
+> 93556
+   Hispanic  |   .0181274   .2794319     0.06   0.948    -.5302291    .56
+> 64838
+   NH Other  |  -.2453367   .4546104    -0.54   0.590    -1.137463    .64
+> 67896
              |
-     raedyrs |    .073262   .0110704     6.62   0.000     .0515351    .094988
-> 9
-   r15inlbrf |   .5990682   .0829352     7.22   0.000     .4362988    .761837
-> 6
-married_2020 |  -.0338237   .0660887    -0.51   0.609      -.16353    .095882
-> 5
-     born_us |   .2270661   .1201915     1.89   0.059    -.0088229     .46295
-> 5
-       _cons |   6.865603   1.533154     4.48   0.000     3.856621    9.87458
-> 6
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1078991   .0322822     3.34   0.001     .0445485    .17
+> 12496
+   r15inlbrf |   .9551685   .2276066     4.20   0.000     .5085139    1.4
+> 01823
+married_2020 |  -.3366111   .1950688    -1.73   0.085    -.7194135    .04
+> 61913
+     born_us |   .9983641   .3211224     3.11   0.002     .3681943    1.6
+> 28534
+       _cons |  -.5214866   4.184803    -0.12   0.901    -8.733733     7.
+> 69076
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        95
-> 7
-                                                F(12, 944)        =      37.3
-> 2
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.263
-> 3
-                                                Root MSE          =      1.07
-> 6
+Linear regression                               Number of obs     =      
+>   989
+                                                F(12, 976)        =      
+> 15.16
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1947
+                                                Root MSE          =     1
+> .9877
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv562 |   .0414987   .0348319     1.19   0.234    -.0268583    .109855
-> 7
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv562 |   -.004197    .077741    -0.05   0.957    -.1567558    .14
+> 83618
              |
      c.rv562#|
-     c.rv562 |  -.0020189   .0035274    -0.57   0.567    -.0089414    .004903
-> 5
+     c.rv562 |   .0050609   .0072028     0.70   0.482    -.0090739    .01
+> 91958
              |
-   r15agey_b |   .1398874   .0511631     2.73   0.006     .0394808    .240293
-> 9
+   r15agey_b |   .1603383   .0820312     1.95   0.051    -.0006396    .32
+> 13162
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0009575   .0003569    -2.68   0.007    -.0016578   -.000257
-> 2
+ c.r15agey_b |   -.000988   .0005797    -1.70   0.089    -.0021255    .00
+> 01496
              |
     ragender |
-   2.female  |  -.4226576    .070312    -6.01   0.000    -.5606434   -.284671
-> 7
+   2.female  |  -.4240961   .1388543    -3.05   0.002    -.6965835   -.15
+> 16088
              |
     race_eth |
-   NH Black  |  -.2429806   .0882676    -2.75   0.006     -.416204   -.069757
-> 3
-   Hispanic  |  -.1703793   .1114974    -1.53   0.127    -.3891907     .04843
-> 2
-   NH Other  |  -.2213072   .1874365    -1.18   0.238    -.5891475    .146533
-> 2
+   NH Black  |  -.6120126   .1750585    -3.50   0.000     -.955547   -.26
+> 84782
+   Hispanic  |  -.4728733   .2155733    -2.19   0.029    -.8959137   -.04
+> 98329
+   NH Other  |  -.4879842   .3259687    -1.50   0.135    -1.127664    .15
+> 16959
              |
-     raedyrs |   .0958646   .0120645     7.95   0.000     .0721884    .119540
-> 9
-   r15inlbrf |   .7840422   .0925331     8.47   0.000     .6024478    .965636
-> 7
-married_2020 |   .1317149    .072814     1.81   0.071    -.0111812     .27461
-> 1
-     born_us |   .1632536   .1376915     1.19   0.236    -.1069633    .433470
-> 5
-       _cons |   3.716406   1.803687     2.06   0.040     .1767072    7.25610
-> 5
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv562.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv562.tex)
+     raedyrs |   .1559786   .0264853     5.89   0.000     .1040039    .20
+> 79534
+   r15inlbrf |   .9720748   .1578669     6.16   0.000     .6622773    1.2
+> 81872
+married_2020 |   .0197026   .1416702     0.14   0.889    -.2583105    .29
+> 77158
+     born_us |   .5363491   .2435396     2.20   0.028     .0584276     1.
+> 01427
+       _cons |   1.190269   2.881928     0.41   0.680     -4.46522    6.8
+> 45757
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv562.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv562.tex)
 
-Linear regression                               Number of obs     =        96
-> 2
-                                                F(2, 959)         =      19.8
-> 5
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.036
-> 4
-                                                Root MSE          =     1.031
-> 1
+Linear regression                               Number of obs     =      
+> 1,046
+                                                F(2, 1043)        =      
+>  3.33
+                                                Prob > F          =     0
+> .0361
+                                                R-squared         =     0
+> .0086
+                                                Root MSE          =     2
+> .9182
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv563 |   .2323491   .0373479     6.22   0.000     .1590562    .305642
-> 1
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv563 |   .2805878   .1163886     2.41   0.016     .0522053    .50
+> 89704
              |
      c.rv563#|
-     c.rv563 |  -.0220868   .0035535    -6.22   0.000    -.0290603   -.015113
-> 3
+     c.rv563 |  -.0222944   .0107199    -2.08   0.038    -.0433295   -.00
+> 12593
              |
-       _cons |   9.670145   .0923376   104.73   0.000     9.488938    9.85135
-> 2
------------------------------------------------------------------------------
-> -
+       _cons |   8.629259   .2804115    30.77   0.000     8.079024    9.1
+> 79494
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =      1,01
-> 0
-                                                F(2, 1007)        =      18.4
-> 4
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.029
-> 7
-                                                Root MSE          =     1.226
-> 5
+Linear regression                               Number of obs     =      
+> 1,046
+                                                F(2, 1043)        =      
+>  6.58
+                                                Prob > F          =     0
+> .0014
+                                                R-squared         =     0
+> .0165
+                                                Root MSE          =     2
+> .2281
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv563 |   .2445274   .0416974     5.86   0.000     .1627036    .326351
-> 2
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv563 |   .3279166   .0923797     3.55   0.000     .1466453    .50
+> 91879
              |
      c.rv563#|
-     c.rv563 |  -.0241275   .0039776    -6.07   0.000    -.0319328   -.016322
-> 1
+     c.rv563 |  -.0311774     .00861    -3.62   0.000    -.0480723   -.01
+> 42824
              |
-       _cons |   9.892099   .1001314    98.79   0.000     9.695609    10.0885
-> 9
------------------------------------------------------------------------------
-> -
+       _cons |   9.352268   .2221427    42.10   0.000      8.91637    9.7
+> 88165
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        95
-> 2
-                                                F(12, 939)        =      29.8
-> 1
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.249
-> 3
-                                                Root MSE          =     .9158
-> 7
+Linear regression                               Number of obs     =      
+> 1,033
+                                                F(12, 1020)       =      
+>  6.87
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1046
+                                                Root MSE          =     2
+> .7602
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv563 |   .1212448   .0349262     3.47   0.001     .0527024    .189787
-> 1
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv563 |    .135387   .1132102     1.20   0.232    -.0867645    .35
+> 75385
              |
      c.rv563#|
-     c.rv563 |  -.0096207   .0032892    -2.92   0.004    -.0160757   -.003165
-> 6
+     c.rv563 |   -.007546   .0105799    -0.71   0.476    -.0283068    .01
+> 32148
              |
-   r15agey_b |   .0562081   .0434351     1.29   0.196    -.0290329    .141449
-> 1
+   r15agey_b |   .1842388   .1162842     1.58   0.113    -.0439448    .41
+> 24225
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0004047   .0003049    -1.33   0.185    -.0010031    .000193
-> 8
+ c.r15agey_b |  -.0009262   .0008254    -1.12   0.262    -.0025459    .00
+> 06935
              |
     ragender |
-   2.female  |  -.4530804   .0623534    -7.27   0.000    -.5754486   -.330712
-> 2
+   2.female  |  -.5491571   .1879827    -2.92   0.004     -.918034   -.18
+> 02801
              |
     race_eth |
-   NH Black  |  -.2648198   .0861448    -3.07   0.002    -.4338785   -.095761
-> 1
-   Hispanic  |  -.1206995   .0960982    -1.26   0.209    -.3092915    .067892
-> 5
-   NH Other  |  -.1392532   .1636603    -0.85   0.395    -.4604356    .181929
-> 1
+   NH Black  |  -.1617681   .2228831    -0.73   0.468      -.59913    .27
+> 55937
+   Hispanic  |   .1156148     .28134     0.41   0.681    -.4364566    .66
+> 76862
+   NH Other  |  -.2138323   .4497604    -0.48   0.635    -1.096394    .66
+> 87292
              |
-     raedyrs |   .0693451   .0106592     6.51   0.000     .0484266    .090263
-> 7
-   r15inlbrf |   .6042934   .0797961     7.57   0.000     .4476942    .760892
-> 6
-married_2020 |   -.021044   .0649287    -0.32   0.746    -.1484663    .106378
-> 2
-     born_us |   .1869846   .1160871     1.61   0.108    -.0408355    .414804
-> 8
-       _cons |   6.935308   1.504979     4.61   0.000     3.981796    9.88882
-> 1
------------------------------------------------------------------------------
-> -
+     raedyrs |   .0995551   .0307342     3.24   0.001     .0392457    .15
+> 98646
+   r15inlbrf |   .9817928   .2212957     4.44   0.000      .547546     1.
+> 41604
+married_2020 |  -.3415018   .1844887    -1.85   0.064    -.7035226     .0
+> 20519
+     born_us |     .96299   .3141548     3.07   0.002     .3465264    1.5
+> 79454
+       _cons |  -1.171286   4.075906    -0.29   0.774    -9.169406    6.8
+> 26833
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        99
-> 9
-                                                F(12, 986)        =      37.1
-> 1
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.259
-> 8
-                                                Root MSE          =     1.073
-> 6
+Linear regression                               Number of obs     =      
+> 1,033
+                                                F(12, 1020)       =      
+> 15.67
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1875
+                                                Root MSE          =     2
+> .0033
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv563 |   .1050878   .0361478     2.91   0.004     .0341523    .176023
-> 3
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv563 |   .0817894   .0829174     0.99   0.324    -.0809188    .24
+> 44976
              |
      c.rv563#|
-     c.rv563 |  -.0090618   .0034434    -2.63   0.009     -.015819   -.002304
-> 7
+     c.rv563 |  -.0052382   .0078417    -0.67   0.504    -.0206259    .01
+> 01495
              |
-   r15agey_b |   .1236299   .0506077     2.44   0.015     .0243187     .22294
-> 1
-             |
- c.r15agey_b#|
- c.r15agey_b |  -.0008268   .0003544    -2.33   0.020    -.0015223   -.000131
-> 3
-             |
-    ragender |
-   2.female  |  -.4354149    .069408    -6.27   0.000    -.5716192   -.299210
-> 6
-             |
-    race_eth |
-   NH Black  |  -.2558901   .0864199    -2.96   0.003    -.4254782    -.08630
-> 2
-   Hispanic  |  -.1611516    .111181    -1.45   0.148    -.3793301     .05702
-> 7
-   NH Other  |  -.2276379   .1841211    -1.24   0.217    -.5889522    .133676
-> 4
-             |
-     raedyrs |    .091893   .0114459     8.03   0.000     .0694319    .114354
-> 1
-   r15inlbrf |   .7857023   .0879731     8.93   0.000     .6130662    .958338
-> 4
-married_2020 |    .130613   .0711484     1.84   0.067    -.0090066    .270232
-> 7
-     born_us |   .1170502   .1333323     0.88   0.380    -.1445974    .378697
-> 8
-       _cons |   4.225365   1.785772     2.37   0.018     .7210136    7.72971
-> 6
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv563.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv563.tex)
-
-Linear regression                               Number of obs     =        95
-> 4
-                                                F(2, 951)         =       8.4
-> 1
-                                                Prob > F          =     0.000
-> 2
-                                                R-squared         =     0.016
-> 9
-                                                Root MSE          =     1.040
-> 1
-
------------------------------------------------------------------------------
-> -
-             |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv564 |    .136875   .0337474     4.06   0.000      .070647     .20310
-> 3
-             |
-     c.rv564#|
-     c.rv564 |  -.0140653   .0039117    -3.60   0.000    -.0217419   -.006388
-> 7
-             |
-       _cons |   9.924964   .0610743   162.51   0.000     9.805108    10.0448
-> 2
------------------------------------------------------------------------------
-> -
-
-Linear regression                               Number of obs     =      1,00
-> 3
-                                                F(2, 1000)        =       8.8
-> 6
-                                                Prob > F          =     0.000
-> 2
-                                                R-squared         =     0.014
-> 6
-                                                Root MSE          =     1.239
-> 8
-
------------------------------------------------------------------------------
-> -
-             |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv564 |    .156973   .0383312     4.10   0.000     .0817542    .232191
-> 7
-             |
-     c.rv564#|
-     c.rv564 |  -.0182436   .0043727    -4.17   0.000    -.0268242   -.009662
-> 9
-             |
-       _cons |    10.1505   .0699893   145.03   0.000     10.01315    10.2878
-> 4
------------------------------------------------------------------------------
-> -
-
-Linear regression                               Number of obs     =        94
-> 4
-                                                F(12, 931)        =      29.4
-> 9
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.243
-> 5
-                                                Root MSE          =     .9182
-> 3
-
------------------------------------------------------------------------------
-> -
-             |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv564 |   .0576023    .030332     1.90   0.058    -.0019247    .117129
-> 2
-             |
-     c.rv564#|
-     c.rv564 |  -.0023546    .003408    -0.69   0.490    -.0090427    .004333
-> 6
-             |
-   r15agey_b |    .054273   .0430356     1.26   0.208    -.0301849     .13873
-> 1
+   r15agey_b |   .1610539   .0809965     1.99   0.047     .0021151    .31
+> 99927
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0003944   .0003017    -1.31   0.191    -.0009864    .000197
-> 6
+ c.r15agey_b |  -.0009657   .0005703    -1.69   0.091    -.0020847    .00
+> 01533
              |
     ragender |
-   2.female  |  -.4341161   .0623892    -6.96   0.000    -.5565559   -.311676
-> 3
+   2.female  |  -.4166463   .1399257    -2.98   0.003    -.6912214   -.14
+> 20711
              |
     race_eth |
-   NH Black  |  -.3164569   .0875723    -3.61   0.000     -.488319   -.144594
-> 8
-   Hispanic  |  -.1781017   .0964537    -1.85   0.065    -.3673936    .011190
-> 1
-   NH Other  |  -.1112691   .1641715    -0.68   0.498    -.4334581      .2109
-> 2
+   NH Black  |  -.6461051   .1695337    -3.81   0.000    -.9787799   -.31
+> 34304
+   Hispanic  |  -.4092858   .2236468    -1.83   0.068    -.8481462    .02
+> 95745
+   NH Other  |   -.459995   .3191159    -1.44   0.150    -1.086194    .16
+> 62036
              |
-     raedyrs |   .0730618   .0106573     6.86   0.000     .0521467    .093976
-> 8
-   r15inlbrf |      .5923   .0812678     7.29   0.000     .4328107    .751789
-> 2
-married_2020 |  -.0202585   .0647122    -0.31   0.754    -.1472572    .106740
-> 1
-     born_us |   .2092721   .1170326     1.79   0.074    -.0204062    .438950
-> 4
-       _cons |   7.103117   1.489818     4.77   0.000     4.179326    10.0269
-> 1
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1528917   .0250359     6.11   0.000      .103764    .20
+> 20194
+   r15inlbrf |   1.004345   .1598736     6.28   0.000     .6906261    1.3
+> 18064
+married_2020 |  -.0204404   .1338996    -0.15   0.879    -.2831905    .24
+> 23097
+     born_us |   .4912905   .2465515     1.99   0.047     .0074843    .97
+> 50966
+       _cons |   1.033996   2.858124     0.36   0.718     -4.57448    6.6
+> 42472
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv563.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv563.tex)
 
-Linear regression                               Number of obs     =        99
-> 2
-                                                F(12, 979)        =      36.8
-> 8
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.256
-> 2
-                                                Root MSE          =     1.079
-> 5
+Linear regression                               Number of obs     =      
+> 1,037
+                                                F(2, 1034)        =      
+>  0.10
+                                                Prob > F          =     0
+> .9056
+                                                R-squared         =     0
+> .0002
+                                                Root MSE          =     2
+> .9268
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-       rv564 |   .0505381   .0339241     1.49   0.137    -.0160342    .117110
-> 3
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv564 |   .0266306   .0918267     0.29   0.772    -.1535573    .20
+> 68186
              |
      c.rv564#|
-     c.rv564 |  -.0034604    .003846    -0.90   0.368    -.0110077    .004086
-> 9
+     c.rv564 |   -.001744   .0110093    -0.16   0.874    -.0233472    .01
+> 98591
              |
-   r15agey_b |   .1251196   .0506767     2.47   0.014      .025672    .224567
-> 1
+       _cons |   9.250333   .1525847    60.62   0.000     8.950922    9.5
+> 49744
+-------------------------------------------------------------------------
+> -----
+
+Linear regression                               Number of obs     =      
+> 1,037
+                                                F(2, 1034)        =      
+>  2.52
+                                                Prob > F          =     0
+> .0809
+                                                R-squared         =     0
+> .0057
+                                                Root MSE          =     2
+> .2065
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv564 |   .1729345   .0772537     2.24   0.025     .0213426    .32
+> 45263
+             |
+     c.rv564#|
+     c.rv564 |  -.0195324   .0094422    -2.07   0.039    -.0380605   -.00
+> 10042
+             |
+       _cons |   9.783467   .1270173    77.02   0.000     9.534225    10.
+> 03271
+-------------------------------------------------------------------------
+> -----
+
+Linear regression                               Number of obs     =      
+> 1,025
+                                                F(12, 1012)       =      
+>  6.76
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1050
+                                                Root MSE          =     2
+> .7683
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv564 |   -.085739   .0857293    -1.00   0.317    -.2539665    .08
+> 24886
+             |
+     c.rv564#|
+     c.rv564 |    .016642   .0103906     1.60   0.110    -.0037476    .03
+> 70316
+             |
+   r15agey_b |   .1838287   .1182092     1.56   0.120    -.0481345    .41
+> 57919
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0008369   .0003546    -2.36   0.018    -.0015328   -.000140
-> 9
+ c.r15agey_b |  -.0009221   .0008396    -1.10   0.272    -.0025697    .00
+> 07254
              |
     ragender |
-   2.female  |  -.4299776   .0694116    -6.19   0.000    -.5661903   -.293764
-> 9
+   2.female  |  -.5499655   .1864997    -2.95   0.003     -.915936    -.1
+> 83995
              |
     race_eth |
-   NH Black  |  -.2905256    .087034    -3.34   0.001    -.4613202   -.119730
-> 9
-   Hispanic  |  -.1869193   .1111932    -1.68   0.093    -.4051238    .031285
-> 2
-   NH Other  |   -.235802   .1861634    -1.27   0.206    -.6011271    .129523
-> 1
+   NH Black  |   -.158404    .224568    -0.71   0.481    -.5990763    .28
+> 22682
+   Hispanic  |    .015037   .2919614     0.05   0.959    -.5578821    .58
+> 79561
+   NH Other  |  -.2182664   .4541775    -0.48   0.631    -1.109504     .6
+> 72971
              |
-     raedyrs |    .096417   .0114154     8.45   0.000     .0740155    .118818
-> 6
-   r15inlbrf |   .7858977   .0901568     8.72   0.000     .6089749    .962820
-> 4
-married_2020 |   .1337503   .0719767     1.86   0.063     -.007496    .274996
-> 6
-     born_us |   .1473102   .1319919     1.12   0.265    -.1117095    .406329
-> 9
-       _cons |   4.213583   1.789797     2.35   0.019     .7013042    7.72586
-> 2
------------------------------------------------------------------------------
-> -
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_rv564.tex
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_rv564.tex)
+     raedyrs |   .1159094   .0307548     3.77   0.000      .055559    .17
+> 62598
+   r15inlbrf |   .9655163   .2245496     4.30   0.000     .5248801    1.4
+> 06153
+married_2020 |  -.2988138   .1861298    -1.61   0.109    -.6640582    .06
+> 64307
+     born_us |   1.050376   .3234838     3.25   0.001     .4156003    1.6
+> 85152
+       _cons |  -1.067857    4.13863    -0.26   0.796    -9.189135    7.0
+> 53421
+-------------------------------------------------------------------------
+> -----
+
+Linear regression                               Number of obs     =      
+> 1,025
+                                                F(12, 1012)       =      
+> 15.08
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1894
+                                                Root MSE          =     1
+> .9884
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+       rv564 |   .0077742   .0691048     0.11   0.910    -.1278309    .14
+> 33794
+             |
+     c.rv564#|
+     c.rv564 |   .0061942   .0082621     0.75   0.454    -.0100186    .02
+> 24069
+             |
+   r15agey_b |   .1663871   .0811391     2.05   0.041      .007167    .32
+> 56071
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0010045   .0005719    -1.76   0.079    -.0021267    .00
+> 01177
+             |
+    ragender |
+   2.female  |  -.4021358   .1367217    -2.94   0.003    -.6704262   -.13
+> 38454
+             |
+    race_eth |
+   NH Black  |  -.6653533   .1682906    -3.95   0.000    -.9955918   -.33
+> 51149
+   Hispanic  |  -.5426327   .2180837    -2.49   0.013    -.9705807   -.11
+> 46847
+   NH Other  |  -.5139515   .3232079    -1.59   0.112    -1.148186    .12
+> 02829
+             |
+     raedyrs |   .1582633   .0254405     6.22   0.000     .1083412    .20
+> 81855
+   r15inlbrf |   1.002713   .1612881     6.22   0.000     .6862156     1.
+> 31921
+married_2020 |  -.0085511   .1324933    -0.06   0.949    -.2685443     .2
+> 51442
+     born_us |   .4512309   .2340312     1.93   0.054    -.0080111    .91
+> 04728
+       _cons |   .9223533   2.866595     0.32   0.748    -4.702796    6.5
+> 47503
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_rv564.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_rv564.tex)
 
 . 
-. * ----------------------------------------------------------------------
+. * ---------------------------------------------------------------------
+> -
 . * PCA of trust variables (rv557-rv564) and regressions using PC1
-. * ----------------------------------------------------------------------
+. * ---------------------------------------------------------------------
+> -
 . di as txt "=== PCA on trust variables (rv557-rv564) ==="
 === PCA on trust variables (rv557-rv564) ===
 
 . capture drop trust_pca1 trust_pca1_z
 
-. capture noisily pca rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564, compon
-> ents(1)
+. capture noisily pca rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564, co
+> mponents(1)
 
-Principal components/correlation                 Number of obs    =        97
-> 0
-                                                 Number of comp.  =          
-> 1
-                                                 Trace            =          
-> 8
-    Rotation: (unrotated = principal)            Rho              =     0.449
-> 3
+Principal components/correlation                 Number of obs    =      
+>   970
+                                                 Number of comp.  =      
+>     1
+                                                 Trace            =      
+>     8
+    Rotation: (unrotated = principal)            Rho              =     0
+> .4493
 
-    -------------------------------------------------------------------------
-> -
-       Component |   Eigenvalue   Difference         Proportion   Cumulative
-    -------------+-----------------------------------------------------------
-> -
-           Comp1 |      3.59438      2.36333             0.4493       0.4493
-           Comp2 |      1.23105      .405717             0.1539       0.6032
-           Comp3 |      .825336      .120069             0.1032       0.7063
-           Comp4 |      .705266      .102935             0.0882       0.7945
-           Comp5 |      .602331      .102839             0.0753       0.8698
-           Comp6 |      .499493      .138996             0.0624       0.9322
-           Comp7 |      .360497      .178854             0.0451       0.9773
-           Comp8 |      .181642            .             0.0227       1.0000
-    -------------------------------------------------------------------------
-> -
+    ---------------------------------------------------------------------
+> -----
+       Component |   Eigenvalue   Difference         Proportion   Cumulat
+> ive
+    -------------+-------------------------------------------------------
+> -----
+           Comp1 |      3.59438      2.36333             0.4493       0.4
+> 493
+           Comp2 |      1.23105      .405717             0.1539       0.6
+> 032
+           Comp3 |      .825336      .120069             0.1032       0.7
+> 063
+           Comp4 |      .705266      .102935             0.0882       0.7
+> 945
+           Comp5 |      .602331      .102839             0.0753       0.8
+> 698
+           Comp6 |      .499493      .138996             0.0624       0.9
+> 322
+           Comp7 |      .360497      .178854             0.0451       0.9
+> 773
+           Comp8 |      .181642            .             0.0227       1.0
+> 000
+    ---------------------------------------------------------------------
+> -----
 
 Principal components (eigenvectors) 
 
@@ -1753,74 +1850,74 @@ Non-missing trust_pca1_z: 970
   4.         quietly count if !missing(`y') & !missing(trust_pca1_z)
   5.         if r(N)==0 continue
   6.         local mname = "pca_raw_`y'"
-  7.         eststo `mname': regress `y' c.trust_pca1_z c.trust_pca1_z#c.trus
-> t_pca1_z if !missing(`y') & !missing(trust_pca1_z), vce(robust)
+  7.         eststo `mname': regress `y' c.trust_pca1_z c.trust_pca1_z#c.
+> trust_pca1_z if !missing(`y') & !missing(trust_pca1_z), vce(robust)
   8.         local models_pca_raw "`models_pca_raw' `mname'"
   9.     }
 
-Linear regression                               Number of obs     =        89
-> 2
-                                                F(2, 889)         =       5.3
-> 7
-                                                Prob > F          =     0.004
-> 8
-                                                R-squared         =     0.021
-> 6
-                                                Root MSE          =     1.004
-> 7
+Linear regression                               Number of obs     =      
+>   970
+                                                F(2, 967)         =      
+>  2.99
+                                                Prob > F          =     0
+> .0506
+                                                R-squared         =     0
+> .0112
+                                                Root MSE          =     2
+> .9133
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-trust_pca1_z |   .0403917   .0371456     1.09   0.277    -.0325116     .11329
-> 5
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+trust_pca1_z |   .1257663   .0925565     1.36   0.175    -.0558685    .30
+> 74011
              |
           c. |
 trust_pca1_z#|
           c. |
-trust_pca1_z |   -.097284   .0303758    -3.20   0.001    -.1569005   -.037667
-> 4
+trust_pca1_z |  -.1722006   .0774627    -2.22   0.026    -.3242151   -.02
+> 01861
              |
-       _cons |   10.23992   .0415374   246.52   0.000     10.15839    10.3214
-> 4
------------------------------------------------------------------------------
-> -
+       _cons |   9.502028   .1174965    80.87   0.000      9.27145    9.7
+> 32605
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        93
-> 8
-                                                F(2, 935)         =       5.0
-> 5
-                                                Prob > F          =     0.006
-> 6
-                                                R-squared         =     0.015
-> 1
-                                                Root MSE          =     1.218
-> 3
+Linear regression                               Number of obs     =      
+>   970
+                                                F(2, 967)         =      
+>  4.68
+                                                Prob > F          =     0
+> .0095
+                                                R-squared         =     0
+> .0278
+                                                Root MSE          =     2
+> .1766
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-trust_pca1_z |   .0300027   .0413396     0.73   0.468    -.0511265    .111131
-> 9
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+trust_pca1_z |   .1559652   .0698593     2.23   0.026      .018872    .29
+> 30584
              |
           c. |
 trust_pca1_z#|
           c. |
-trust_pca1_z |  -.1020455   .0324608    -3.14   0.002      -.16575   -.038340
-> 9
+trust_pca1_z |  -.2006607   .0712228    -2.82   0.005    -.3404298   -.06
+> 08916
              |
-       _cons |    10.4394    .049385   211.39   0.000     10.34248    10.5363
-> 2
------------------------------------------------------------------------------
-> -
+       _cons |   10.20078   .0925566   110.21   0.000     10.01914    10.
+> 38241
+-------------------------------------------------------------------------
+> -----
 . 
 .     * With controls
 .     foreach y of local inc_vars {
@@ -1829,135 +1926,135 @@ trust_pca1_z |  -.1020455   .0324608    -3.14   0.002      -.16575   -.038340
   4.         quietly count if !missing(`y') & !missing(trust_pca1_z)
   5.         if r(N)==0 continue
   6.         local mname = "pca_ctl_`y'"
-  7.         eststo `mname': regress `y' c.trust_pca1_z c.trust_pca1_z#c.trus
-> t_pca1_z `age_quad' i.ragender `race_factor' `ctrl_in' if !missing(`y') & !
-> missing(trust_pca1_z), vce(robust)
+  7.         eststo `mname': regress `y' c.trust_pca1_z c.trust_pca1_z#c.
+> trust_pca1_z `age_quad' i.ragender `race_factor' `ctrl_in' if !missing(
+> `y') & !missing(trust_pca1_z), vce(robust)
   8.         local models_pca_ctl "`models_pca_ctl' `mname'"
   9.     }
 
-Linear regression                               Number of obs     =        88
-> 2
-                                                F(12, 869)        =      28.4
-> 7
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.258
-> 4
-                                                Root MSE          =     .8805
-> 5
+Linear regression                               Number of obs     =      
+>   958
+                                                F(12, 945)        =      
+>  6.67
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1098
+                                                Root MSE          =     2
+> .7633
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-trust_pca1_z |   .0468243   .0330561     1.42   0.157    -.0180549    .111703
-> 5
+ln_resp_la~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+trust_pca1_z |   .0474979   .0927107     0.51   0.609    -.1344447    .22
+> 94405
              |
           c. |
 trust_pca1_z#|
           c. |
-trust_pca1_z |   -.047847   .0254374    -1.88   0.060     -.097773    .002079
-> 1
+trust_pca1_z |  -.1146363   .0718872    -1.59   0.111    -.2557133    .02
+> 64407
              |
-   r15agey_b |   .0238018    .038661     0.62   0.538     -.052078    .099681
-> 7
+   r15agey_b |   .1672721   .1237215     1.35   0.177    -.0755286    .41
+> 00729
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0001893   .0002766    -0.68   0.494    -.0007322    .000353
-> 6
+ c.r15agey_b |  -.0008116   .0008783    -0.92   0.356    -.0025352    .00
+> 09121
              |
     ragender |
-   2.female  |  -.4141041   .0631028    -6.56   0.000    -.5379558   -.290252
-> 4
+   2.female  |  -.5594185   .1938638    -2.89   0.004    -.9398718   -.17
+> 89653
              |
     race_eth |
-   NH Black  |  -.2586911   .0811154    -3.19   0.001     -.417896   -.099486
-> 2
-   Hispanic  |  -.1537251   .0980364    -1.57   0.117    -.3461409    .038690
-> 6
-   NH Other  |  -.1456895   .1685621    -0.86   0.388     -.476526    .185146
-> 9
+   NH Black  |  -.1184633   .2276594    -0.52   0.603    -.5652397    .32
+> 83131
+   Hispanic  |   .0330636   .2916824     0.11   0.910    -.5393565    .60
+> 54838
+   NH Other  |  -.3204216   .4548626    -0.70   0.481    -1.213079    .57
+> 22361
              |
-     raedyrs |   .0778776   .0110584     7.04   0.000     .0561733    .099581
-> 9
-   r15inlbrf |   .5482525   .0736305     7.45   0.000     .4037381    .692766
-> 9
-married_2020 |  -.0035608   .0628306    -0.06   0.955    -.1268783    .119756
-> 8
-     born_us |   .2222109   .1218275     1.82   0.068    -.0168996    .461321
-> 4
-       _cons |   8.328785   1.338323     6.22   0.000     5.702061    10.9555
-> 1
------------------------------------------------------------------------------
-> -
+     raedyrs |   .1059026    .032032     3.31   0.001     .0430404    .16
+> 87647
+   r15inlbrf |   .9538146   .2281005     4.18   0.000     .5061725    1.4
+> 01457
+married_2020 |  -.3521634   .1930171    -1.82   0.068    -.7309552    .02
+> 66284
+     born_us |   1.018301   .3309717     3.08   0.002     .3687767    1.6
+> 67826
+       _cons |  -.1119308   4.352128    -0.03   0.979    -8.652884    8.4
+> 29023
+-------------------------------------------------------------------------
+> -----
 
-Linear regression                               Number of obs     =        92
-> 7
-                                                F(12, 914)        =      34.9
-> 3
-                                                Prob > F          =     0.000
-> 0
-                                                R-squared         =     0.259
-> 7
-                                                Root MSE          =     1.058
-> 5
+Linear regression                               Number of obs     =      
+>   958
+                                                F(12, 945)        =      
+> 14.56
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1991
+                                                Root MSE          =     1
+> .9712
 
------------------------------------------------------------------------------
-> -
+-------------------------------------------------------------------------
+> -----
              |               Robust
-ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. interval
-> ]
--------------+---------------------------------------------------------------
-> -
-trust_pca1_z |   .0156647   .0356712     0.44   0.661    -.0543422    .085671
-> 6
+ln_resp_to~c | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+trust_pca1_z |   .0989822   .0664902     1.49   0.137    -.0315034    .22
+> 94678
              |
           c. |
 trust_pca1_z#|
           c. |
-trust_pca1_z |  -.0443155   .0260913    -1.70   0.090    -.0955213    .006890
-> 3
+trust_pca1_z |  -.1037668   .0632215    -1.64   0.101    -.2278376    .02
+> 03039
              |
-   r15agey_b |    .111327   .0476959     2.33   0.020     .0177208    .204933
-> 2
+   r15agey_b |   .1436008   .0829904     1.73   0.084    -.0192659    .30
+> 64675
              |
  c.r15agey_b#|
- c.r15agey_b |  -.0007603   .0003347    -2.27   0.023    -.0014171   -.000103
-> 5
+ c.r15agey_b |  -.0008734   .0005866    -1.49   0.137    -.0020246    .00
+> 02777
              |
     ragender |
-   2.female  |  -.4284414   .0706004    -6.07   0.000    -.5669991   -.289883
-> 7
+   2.female  |  -.4232234   .1406587    -3.01   0.003    -.6992631   -.14
+> 71838
              |
     race_eth |
-   NH Black  |  -.2249875   .0830605    -2.71   0.007     -.387999    -.06197
-> 6
-   Hispanic  |  -.1669289   .1150752    -1.45   0.147    -.3927713    .058913
-> 5
-   NH Other  |  -.2493434   .1920318    -1.30   0.194    -.6262179    .127531
-> 1
+   NH Black  |  -.5460744   .1702638    -3.21   0.001    -.8802133   -.21
+> 19354
+   Hispanic  |  -.4837573   .2260466    -2.14   0.033    -.9273686   -.04
+> 01459
+   NH Other  |  -.5160249   .3300724    -1.56   0.118    -1.163785    .13
+> 17347
              |
-     raedyrs |   .0953709   .0119435     7.99   0.000     .0719309    .118810
-> 8
-   r15inlbrf |   .7547066   .0873474     8.64   0.000     .5832819    .926131
-> 3
-married_2020 |   .1624673    .071206     2.28   0.023     .0227212    .302213
-> 5
-     born_us |   .1642683   .1406086     1.17   0.243     -.111685    .440221
-> 6
-       _cons |     4.9107   1.701086     2.89   0.004     1.572211     8.2491
-> 9
------------------------------------------------------------------------------
-> -
+     raedyrs |    .149725   .0263922     5.67   0.000      .097931    .20
+> 15191
+   r15inlbrf |   .9643346   .1572803     6.13   0.000     .6556755    1.2
+> 72994
+married_2020 |   .0138879   .1378871     0.10   0.920    -.2567123    .28
+> 44882
+     born_us |   .5093652   .2488756     2.05   0.041     .0209525    .99
+> 77779
+       _cons |   2.136684   2.929237     0.73   0.466    -3.611879    7.8
+> 85246
+-------------------------------------------------------------------------
+> -----
 . 
 .     * Export PCA table -> Paper/Tables
 .     local outfile_pca "`tables'/trust_income_pca.tex"
 .     di as txt "Exporting LaTeX table: `outfile_pca'"
-Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
-> er/Tables/trust_income_pca.tex
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_income_pca.tex
 .     if "`models_pca_raw'`models_pca_ctl'" != "" {
 .         local pc1_str : display %6.3f pc1_prop
 .         
@@ -1969,7 +2066,7 @@ Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
 .         local vlab2 c.trust_pca1_z#c.trust_pca1_z "Trust PC1\$^{2}\$"
 .         local vlab3 r15agey_b    "Age"
 .         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
-.         local vlab5 ragender     "Female"
+.         local vlab5 2.ragender     "Female"
 .         local vlab6 2.race_eth   "NH Black"
 .         local vlab7 3.race_eth   "Hispanic"
 .         local vlab8 4.race_eth   "NH Other"
@@ -1978,22 +2075,23 @@ Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
 .         local vlab11 married_2020 "Married"
 .         local vlab12 born_us      "Born in U.S."
 .         
-.         esttab `models_pca_raw' `models_pca_ctl' using "`outfile_pca'", rep
-> lace ///
+.         esttab `models_pca_raw' `models_pca_ctl' using "`outfile_pca'",
+>  replace ///
 >             booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
 >             compress b(%9.3f) se(%9.3f) ///
 >             mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
->             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c
-> }{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
->             varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7
-> ' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
+>             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{
+> 2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
+>             varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `v
+> lab7' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
+>             drop(1.ragender 1.race_eth) ///
 >             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
 >             title("Log Income (2020) on Trust PC1") ///
->             addnote("Robust SEs in parentheses; Age entered quadratically w
-> hen available." "Controls (when included): raedyrs, in labor force, married
-> , born in U.S." "PC1 variance prop = `pc1_str'")
-(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/T
-> ables/trust_income_pca.tex)
+>             addnote("Robust SEs in parentheses; Age entered quadratical
+> ly when available." "Controls (when included): raedyrs, in labor force,
+>  married, born in U.S." "PC1 variance prop = `pc1_str'")
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_income_pca.tex)
 .     }
 .     else {
 .         di as warn "No PCA models estimated; skipping export."
@@ -2011,8 +2109,8 @@ All regressions completed and tables exported.
 . 
 . log close
       name:  <unnamed>
-       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data/HRS
-> _Long/randhrs1992_2022v1_STATA/reg_inc_trust_2020.log
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/reg_inc_trust_2020.log
   log type:  text
- closed on:   3 Nov 2025, 15:48:55
------------------------------------------------------------------------------
+ closed on:  17 Nov 2025, 11:40:50
+-------------------------------------------------------------------------

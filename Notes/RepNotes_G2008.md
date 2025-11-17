@@ -39,7 +39,22 @@ Here are the variables on the RHS of the regression for returrns to identify the
 
 After collecting these controls, we need to add trust to the RHS and possibly allow for fixed effects if we use multiple years of data. 
 
-* trust: rv557, rv558, rv559, rv560. rv561. rv562, rv563, rv564
+* trust: 
+    * rv557 - Trust in others
+    * rv558 - Trust in Social Security
+    * rv559 - Trust in Medicare/Medicaid
+    * rv560 - Trust in Banks
+    * rv561 - Trust in Financial Advisors
+    * rv562 - Trust in Mutual Funds
+    * rv563 - Trust in Insurance Companies
+    * rv564 - Trust in Mass Media
+
+    r15govmr - Covered by Medicare
+    r15govmd - Covered by Medicaid
+    r15lifein - Has life insurance
+    r15beqany - Prob. of leaving any bequest
+    r15mdiv - Number of reported divorces
+    r15mid - Number of reported times being widowed
 
 # Statistical model
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.7.16)  20 OCT 2025 16:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.7.16)  17 NOV 2025 11:58
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -968,28 +968,36 @@ al/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/local
 [3]
 
 [4] (./Subfiles/../Tables/trust_rv557_returns.tex
-Overfull \hbox (62.23848pt too wide) in paragraph at lines 4--36
+Overfull \hbox (67.6667pt too wide) in paragraph at lines 4--44
  [][] 
  []
 
+
+LaTeX Warning: Float too large for page by 39.95769pt on input line 44.
+
 )
 
-[5
-
-] (./Subfiles/../Tables/trust_pca_returns.tex
-Overfull \hbox (54.80873pt too wide) in paragraph at lines 4--37
+[5] (./Subfiles/../Tables/trust_pca_returns.tex
+Overfull \hbox (54.80873pt too wide) in paragraph at lines 4--45
  [][] 
  []
 
+
+LaTeX Warning: Float too large for page by 51.95769pt on input line 45.
+
 )
 
-[6
-
-
-] (./Subfiles/../Tables/baseline_pooled.tex)
+[6] (./Subfiles/../Tables/baseline_pooled.tex)
 (./Subfiles/../Tables/shares_interacted.tex)
-(./Subfiles/../Tables/fixed_effects.tex)
-<Subfiles/../Figures/fixed_effects_hist_reg3_1.png, id=77, 813.0375pt x 487.822
+(./Subfiles/../Tables/fixed_effects.tex
+
+[7
+
+
+
+
+])
+<Subfiles/../Figures/fixed_effects_hist_reg3_1.png, id=88, 813.0375pt x 487.822
 5pt>
 File: Subfiles/../Figures/fixed_effects_hist_reg3_1.png Graphic file (type png)
 
@@ -997,7 +1005,7 @@ File: Subfiles/../Figures/fixed_effects_hist_reg3_1.png Graphic file (type png)
 Package pdftex.def Info: Subfiles/../Figures/fixed_effects_hist_reg3_1.png  use
 d on input line 73.
 (pdftex.def)             Requested size: 344.005pt x 206.40253pt.
-<Subfiles/../Figures/fixed_effects_hist_reg3_2.png, id=78, 813.0375pt x 487.822
+<Subfiles/../Figures/fixed_effects_hist_reg3_2.png, id=89, 813.0375pt x 487.822
 5pt>
 File: Subfiles/../Figures/fixed_effects_hist_reg3_2.png Graphic file (type png)
 
@@ -1005,7 +1013,7 @@ File: Subfiles/../Figures/fixed_effects_hist_reg3_2.png Graphic file (type png)
 Package pdftex.def Info: Subfiles/../Figures/fixed_effects_hist_reg3_2.png  use
 d on input line 79.
 (pdftex.def)             Requested size: 344.005pt x 206.40253pt.
-<Subfiles/../Figures/fixed_effects_hist_reg3_3.png, id=79, 813.0375pt x 487.822
+<Subfiles/../Figures/fixed_effects_hist_reg3_3.png, id=90, 813.0375pt x 487.822
 5pt>
 File: Subfiles/../Figures/fixed_effects_hist_reg3_3.png Graphic file (type png)
 
@@ -1013,7 +1021,7 @@ File: Subfiles/../Figures/fixed_effects_hist_reg3_3.png Graphic file (type png)
 Package pdftex.def Info: Subfiles/../Figures/fixed_effects_hist_reg3_3.png  use
 d on input line 85.
 (pdftex.def)             Requested size: 344.005pt x 206.40253pt.
-<Subfiles/../Figures/fixed_effects_hist_reg3_4.png, id=80, 813.0375pt x 487.822
+<Subfiles/../Figures/fixed_effects_hist_reg3_4.png, id=91, 813.0375pt x 487.822
 5pt>
 File: Subfiles/../Figures/fixed_effects_hist_reg3_4.png Graphic file (type png)
 
@@ -1022,10 +1030,6 @@ Package pdftex.def Info: Subfiles/../Figures/fixed_effects_hist_reg3_4.png  use
 d on input line 91.
 (pdftex.def)             Requested size: 344.005pt x 206.40253pt.
 
-
-[7
-
-]
 
 [8]
 
@@ -1036,28 +1040,48 @@ s/fixed_effects_hist_reg3_3.png>]
 
 [11 <./Subfiles/../Figures/fixed_effects_hist_reg3_4.png>]
 (./Subfiles/../Tables/trust_rv557_returns_avg.tex
-Overfull \hbox (95.93161pt too wide) in paragraph at lines 44--45
+Overfull \hbox (32.31209pt too wide) in paragraph at lines 4--44
  [][] 
  []
 
+
+LaTeX Warning: Float too large for page by 39.95769pt on input line 44.
+
 )
 
-[12
-
-] (./Subfiles/../Tables/trust_pca_returns_avg.tex
-Overfull \hbox (95.93161pt too wide) in paragraph at lines 45--46
+[12] (./Subfiles/../Tables/trust_pca_returns_avg.tex
+Overfull \hbox (22.78664pt too wide) in paragraph at lines 4--45
  [][] 
  []
 
+
+LaTeX Warning: Float too large for page by 51.95769pt on input line 45.
+
 )
 
-[13
+[13] (./Subfiles/../Tables/trust_correlation_2020.tex
+Overfull \hbox (12.80264pt too wide) in paragraph at lines 3--19
+ [][] 
+ []
 
-
-])
+) (./Subfiles/../Tables/trust_rv557_spec5.tex)
+(./Subfiles/../Tables/trust_pca_spec5.tex)
+(./Subfiles/../Tables/trust_pca2_spec5.tex))
 
 [14
 
+
+
+
+]
+
+[15]
+
+[16]
+
+[17]
+
+[18
 
 ]
 
@@ -1070,19 +1094,19 @@ LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-07-11>
  ***********
 Package rerunfilecheck Info: File `Chp2-draft.out' has not changed.
-(rerunfilecheck)             Checksum: 00D3601A3DEDCDBFC596D046EC2C2F4A;733.
+(rerunfilecheck)             Checksum: 68EA3F479636897974A35CCE8EE09639;901.
 Package logreq Info: Writing requests to 'Chp2-draft.run.xml'.
 \openout1 = `Chp2-draft.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 25428 strings out of 467816
- 462302 string characters out of 5432252
- 1353449 words of memory out of 5000000
- 53624 multiletter control sequences out of 15000+600000
+ 25466 strings out of 467816
+ 463586 string characters out of 5432252
+ 1355449 words of memory out of 5000000
+ 53641 multiletter control sequences out of 15000+600000
  643538 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 80i,12n,82p,1907b,1494s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 80i,11n,82p,1907b,1494s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
 ></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><
 /usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></u
@@ -1102,10 +1126,10 @@ mf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2024/texmf
 -dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2024/texmf-d
 ist/fonts/type1/public/cm-super/sfti1000.pfb></usr/local/texlive/2024/texmf-dis
 t/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Chp2-draft.pdf (14 pages, 554356 bytes).
+Output written on Chp2-draft.pdf (18 pages, 565697 bytes).
 PDF statistics:
- 238 PDF objects out of 1000 (max. 8388607)
- 175 compressed objects within 2 object streams
- 37 named destinations out of 1000 (max. 500000)
- 61 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 263 PDF objects out of 1000 (max. 8388607)
+ 196 compressed objects within 2 object streams
+ 46 named destinations out of 1000 (max. 500000)
+ 69 words of extra memory for PDF output out of 10000 (max. 10000000)
 

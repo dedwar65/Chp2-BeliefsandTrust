@@ -3,7 +3,7 @@
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
 > /HRS_Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- opened on:   4 Nov 2025, 09:15:20
+ opened on:   4 Nov 2025, 13:25:52
 
 . 
 . set more off
@@ -356,23 +356,23 @@ FINAL STATUS: race_eth variable successfully created
 
 . 
 . * Sum with rule: missing only if all components missing
-. capture drop resp_lab_inc_2022
+. capture drop resp_lab_inc_2020
 
-. egen double resp_lab_inc_2022 = rowtotal(`lab_vars')
+. egen double resp_lab_inc_2020 = rowtotal(`lab_vars')
 
-. replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) 
+. replace resp_lab_inc_2020 = . if missing(r15iearn) & missing(r15ipena) 
 > & missing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r
 > 15igxfr)
 (3,688 real changes made, 3,688 to missing)
 
-. label var resp_lab_inc_2022 "Respondent labor income (sum of 6 componen
+. label var resp_lab_inc_2020 "Respondent labor income (sum of 6 componen
 > ts; missing if all missing)"
 
 . 
-. di as txt "resp_lab_inc_2022 summary:"
-resp_lab_inc_2022 summary:
+. di as txt "resp_lab_inc_2020 summary:"
+resp_lab_inc_2020 summary:
 
-. summarize resp_lab_inc_2022, detail
+. summarize resp_lab_inc_2020, detail
 
         Respondent labor income (sum of 6 components;
                    missing if all missing)
@@ -403,27 +403,27 @@ resp_lab_inc_2022 summary:
   6. }
 
 . 
-. capture drop resp_tot_inc_2022
+. capture drop resp_tot_inc_2020
 
-. gen double resp_tot_inc_2022 = resp_lab_inc_2022 ///
+. gen double resp_tot_inc_2020 = resp_lab_inc_2020 ///
 >     + cond(missing(h15icap), 0, h15icap) ///
 >     + cond(missing(h15iothr), 0, h15iothr)
 (3,688 missing values generated)
 
 . * If labor income is missing AND both additions are missing, set total 
 > to missing as well
-. replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h
+. replace resp_tot_inc_2020 = . if missing(resp_lab_inc_2020) & missing(h
 > 15icap) & missing(h15iothr)
 (0 real changes made)
 
-. label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + 
+. label var resp_tot_inc_2020 "Respondent total income (labor + hwicap + 
 > hwiother; missing if all missing)"
 
 . 
-. di as txt "resp_tot_inc_2022 summary:"
-resp_tot_inc_2022 summary:
+. di as txt "resp_tot_inc_2020 summary:"
+resp_tot_inc_2020 summary:
 
-. summarize resp_tot_inc_2022, detail
+. summarize resp_tot_inc_2020, detail
 
           Respondent total income (labor + hwicap +
               hwiother; missing if all missing)
@@ -599,5 +599,5 @@ Saved unified dataset: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
        log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
 > /HRS_Long/randhrs1992_2022v1_STATA/prep_controls_income_2020.log
   log type:  text
- closed on:   4 Nov 2025, 09:15:21
+ closed on:   4 Nov 2025, 13:25:53
 -------------------------------------------------------------------------

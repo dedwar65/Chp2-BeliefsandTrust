@@ -1,0 +1,1221 @@
+-------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/reg_explain_trust.log
+  log type:  text
+ opened on:  17 Nov 2025, 11:58:43
+
+. 
+. set more off
+
+. 
+. * Ensure estout is available for table export
+. capture which esttab
+
+. if _rc {
+.         ssc install estout, replace
+. }
+
+. 
+. * Master dataset with all computed variables
+. local master "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/D
+> ata/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.dta"
+
+. capture confirm file "`master'"
+
+. if _rc {
+.     di as error "ERROR: master file not found -> `master'"
+.     exit 198
+. }
+
+. use "`master'", clear
+
+. di as txt "Using master file: `master'"
+Using master file: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Cod
+> e/Data/HRS_Long/randhrs1992_2022v1_STATA/_randhrs1992_2022v1_analysis.d
+> ta
+
+. 
+. * Trust variables (2020) - these are the dependent variables
+. local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
+
+. 
+. * Quick overlap diagnostics for sample sizes
+. quietly count
+
+. local N_all = r(N)
+
+. di as txt "=== Quick overlap check: trust variables and controls ==="
+=== Quick overlap check: trust variables and controls ===
+
+. quietly count if !missing(rv557)
+
+. di as txt "  Non-missing rv557: " r(N) " of " `N_all'
+  Non-missing rv557: 1059 of 15856
+
+. quietly count if !missing(r15agey_b) & !missing(raedyrs) & !missing(rag
+> ender)
+
+. di as txt "  Non-missing basic controls: " r(N) " of " `N_all'
+  Non-missing basic controls: 12115 of 15856
+
+. quietly count if !missing(rv557) & !missing(r15agey_b) & !missing(raedy
+> rs) & !missing(ragender)
+
+. di as txt "  Non-missing rv557 and basic controls: " r(N) " of " `N_all
+> '
+  Non-missing rv557 and basic controls: 1054 of 15856
+
+. di as txt ""
+
+
+. 
+. * ---------------------------------------------------------------------
+> -
+. * Setup control variables
+. * ---------------------------------------------------------------------
+> -
+. di as txt "=== Setting up control variables ==="
+=== Setting up control variables ===
+
+. 
+. * Basic controls: age (quadratic), education, gender, race
+. local age_quad ""
+
+. capture confirm variable r15agey_b
+
+. if !_rc {
+.     local age_quad "c.r15agey_b c.r15agey_b#c.r15agey_b"
+.     di as txt "Age (quadratic) included"
+Age (quadratic) included
+. }
+
+. 
+. local education_var ""
+
+. capture confirm variable raedyrs
+
+. if !_rc {
+.     local education_var "raedyrs"
+.     di as txt "Education (raedyrs) included"
+Education (raedyrs) included
+. }
+
+. 
+. local gender_factor ""
+
+. capture confirm variable ragender
+
+. if !_rc {
+.     local gender_factor "i.ragender"
+.     di as txt "Gender (i.ragender) included"
+Gender (i.ragender) included
+. }
+
+. 
+. local race_factor ""
+
+. capture confirm variable race_eth
+
+. if !_rc {
+.     local race_factor "i.race_eth"
+.     di as txt "Race/ethnicity (i.race_eth) included"
+Race/ethnicity (i.race_eth) included
+. }
+
+. di as txt ""
+
+
+. 
+. * Additional controls: married status
+. local additional_ctrls ""
+
+. 
+. * Check for married_2020
+. capture confirm variable married_2020
+
+. if !_rc {
+.     local additional_ctrls "married_2020"
+.     di as txt "Married status (married_2020) included"
+Married status (married_2020) included
+. }
+
+. 
+. if "`additional_ctrls'" != "" {
+.     di as txt "Additional controls included: `additional_ctrls'"
+Additional controls included: married_2020
+. }
+
+. di as txt ""
+
+
+. 
+. * Spec 5 controls: additional_ctrls + h15aira + r15cesd + r15conde + r1
+> 5govmr + r15govmd + r15lifein + r15beqany + r15mdiv + r15mwid
+. local spec5_ctrls ""
+
+. if "`additional_ctrls'" != "" {
+.     local spec5_ctrls "`additional_ctrls' h15aira r15cesd r15conde r15g
+> ovmr r15govmd r15lifein r15beqany r15mdiv r15mwid"
+. }
+
+. else {
+.     local spec5_ctrls "h15aira r15cesd r15conde r15govmr r15govmd r15li
+> fein r15beqany r15mdiv r15mwid"
+. }
+
+. 
+. if "`spec5_ctrls'" != "" {
+.     di as txt "Spec 5 controls: `spec5_ctrls'"
+Spec 5 controls: married_2020 h15aira r15cesd r15conde r15govmr r15govmd 
+> r15lifein r15beqany r15mdiv r15mwid
+. }
+
+. di as txt ""
+
+
+. 
+. * ---------------------------------------------------------------------
+> -
+. * Individual trust variable regressions
+. * ---------------------------------------------------------------------
+> -
+. di as txt "=== Running individual trust variable regressions ==="
+=== Running individual trust variable regressions ===
+
+. 
+. local tables "/Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Paper/
+> Tables"
+
+. 
+. foreach t of local trust_vars {
+  2.     capture confirm variable `t'
+  3.     if _rc {
+  4.         di as warn "Skipping trust var (not found): `t'"
+  5.         continue
+  6.     }
+  7. 
+.     * Check sample size
+.     quietly count if !missing(`t')
+  8.     if r(N)==0 {
+  9.         di as warn "Skipping trust var (no non-missing): `t'"
+ 10.         continue
+ 11.     }
+ 12. 
+.     eststo clear
+ 13. 
+.     * Spec 5: add h15aira + r15cesd + r15conde + r15govmr + r15govmd + 
+> r15lifein + r15beqany + r15mdiv + r15mwid (export separate table)
+.     if "`spec5_ctrls'" != "" {
+ 14.         * Build condition for sample size check (basic controls + al
+> l spec5 variables)
+.         local spec5_cond "!missing(`t') & !missing(r15agey_b) & !missin
+> g(raedyrs) & !missing(ragender)"
+ 15.         if "`additional_ctrls'" != "" {
+ 16.             foreach v of local additional_ctrls {
+ 17.                 local spec5_cond "`spec5_cond' & !missing(`v')"
+ 18.             }
+ 19.         }
+ 20.         local spec5_cond "`spec5_cond' & !missing(h15aira) & !missin
+> g(r15cesd) & !missing(r15conde) & !missing(r15govmr) & !missing(r15govm
+> d) & !missing(r15lifein) & !missing(r15beqany) & !missing(r15mdiv) & !m
+> issing(r15mwid)"
+ 21.         quietly count if `spec5_cond'
+ 22.         if r(N) > 0 {
+ 23.             eststo `t'_spec5: regress `t' `age_quad' `education_var'
+>  `gender_factor' `race_factor' `spec5_ctrls' ///
+>                 if `spec5_cond', vce(robust)
+ 24. 
+.             local outfile5 "`tables'/trust_`t'_spec5.tex"
+ 25.             di as txt "Exporting LaTeX table (spec 5): `outfile5'"
+ 26.             
+.             * Create trust variable label for title
+.             local trust_title ""
+ 27.             if "`t'" == "rv557" local trust_title "Trust in others -
+>  557"
+ 28.             else if "`t'" == "rv558" local trust_title "Trust in Soc
+> ial Security - 558"
+ 29.             else if "`t'" == "rv559" local trust_title "Trust in Med
+> icare/Medicaid - 559"
+ 30.             else if "`t'" == "rv560" local trust_title "Trust in Ban
+> ks - 560"
+ 31.             else if "`t'" == "rv561" local trust_title "Trust in Fin
+> ancial Advisors - 561"
+ 32.             else if "`t'" == "rv562" local trust_title "Trust in Mut
+> ual Funds - 562"
+ 33.             else if "`t'" == "rv563" local trust_title "Trust in Ins
+> urance Companies - 563"
+ 34.             else if "`t'" == "rv564" local trust_title "Trust in Mas
+> s Media - 564"
+ 35.             else local trust_title "Trust `t'"
+ 36.             
+.             * Variable labels (LaTeX-safe)
+.             local vlab_all ///
+>                 r15agey_b "Age" ///
+>                 c.r15agey_b#c.r15agey_b "Age$^{2}$" ///
+>                 raedyrs "Years of education" ///
+>                 2.ragender "Female" ///
+>                 2.race_eth "NH Black" ///
+>                 3.race_eth "Hispanic" ///
+>                 4.race_eth "NH Other"
+ 37.             if "`additional_ctrls'" != "" {
+ 38.                 foreach v of local additional_ctrls {
+ 39.                     if "`v'" == "married_2020" {
+ 40.                         local vlab_all `"`vlab_all' married_2020 "Ma
+> rried""'
+ 41.                     }
+ 42.                 }
+ 43.             }
+ 44.             local vlab_all `"`vlab_all' h15aira "IRA wealth" r15cesd
+>  "Depression" r15conde "Health conditions" r15govmr "Covered by Medicar
+> e" r15govmd "Covered by Medicaid" r15lifein "Has life insurance" r15beq
+> any "Prob. of leaving any bequest" r15mdiv "Number of reported divorces
+> " r15mwid "Number of reported times being widowed""'
+ 45.             
+.             * Build addnote for spec 5
+.             local addnote_text5 "Robust SEs in parentheses"
+ 46.             esttab `t'_spec5 using "`outfile5'", replace ///
+>                 booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
+>                 compress b(%9.3f) se(%9.3f) ///
+>                 varlabels(`vlab_all') ///
+>                 drop(1.ragender 1.race_eth) ///
+>                 stats(N r2_a, labels("Observations" "Adj. R-squared")) 
+> ///
+>                 title("`trust_title' on Controls + Extended (Spec 5)") 
+> ///
+>                 addnote("`addnote_text5'")
+ 47.         }
+ 48.     }
+ 49. }
+
+Linear regression                               Number of obs     =      
+>   512
+                                                F(17, 494)        =      
+>  7.99
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .2214
+                                                Root MSE          =      
+> 2.394
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv557 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |   .1366068   .1529892     0.89   0.372     -.163983    .43
+> 71967
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0006885   .0011001    -0.63   0.532      -.00285     .0
+> 01473
+             |
+     raedyrs |   .0781331    .048833     1.60   0.110    -.0178129    .17
+> 40791
+             |
+    ragender |
+   2.female  |   .4276613   .2301387     1.86   0.064      -.02451    .87
+> 98327
+             |
+    race_eth |
+   NH Black  |  -1.522743   .3359468    -4.53   0.000    -2.182804   -.86
+> 26823
+   Hispanic  |  -.2982197   .3933999    -0.76   0.449    -1.071163    .47
+> 47236
+   NH Other  |  -.9250262   .5035405    -1.84   0.067    -1.914371    .06
+> 43188
+             |
+married_2020 |   .0297583   .2640146     0.11   0.910    -.4889716    .54
+> 84882
+     h15aira |   2.94e-07   1.44e-07     2.04   0.042     1.07e-08    5.7
+> 7e-07
+     r15cesd |   -.176673   .0641261    -2.76   0.006    -.3026665   -.05
+> 06795
+    r15conde |  -.0670865   .0872967    -0.77   0.443    -.2386051    .10
+> 44321
+    r15govmr |  -.0534838   .3098095    -0.17   0.863    -.6621906     .5
+> 55223
+    r15govmd |  -.8214789   .4332057    -1.90   0.059    -1.672632     .0
+> 29674
+   r15lifein |   .3243378   .2238802     1.45   0.148    -.1155371    .76
+> 42127
+   r15beqany |   .0030011   .0040109     0.75   0.455    -.0048794    .01
+> 08816
+     r15mdiv |  -.0842142   .1604084    -0.52   0.600    -.3993811    .23
+> 09527
+     r15mwid |   .3414777   .2681215     1.27   0.203    -.1853216    .86
+> 82769
+       _cons |   -.506627   5.229451    -0.10   0.923    -10.78134    9.7
+> 68082
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv557_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv557_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   509
+                                                F(17, 491)        =      
+>  7.13
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1602
+                                                Root MSE          =     2
+> .5474
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv558 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |    .106889    .163468     0.65   0.513    -.2142941    .42
+> 80722
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0003806   .0011569    -0.33   0.742    -.0026538    .00
+> 18925
+             |
+     raedyrs |  -.0711138   .0464536    -1.53   0.126    -.1623861    .02
+> 01585
+             |
+    ragender |
+   2.female  |  -.2493095   .2393985    -1.04   0.298    -.7196813    .22
+> 10623
+             |
+    race_eth |
+   NH Black  |  -.1105856    .353558    -0.31   0.755    -.8052588    .58
+> 40877
+   Hispanic  |  -.0438705   .3936552    -0.11   0.911    -.8173271    .72
+> 95861
+   NH Other  |  -.7909599   .5429633    -1.46   0.146    -1.857778    .27
+> 58583
+             |
+married_2020 |  -1.159941   .2823817    -4.11   0.000    -1.714766   -.60
+> 51151
+     h15aira |   3.44e-07   2.42e-07     1.42   0.156    -1.32e-07    8.2
+> 0e-07
+     r15cesd |  -.1582283   .0768397    -2.06   0.040    -.3092034   -.00
+> 72531
+    r15conde |  -.1155975   .0963671    -1.20   0.231    -.3049402    .07
+> 37453
+    r15govmr |   .5513006   .3580391     1.54   0.124    -.1521773    1.2
+> 54778
+    r15govmd |   .8931463   .3920158     2.28   0.023     .1229108    1.6
+> 63382
+   r15lifein |  -.2014474   .2417588    -0.83   0.405    -.6764567     .2
+> 73562
+   r15beqany |   .0011974   .0039626     0.30   0.763    -.0065883    .00
+> 89832
+     r15mdiv |  -.3201724   .1723398    -1.86   0.064     -.658787    .01
+> 84421
+     r15mwid |  -.3763256   .3090121    -1.22   0.224    -.9834749    .23
+> 08236
+       _cons |   3.316503   5.672571     0.58   0.559    -7.829006    14.
+> 46201
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv558_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv558_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   506
+                                                F(17, 488)        =      
+>  6.28
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1537
+                                                Root MSE          =     2
+> .4287
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv559 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |   .1051244   .1142315     0.92   0.358    -.1193219    .32
+> 95708
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0004563    .000828    -0.55   0.582    -.0020832    .00
+> 11706
+             |
+     raedyrs |  -.0490189   .0451152    -1.09   0.278    -.1376629    .03
+> 96251
+             |
+    ragender |
+   2.female  |  -.1432007   .2272282    -0.63   0.529    -.5896672    .30
+> 32657
+             |
+    race_eth |
+   NH Black  |   .2102413   .3168135     0.66   0.507    -.4122456    .83
+> 27283
+   Hispanic  |   .2157295    .393369     0.55   0.584    -.5571765    .98
+> 86356
+   NH Other  |  -1.038277   .6123532    -1.70   0.091    -2.241452    .16
+> 48969
+             |
+married_2020 |  -1.001267   .2685716    -3.73   0.000    -1.528967   -.47
+> 35681
+     h15aira |   5.64e-07   2.60e-07     2.17   0.031     5.28e-08    1.0
+> 8e-06
+     r15cesd |  -.1651197   .0733381    -2.25   0.025    -.3092172   -.02
+> 10223
+    r15conde |   .0067748   .0937689     0.07   0.942    -.1774658    .19
+> 10155
+    r15govmr |   .4393215   .3370228     1.30   0.193    -.2228735    1.1
+> 01516
+    r15govmd |   .8293927   .3730073     2.22   0.027      .096494    1.5
+> 62291
+   r15lifein |  -.5245163   .2269342    -2.31   0.021     -.970405   -.07
+> 86276
+   r15beqany |   .0027179   .0038385     0.71   0.479    -.0048241    .01
+> 02599
+     r15mdiv |  -.2843736   .1597682    -1.78   0.076     -.598292    .02
+> 95449
+     r15mwid |  -.2844535   .2813761    -1.01   0.313    -.8373118    .26
+> 84047
+       _cons |   3.019724   3.882909     0.78   0.437    -4.609559    10.
+> 64901
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv559_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv559_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   504
+                                                F(17, 486)        =      
+>  3.46
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1050
+                                                Root MSE          =     2
+> .8181
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv560 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |  -.0140394   .1831322    -0.08   0.939     -.373868    .34
+> 57891
+             |
+ c.r15agey_b#|
+ c.r15agey_b |   .0003554   .0012934     0.27   0.784     -.002186    .00
+> 28967
+             |
+     raedyrs |  -.0699397   .0560785    -1.25   0.213     -.180126    .04
+> 02466
+             |
+    ragender |
+   2.female  |   .6388757   .2680522     2.38   0.018     .1121914     1.
+> 16556
+             |
+    race_eth |
+   NH Black  |  -1.096837   .3837996    -2.86   0.004    -1.850948   -.34
+> 27255
+   Hispanic  |  -.9735639   .4672519    -2.08   0.038    -1.891647   -.05
+> 54807
+   NH Other  |  -1.224437   .5638132    -2.17   0.030     -2.33225   -.11
+> 66246
+             |
+married_2020 |  -.4829521   .3001059    -1.61   0.108    -1.072617    .10
+> 67131
+     h15aira |   2.32e-07   2.17e-07     1.07   0.284    -1.94e-07    6.5
+> 8e-07
+     r15cesd |  -.1272235   .0798143    -1.59   0.112    -.2840471    .02
+> 96002
+    r15conde |  -.0793409   .1077323    -0.74   0.462    -.2910194    .13
+> 23377
+    r15govmr |   .0979691   .4000003     0.24   0.807    -.6879744    .88
+> 39126
+    r15govmd |  -.0461008   .4688173    -0.10   0.922    -.9672597    .87
+> 50582
+   r15lifein |    .467895   .2695092     1.74   0.083    -.0616521    .99
+> 74421
+   r15beqany |   .0064713   .0041139     1.57   0.116    -.0016121    .01
+> 45546
+     r15mdiv |  -.0679699   .1909484    -0.36   0.722    -.4431563    .30
+> 72165
+     r15mwid |    .015313   .3211644     0.05   0.962    -.6157292    .64
+> 63552
+       _cons |    6.55837    6.35893     1.03   0.303    -5.936019    19.
+> 05276
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv560_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv560_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   499
+                                                F(17, 481)        =      
+>  5.10
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1480
+                                                Root MSE          =     3
+> .0074
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv561 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |   .1123431   .1736362     0.65   0.518     -.228836    .45
+> 35222
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0008871   .0012496    -0.71   0.478    -.0033424    .00
+> 15681
+             |
+     raedyrs |   .0124769   .0572301     0.22   0.828     -.099975    .12
+> 49289
+             |
+    ragender |
+   2.female  |   .8173485   .2842722     2.88   0.004     .2587798    1.3
+> 75917
+             |
+    race_eth |
+   NH Black  |  -1.261308   .4022525    -3.14   0.002    -2.051698   -.47
+> 09192
+   Hispanic  |  -.9375857   .4987191    -1.88   0.061    -1.917523    .04
+> 23515
+   NH Other  |  -1.461841   .5119483    -2.86   0.004    -2.467772   -.45
+> 59098
+             |
+married_2020 |  -.0640035   .3378578    -0.19   0.850     -.727863    .59
+> 98559
+     h15aira |   4.27e-07   4.00e-07     1.07   0.286    -3.58e-07    1.2
+> 1e-06
+     r15cesd |  -.0878678   .0886276    -0.99   0.322    -.2620129    .08
+> 62773
+    r15conde |  -.1396285   .1065823    -1.31   0.191    -.3490529     .0
+> 69796
+    r15govmr |   .0165133   .4055656     0.04   0.968    -.7803859    .81
+> 34125
+    r15govmd |  -.2597812   .5134618    -0.51   0.613    -1.268687    .74
+> 91241
+   r15lifein |    -.44566   .2865811    -1.56   0.121    -1.008766    .11
+> 74455
+   r15beqany |   .0147468   .0047694     3.09   0.002     .0053754    .02
+> 41181
+     r15mdiv |  -.1850342   .1925999    -0.96   0.337    -.5634754    .19
+> 34069
+     r15mwid |   .6896985   .3588122     1.92   0.055    -.0153345    1.3
+> 94731
+       _cons |   .9578252   5.919659     0.16   0.872    -10.67376    12.
+> 58941
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv561_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv561_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   490
+                                                F(17, 472)        =      
+>  5.43
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1598
+                                                Root MSE          =     2
+> .9033
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv562 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |     -.1091   .1498234    -0.73   0.467    -.4035033    .18
+> 53033
+             |
+ c.r15agey_b#|
+ c.r15agey_b |   .0009572   .0011057     0.87   0.387    -.0012155      .
+> 00313
+             |
+     raedyrs |   .1018795   .0577762     1.76   0.078    -.0116509    .21
+> 54098
+             |
+    ragender |
+   2.female  |   .2418453   .2772869     0.87   0.384    -.3030243    .78
+> 67149
+             |
+    race_eth |
+   NH Black  |  -.5944798   .3819039    -1.56   0.120    -1.344922    .15
+> 59625
+   Hispanic  |   .0184988   .4680155     0.04   0.968    -.9011529    .93
+> 81505
+   NH Other  |  -1.009412   .5293927    -1.91   0.057     -2.04967    .03
+> 08458
+             |
+married_2020 |   .1370776   .3179769     0.43   0.667    -.4877478     .7
+> 61903
+     h15aira |   5.78e-07   3.20e-07     1.81   0.071    -4.94e-08    1.2
+> 1e-06
+     r15cesd |  -.0635202   .0865822    -0.73   0.464    -.2336545    .10
+> 66141
+    r15conde |  -.2092719   .1006945    -2.08   0.038    -.4071369   -.01
+> 14069
+    r15govmr |  -.1361104   .3972292    -0.34   0.732    -.9166667     .6
+> 44446
+    r15govmd |   -.693695   .5366095    -1.29   0.197    -1.748134    .36
+> 07441
+   r15lifein |  -.1287518   .2851279    -0.45   0.652    -.6890289    .43
+> 15253
+   r15beqany |    .011898   .0047116     2.53   0.012     .0026397    .02
+> 11563
+     r15mdiv |  -.2769901   .2010039    -1.38   0.169    -.6719633    .11
+> 79831
+     r15mwid |   .0374649   .3718277     0.10   0.920    -.6931774    .76
+> 81072
+       _cons |   6.489758   4.962422     1.31   0.192    -3.261414    16.
+> 24093
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv562_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv562_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   505
+                                                F(17, 487)        =      
+>  3.80
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1099
+                                                Root MSE          =     2
+> .8459
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv563 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |   .1229114   .1573217     0.78   0.435    -.1862017    .43
+> 20246
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0006594   .0011503    -0.57   0.567    -.0029195    .00
+> 16007
+             |
+     raedyrs |   .0058049   .0565609     0.10   0.918    -.1053287    .11
+> 69384
+             |
+    ragender |
+   2.female  |   .6410841   .2680297     2.39   0.017     .1144467    1.1
+> 67721
+             |
+    race_eth |
+   NH Black  |   .0298275   .3858401     0.08   0.938    -.7282893    .78
+> 79442
+   Hispanic  |  -.0434483   .4758237    -0.09   0.927    -.9783692    .89
+> 14726
+   NH Other  |   .2365855   .4568933     0.52   0.605      -.66114    1.1
+> 34311
+             |
+married_2020 |  -.1620564   .3172938    -0.51   0.610    -.7854902    .46
+> 13775
+     h15aira |   1.59e-07   2.15e-07     0.74   0.459    -2.63e-07    5.8
+> 1e-07
+     r15cesd |  -.1250446   .0771383    -1.62   0.106    -.2766095    .02
+> 65203
+    r15conde |  -.1072282   .1002336    -1.07   0.285    -.3041719    .08
+> 97155
+    r15govmr |   .2682385    .379612     0.71   0.480    -.4776411    1.0
+> 14118
+    r15govmd |  -.4116878   .4738258    -0.87   0.385    -1.342683    .51
+> 93075
+   r15lifein |    1.20681   .2759023     4.37   0.000     .6647045    1.7
+> 48916
+   r15beqany |   .0001325   .0043471     0.03   0.976    -.0084089    .00
+> 86739
+     r15mdiv |  -.2006456   .1877024    -1.07   0.286    -.5694521    .16
+> 81609
+     r15mwid |   .4038968   .3356353     1.20   0.229    -.2555753    1.0
+> 63369
+       _cons |  -.9715978   5.228777    -0.19   0.853    -11.24534    9.3
+> 02149
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv563_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv563_spec5.tex)
+
+Linear regression                               Number of obs     =      
+>   502
+                                                F(17, 484)        =      
+>  2.54
+                                                Prob > F          =     0
+> .0007
+                                                R-squared         =     0
+> .0836
+                                                Root MSE          =     2
+> .8351
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+       rv564 | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |    .081998   .1439257     0.57   0.569    -.2007983    .36
+> 47944
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0003004   .0010677    -0.28   0.779    -.0023984    .00
+> 17976
+             |
+     raedyrs |   .0329588   .0579443     0.57   0.570    -.0808947    .14
+> 68122
+             |
+    ragender |
+   2.female  |   .0641413   .2619342     0.24   0.807    -.4505272    .57
+> 88098
+             |
+    race_eth |
+   NH Black  |   .6181024   .3388177     1.82   0.069    -.0476328    1.2
+> 83838
+   Hispanic  |   1.767925   .5035427     3.51   0.000     .7785249    2.7
+> 57324
+   NH Other  |  -.2705081   .5725918    -0.47   0.637    -1.395581    .85
+> 45647
+             |
+married_2020 |  -.1494741   .3045143    -0.49   0.624    -.7478074    .44
+> 88591
+     h15aira |   2.67e-07   2.75e-07     0.97   0.331    -2.72e-07    8.0
+> 7e-07
+     r15cesd |  -.0908268   .0747519    -1.22   0.225    -.2377051    .05
+> 60515
+    r15conde |  -.0580349   .0984194    -0.59   0.556    -.2514169    .13
+> 53471
+    r15govmr |  -.4526132   .3717526    -1.22   0.224    -1.183061     .2
+> 77835
+    r15govmd |    .604659   .4512228     1.34   0.181    -.2819385    1.4
+> 91257
+   r15lifein |  -.3621572   .2756854    -1.31   0.190    -.9038452    .17
+> 95307
+   r15beqany |   .0072882   .0041413     1.76   0.079    -.0008489    .01
+> 54254
+     r15mdiv |  -.4803774   .1481424    -3.24   0.001     -.771459   -.18
+> 92958
+     r15mwid |  -.2283192   .3337962    -0.68   0.494    -.8841878    .42
+> 75494
+       _cons |  -1.186555   4.885051    -0.24   0.808    -10.78508    8.4
+> 11971
+-------------------------------------------------------------------------
+> -----
+Exporting LaTeX table (spec 5): /Volumes/SSD PRO/Github-forks/Chp2-Belief
+> sandTrust/Paper/Tables/trust_rv564_spec5.tex
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_rv564_spec5.tex)
+
+. 
+. * ---------------------------------------------------------------------
+> -
+. * PCA of trust variables and regressions using PC1
+. * ---------------------------------------------------------------------
+> -
+. di as txt "=== PCA on trust variables (rv557-rv564) ==="
+=== PCA on trust variables (rv557-rv564) ===
+
+. 
+. capture drop trust_pca1 trust_pca1_z trust_pca2 trust_pca2_z
+
+. capture noisily pca rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564, co
+> mponents(2)
+
+Principal components/correlation                 Number of obs    =      
+>   970
+                                                 Number of comp.  =      
+>     2
+                                                 Trace            =      
+>     8
+    Rotation: (unrotated = principal)            Rho              =     0
+> .6032
+
+    ---------------------------------------------------------------------
+> -----
+       Component |   Eigenvalue   Difference         Proportion   Cumulat
+> ive
+    -------------+-------------------------------------------------------
+> -----
+           Comp1 |      3.59438      2.36333             0.4493       0.4
+> 493
+           Comp2 |      1.23105      .405717             0.1539       0.6
+> 032
+           Comp3 |      .825336      .120069             0.1032       0.7
+> 063
+           Comp4 |      .705266      .102935             0.0882       0.7
+> 945
+           Comp5 |      .602331      .102839             0.0753       0.8
+> 698
+           Comp6 |      .499493      .138996             0.0624       0.9
+> 322
+           Comp7 |      .360497      .178854             0.0451       0.9
+> 773
+           Comp8 |      .181642            .             0.0227       1.0
+> 000
+    ---------------------------------------------------------------------
+> -----
+
+Principal components (eigenvectors) 
+
+    ------------------------------------------------
+        Variable |    Comp1     Comp2 | Unexplained 
+    -------------+--------------------+-------------
+           rv557 |   0.2983    0.2053 |       .6282 
+           rv558 |   0.3785   -0.5263 |       .1441 
+           rv559 |   0.3750   -0.5204 |       .1611 
+           rv560 |   0.3889    0.1239 |       .4375 
+           rv561 |   0.3756    0.4068 |       .2891 
+           rv562 |   0.3503    0.4258 |       .3359 
+           rv563 |   0.3775    0.0932 |       .4771 
+           rv564 |   0.2638   -0.1979 |       .7017 
+    ------------------------------------------------
+
+. 
+. if _rc==0 {
+.     * Proportion of variance explained by PC1 and PC2 (display only)
+.     capture matrix M = e(Prop)
+.     if _rc==0 {
+.         scalar pc1_prop = M[1,1]
+.         di as txt "PC1 variance proportion: " %6.3f pc1_prop
+PC1 variance proportion:      .
+.         capture scalar pc2_prop = M[1,2]
+.         if !_rc di as txt "PC2 variance proportion: " %6.3f pc2_prop
+PC2 variance proportion:      .
+.     }
+.     * Predict PC1 and PC2 scores and standardize
+.     predict double trust_pca1 trust_pca2 if e(sample), score
+
+Scoring coefficients 
+    sum of squares(column-loading) = 1
+
+    ----------------------------------
+        Variable |    Comp1     Comp2 
+    -------------+--------------------
+           rv557 |   0.2983    0.2053 
+           rv558 |   0.3785   -0.5263 
+           rv559 |   0.3750   -0.5204 
+           rv560 |   0.3889    0.1239 
+           rv561 |   0.3756    0.4068 
+           rv562 |   0.3503    0.4258 
+           rv563 |   0.3775    0.0932 
+           rv564 |   0.2638   -0.1979 
+    ----------------------------------
+.     egen double trust_pca1_z = std(trust_pca1)
+(14,886 missing values generated)
+.     quietly count if !missing(trust_pca1_z)
+.     di as txt "Non-missing trust_pca1_z: " r(N)
+Non-missing trust_pca1_z: 970
+.     egen double trust_pca2_z = std(trust_pca2)
+(14,886 missing values generated)
+.     quietly count if !missing(trust_pca2_z)
+.     di as txt "Non-missing trust_pca2_z: " r(N)
+Non-missing trust_pca2_z: 970
+. 
+.     eststo clear
+. 
+.     * Build condition for sample size checks (same for all PCA regressi
+> ons)
+.     local pca_cond "!missing(r15agey_b) & !missing(raedyrs) & !missing(
+> ragender)"
+.     if "`additional_ctrls'" != "" {
+.         foreach v of local additional_ctrls {
+  2.             local pca_cond "`pca_cond' & !missing(`v')"
+  3.         }
+.     }
+. 
+.     * Spec 5 for PC1: add h15aira + r15cesd + r15conde + r15govmr + r15
+> govmd + r15lifein + r15beqany + r15mdiv + r15mwid
+.     if "`spec5_ctrls'" != "" {
+.         * Build condition for spec 5 (pca_cond + all spec5 variables)
+.         local pca_spec5_cond "`pca_cond' & !missing(h15aira) & !missing
+> (r15cesd) & !missing(r15conde) & !missing(r15govmr) & !missing(r15govmd
+> ) & !missing(r15lifein) & !missing(r15beqany) & !missing(r15mdiv) & !mi
+> ssing(r15mwid)"
+.         quietly count if !missing(trust_pca1_z) & `pca_spec5_cond'
+.         if r(N) > 0 {
+.             eststo pca_spec5: regress trust_pca1_z `age_quad' `educatio
+> n_var' `gender_factor' `race_factor' `spec5_ctrls' ///
+>                 if !missing(trust_pca1_z) & `pca_spec5_cond', vce(robus
+> t)
+
+Linear regression                               Number of obs     =      
+>   468
+                                                F(17, 450)        =      
+>  5.98
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .1507
+                                                Root MSE          =     .
+> 99989
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+trust_pca1_z | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |   .0411815   .0622002     0.66   0.508    -.0810575    .16
+> 34205
+             |
+ c.r15agey_b#|
+ c.r15agey_b |  -.0001458   .0004462    -0.33   0.744    -.0010227    .00
+> 07311
+             |
+     raedyrs |   .0070225   .0206005     0.34   0.733    -.0334627    .04
+> 75077
+             |
+    ragender |
+   2.female  |    .168408   .0960923     1.75   0.080    -.0204374    .35
+> 72533
+             |
+    race_eth |
+   NH Black  |  -.2329798   .1419026    -1.64   0.101    -.5118538    .04
+> 58942
+   Hispanic  |   .0453152   .1708138     0.27   0.791    -.2903766     .3
+> 81007
+   NH Other  |  -.4086113   .1763701    -2.32   0.021    -.7552226   -.06
+> 20001
+             |
+married_2020 |  -.2397097   .1110966    -2.16   0.031    -.4580422   -.02
+> 13773
+     h15aira |   3.17e-07   9.16e-08     3.46   0.001     1.37e-07    4.9
+> 7e-07
+     r15cesd |  -.0809309    .030021    -2.70   0.007    -.1399297   -.02
+> 19322
+    r15conde |   -.050239   .0397363    -1.26   0.207    -.1283307    .02
+> 78526
+    r15govmr |   .0105006   .1442854     0.07   0.942    -.2730562    .29
+> 40573
+    r15govmd |   .0078735   .1773724     0.04   0.965    -.3407077    .35
+> 64546
+   r15lifein |   .0329889    .100057     0.33   0.742    -.1636482    .22
+> 96259
+   r15beqany |   .0021518   .0016122     1.33   0.183    -.0010167    .00
+> 53202
+     r15mdiv |  -.1300888   .0634566    -2.05   0.041    -.2547968   -.00
+> 53808
+     r15mwid |   .0048665   .1181051     0.04   0.967    -.2272395    .23
+> 69726
+       _cons |  -1.970745   2.112614    -0.93   0.351     -6.12256    2.1
+> 81069
+-------------------------------------------------------------------------
+> -----
+.         }
+.     }
+. 
+.     * Spec 5 for PC2: add h15aira + r15cesd + r15conde + r15govmr + r15
+> govmd + r15lifein + r15beqany + r15mdiv + r15mwid
+.     if "`spec5_ctrls'" != "" {
+.         * Build condition for spec 5 (pca_cond + all spec5 variables)
+.         local pca_spec5_cond "`pca_cond' & !missing(h15aira) & !missing
+> (r15cesd) & !missing(r15conde) & !missing(r15govmr) & !missing(r15govmd
+> ) & !missing(r15lifein) & !missing(r15beqany) & !missing(r15mdiv) & !mi
+> ssing(r15mwid)"
+.         quietly count if !missing(trust_pca2_z) & `pca_spec5_cond'
+.         if r(N) > 0 {
+.             eststo pca2_spec5: regress trust_pca2_z `age_quad' `educati
+> on_var' `gender_factor' `race_factor' `spec5_ctrls' ///
+>                 if !missing(trust_pca2_z) & `pca_spec5_cond', vce(robus
+> t)
+
+Linear regression                               Number of obs     =      
+>   468
+                                                F(17, 450)        =      
+>  8.94
+                                                Prob > F          =     0
+> .0000
+                                                R-squared         =     0
+> .2760
+                                                Root MSE          =      
+> .9384
+
+-------------------------------------------------------------------------
+> -----
+             |               Robust
+trust_pca2_z | Coefficient  std. err.      t    P>|t|     [95% conf. inte
+> rval]
+-------------+-----------------------------------------------------------
+> -----
+   r15agey_b |  -.0331824   .0416457    -0.80   0.426    -.1150267    .04
+> 86619
+             |
+ c.r15agey_b#|
+ c.r15agey_b |   .0001304   .0003041     0.43   0.668    -.0004673     .0
+> 00728
+             |
+     raedyrs |   .0392865   .0184876     2.13   0.034     .0029538    .07
+> 56193
+             |
+    ragender |
+   2.female  |   .2941917   .0912518     3.22   0.001      .114859    .47
+> 35243
+             |
+    race_eth |
+   NH Black  |  -.4251993   .1263263    -3.37   0.001    -.6734621   -.17
+> 69366
+   Hispanic  |  -.2956386   .1541028    -1.92   0.056    -.5984891    .00
+> 72119
+   NH Other  |  -.0847488   .1749976    -0.48   0.628    -.4286627    .25
+> 91652
+             |
+married_2020 |    .408404   .1106777     3.69   0.000     .1908946    .62
+> 59133
+     h15aira |   7.77e-08   1.10e-07     0.71   0.479    -1.38e-07    2.9
+> 4e-07
+     r15cesd |   .0242864   .0318249     0.76   0.446    -.0382574    .08
+> 68302
+    r15conde |  -.0500139   .0344502    -1.45   0.147    -.1177171    .01
+> 76893
+    r15govmr |  -.1152105   .1335395    -0.86   0.389    -.3776489     .1
+> 47228
+    r15govmd |  -.5145174   .1696423    -3.03   0.003    -.8479069    -.1
+> 81128
+   r15lifein |   .1196447   .0909787     1.32   0.189    -.0591513    .29
+> 84406
+   r15beqany |   .0030806   .0015582     1.98   0.049     .0000183    .00
+> 61429
+     r15mdiv |   .0735081   .0680722     1.08   0.281    -.0602706    .20
+> 72869
+     r15mwid |   .2938948   .1211475     2.43   0.016     .0558097    .53
+> 19799
+       _cons |   .5728031   1.422354     0.40   0.687    -2.222478    3.3
+> 68084
+-------------------------------------------------------------------------
+> -----
+.         }
+.     }
+. 
+.     * Export PCA table
+.     local outfile_pca "`tables'/trust_pca_spec5.tex"
+.     di as txt "Exporting LaTeX table: `outfile_pca'"
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_pca_spec5.tex
+.     
+.     * Check if PC1 proportion was computed
+.     capture scalar pc1_prop
+.     local pc1_str ""
+.     if !_rc {
+.         local pc1_str : display %6.3f pc1_prop
+.     }
+.     * Optionally include PC2 proportion in note if available
+.     capture scalar pc2_prop
+.     local pc2_str ""
+.     if !_rc {
+.         local pc2_str : display %6.3f pc2_prop
+.     }
+.     
+.     * Build addnote string (same format as individual trust tables)
+.     local addnote_text5 "Robust SEs in parentheses"
+.     
+.     * Variable labels
+.     local vlab_pca_all ///
+>         r15agey_b "Age" ///
+>         c.r15agey_b#c.r15agey_b "Age$^{2}$" ///
+>         raedyrs "Years of education" ///
+>         2.ragender "Female" ///
+>         2.race_eth "NH Black" ///
+>         3.race_eth "Hispanic" ///
+>         4.race_eth "NH Other"
+.     if "`additional_ctrls'" != "" {
+.         foreach v of local additional_ctrls {
+  2.             if "`v'" == "married_2020" {
+  3.                 local vlab_pca_all `"`vlab_pca_all' married_2020 "Ma
+> rried""'
+  4.             }
+  5.         }
+.     }
+.     local vlab_pca_all `"`vlab_pca_all' h15aira "IRA wealth" r15cesd "D
+> epression" r15conde "Health conditions" r15govmr "Covered by Medicare" 
+> r15govmd "Covered by Medicaid" r15lifein "Has life insurance" r15beqany
+>  "Prob. of leaving any bequest" r15mdiv "Number of reported divorces" r
+> 15mwid "Number of reported times being widowed""'
+.     
+.     * Export PC1 spec 5 table if estimated
+.     capture estimates dir
+.     local has_pca1s5 = strpos(r(names), "pca_spec5")
+.     if `has_pca1s5' > 0 {
+.         esttab pca_spec5 using "`outfile_pca'", replace ///
+>             booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
+>             compress b(%9.3f) se(%9.3f) ///
+>             varlabels(`vlab_pca_all') ///
+>             drop(1.ragender 1.race_eth) ///
+>             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
+>             title("Trust PC1 on Controls + Extended (Spec 5)") ///
+>             addnote("`addnote_text5'")
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_pca_spec5.tex)
+.     }
+. 
+.     * Export PC2 spec 5 table if estimated
+.     capture estimates dir
+.     local has_pca2s5 = strpos(r(names), "pca2_spec5")
+.     if `has_pca2s5' > 0 {
+.         local outfile_pca2 "`tables'/trust_pca2_spec5.tex"
+.         di as txt "Exporting LaTeX table: `outfile_pca2'"
+Exporting LaTeX table: /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust
+> /Paper/Tables/trust_pca2_spec5.tex
+.         esttab pca2_spec5 using "`outfile_pca2'", replace ///
+>             booktabs se star(* 0.10 ** 0.05 *** 0.01) ///
+>             compress b(%9.3f) se(%9.3f) ///
+>             varlabels(`vlab_pca_all') ///
+>             drop(1.ragender 1.race_eth) ///
+>             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
+>             title("Trust PC2 on Controls + Extended (Spec 5)") ///
+>             addnote("`addnote_text5'")
+(output written to /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Pap
+> er/Tables/trust_pca2_spec5.tex)
+.     }
+. }
+
+. else {
+.     di as error "PCA failed; trust PCA regressions skipped."
+. }
+
+. 
+. di as txt "All regressions completed and tables exported."
+All regressions completed and tables exported.
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Volumes/SSD PRO/Github-forks/Chp2-BeliefsandTrust/Code/Data
+> /HRS_Long/randhrs1992_2022v1_STATA/reg_explain_trust.log
+  log type:  text
+ closed on:  17 Nov 2025, 11:58:45
+-------------------------------------------------------------------------

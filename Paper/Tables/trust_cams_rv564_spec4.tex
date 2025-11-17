@@ -1,0 +1,49 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Trust rv564 on Controls + Extended (Spec 4)}
+\begin{tabular}{l*{1}{c}}
+\toprule
+          &\multicolumn{1}{c}{(1)}\\
+          &\multicolumn{1}{c}{rv564}\\
+\midrule
+Age       &   -0.034         \\
+          &  (0.100)         \\
+Age$^{2}$ &    0.000         \\
+          &  (0.001)         \\
+Years of education&    0.042         \\
+          &  (0.035)         \\
+1.ragender&    0.000         \\
+          &      (.)         \\
+2.ragender&   -0.033         \\
+          &  (0.176)         \\
+1.race\_eth&    0.000         \\
+          &      (.)         \\
+NH Black  &    0.810\sym{***}\\
+          &  (0.219)         \\
+Hispanic  &    1.859\sym{***}\\
+          &  (0.290)         \\
+NH Other  &    0.106         \\
+          &  (0.361)         \\
+Married   &    0.045         \\
+          &  (0.185)         \\
+Log labor income&    0.040         \\
+          &  (0.029)         \\
+In labor force&    0.061         \\
+          &  (0.201)         \\
+h15aira   &    0.000\sym{***}\\
+          &  (0.000)         \\
+r15cesd   &   -0.032         \\
+          &  (0.047)         \\
+r15conde  &   -0.039         \\
+          &  (0.066)         \\
+\_cons    &    3.101         \\
+          &  (3.350)         \\
+\midrule
+Observations& 1025.000         \\
+Adj. R-squared&    0.040         \\
+\bottomrule
+\multicolumn{2}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{2}{l}{\footnotesize Robust SEs in parentheses; Age entered quadratically; adds labor force, h15aira, r15cesd, r15conde. Includes married status and log labor income (2020).}\\
+\multicolumn{2}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

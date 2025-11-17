@@ -33,21 +33,65 @@ di as txt ""
 local trust_vars "rv557 rv558 rv559 rv560 rv561 rv562 rv563 rv564"
 
 * Income variables: log versions only
-local inc_raw "resp_lab_inc resp_tot_inc"
-
+* Priority: resp_lab_inc_2020 and resp_tot_inc_2020 (constructed from R15/2020 wave components)
+* Note: We use shorter log variable names (without _2020 suffix) to keep estimate names within Stata limits
 di as txt "=== Creating log versions of income variables ==="
-foreach v of local inc_raw {
-    capture confirm variable `v'
+
+local inc_vars ""
+
+* Check for resp_lab_inc_2020 and create log version (using shorter name for compatibility)
+* Note: Using ln(var + 1) convention to handle zeros
+capture confirm variable resp_lab_inc_2020
+if !_rc {
+    capture drop ln_resp_lab_inc
+    gen double ln_resp_lab_inc = ln(resp_lab_inc_2020 + 1)
+    label var ln_resp_lab_inc "log(resp_lab_inc + 1) - 2020 wave"
+    local inc_vars "`inc_vars' ln_resp_lab_inc"
+    di as txt "Log labor income (ln_resp_lab_inc) created from resp_lab_inc_2020 (2020 wave data, using +1)"
+}
+else {
+    * Fallback: check for resp_lab_inc (no suffix)
+    capture confirm variable resp_lab_inc
     if !_rc {
-        local lnname = substr("ln_`v'", 1, .)
-        capture drop ln_`v'
-        gen double ln_`v' = ln(`v') if `v' > 0
-        label var ln_`v' "log(`v')"
+        capture drop ln_resp_lab_inc
+        gen double ln_resp_lab_inc = ln(resp_lab_inc + 1)
+        label var ln_resp_lab_inc "log(resp_lab_inc + 1)"
+        local inc_vars "`inc_vars' ln_resp_lab_inc"
+        di as txt "Log labor income (ln_resp_lab_inc) created from resp_lab_inc (using +1)"
     }
 }
 
-* Define income variables (log only)
-local inc_vars "ln_resp_lab_inc ln_resp_tot_inc"
+* Check for resp_tot_inc_2020 and create log version (using shorter name for compatibility)
+* Note: Using ln(var + 1) convention to handle zeros
+capture confirm variable resp_tot_inc_2020
+if !_rc {
+    capture drop ln_resp_tot_inc
+    gen double ln_resp_tot_inc = ln(resp_tot_inc_2020 + 1)
+    label var ln_resp_tot_inc "log(resp_tot_inc + 1) - 2020 wave"
+    if "`inc_vars'" != "" {
+        local inc_vars "`inc_vars' ln_resp_tot_inc"
+    }
+    else {
+        local inc_vars "ln_resp_tot_inc"
+    }
+    di as txt "Log total income (ln_resp_tot_inc) created from resp_tot_inc_2020 (2020 wave data, using +1)"
+}
+else {
+    * Fallback: check for resp_tot_inc (no suffix)
+    capture confirm variable resp_tot_inc
+    if !_rc {
+        capture drop ln_resp_tot_inc
+        gen double ln_resp_tot_inc = ln(resp_tot_inc + 1)
+        label var ln_resp_tot_inc "log(resp_tot_inc + 1)"
+        if "`inc_vars'" != "" {
+            local inc_vars "`inc_vars' ln_resp_tot_inc"
+        }
+        else {
+            local inc_vars "ln_resp_tot_inc"
+        }
+        di as txt "Log total income (ln_resp_tot_inc) created from resp_tot_inc (using +1)"
+    }
+}
 
 * Quick overlap diagnostics for sample sizes
 quietly count
@@ -144,12 +188,24 @@ foreach t of local trust_vars {
         * Short, human column titles for 4 models (log income only)
         local mt "log Lab" "log Tot" "log Lab" "log Tot"
         
+        * Create trust variable label based on which variable it is
+        local trust_label ""
+        if "`t'" == "rv557" local trust_label "Trust in others - 557"
+        else if "`t'" == "rv558" local trust_label "Trust in Social Security - 558"
+        else if "`t'" == "rv559" local trust_label "Trust in Medicare/Medicaid - 559"
+        else if "`t'" == "rv560" local trust_label "Trust in Banks - 560"
+        else if "`t'" == "rv561" local trust_label "Trust in Financial Advisors - 561"
+        else if "`t'" == "rv562" local trust_label "Trust in Mutual Funds - 562"
+        else if "`t'" == "rv563" local trust_label "Trust in Insurance Companies - 563"
+        else if "`t'" == "rv564" local trust_label "Trust in Mass Media - 564"
+        else local trust_label "Trust `t'"
+        
         * Short row names (LaTeX-safe)
-        local vlab `t'         "Trust"
+        local vlab `t'         "`trust_label'"
         local vlab2 c.`t'#c.`t' "Trust\$^{2}\$"
         local vlab3 r15agey_b    "Age"
         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
-        local vlab5 ragender     "Female"
+        local vlab5 2.ragender     "Female"
         local vlab6 2.race_eth   "NH Black"
         local vlab7 3.race_eth   "Hispanic"
         local vlab8 4.race_eth   "NH Other"
@@ -164,6 +220,7 @@ foreach t of local trust_vars {
             mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
             varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
+            drop(1.ragender 1.race_eth) ///
             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
             title("Log Income (2020) on Trust `t'") ///
             addnote("Robust SEs in parentheses; Age entered quadratically when available." "Controls (when included): raedyrs, in labor force, married, born in U.S.")
@@ -231,7 +288,7 @@ if _rc==0 {
         local vlab2 c.trust_pca1_z#c.trust_pca1_z "Trust PC1\$^{2}\$"
         local vlab3 r15agey_b    "Age"
         local vlab4 c.r15agey_b#c.r15agey_b "Age\$^{2}\$"
-        local vlab5 ragender     "Female"
+        local vlab5 2.ragender     "Female"
         local vlab6 2.race_eth   "NH Black"
         local vlab7 3.race_eth   "Hispanic"
         local vlab8 4.race_eth   "NH Other"
@@ -246,6 +303,7 @@ if _rc==0 {
             mtitles("log Lab" "log Tot" "log Lab" "log Tot") ///
             posthead("& \multicolumn{2}{c}{No controls} & \multicolumn{2}{c}{With controls} \\\\ \cmidrule(lr){2-3}\cmidrule(lr){4-5}") ///
             varlabels(`vlab' `vlab2' `vlab3' `vlab4' `vlab5' `vlab6' `vlab7' `vlab8' `vlab9' `vlab10' `vlab11' `vlab12') ///
+            drop(1.ragender 1.race_eth) ///
             stats(N r2_a, labels("Observations" "Adj. R-squared")) ///
             title("Log Income (2020) on Trust PC1") ///
             addnote("Robust SEs in parentheses; Age entered quadratically when available." "Controls (when included): raedyrs, in labor force, married, born in U.S." "PC1 variance prop = `pc1_str'")

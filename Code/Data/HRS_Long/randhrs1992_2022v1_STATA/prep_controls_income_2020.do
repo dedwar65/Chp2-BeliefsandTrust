@@ -181,13 +181,13 @@ foreach v of local lab_vars {
 }
 
 * Sum with rule: missing only if all components missing
-capture drop resp_lab_inc_2022
-egen double resp_lab_inc_2022 = rowtotal(`lab_vars')
-replace resp_lab_inc_2022 = . if missing(r15iearn) & missing(r15ipena) & missing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
-label var resp_lab_inc_2022 "Respondent labor income (sum of 6 components; missing if all missing)"
+capture drop resp_lab_inc_2020
+egen double resp_lab_inc_2020 = rowtotal(`lab_vars')
+replace resp_lab_inc_2020 = . if missing(r15iearn) & missing(r15ipena) & missing(r15issdi) & missing(r15isret) & missing(r15iunwc) & missing(r15igxfr)
+label var resp_lab_inc_2020 "Respondent labor income (sum of 6 components; missing if all missing)"
 
-di as txt "resp_lab_inc_2022 summary:"
-summarize resp_lab_inc_2022, detail
+di as txt "resp_lab_inc_2020 summary:"
+summarize resp_lab_inc_2020, detail
 
 * Total income = labor income + household capital income + other household income
 local tot_add "h15icap h15iothr"
@@ -198,16 +198,16 @@ foreach v of local tot_add {
     }
 }
 
-capture drop resp_tot_inc_2022
-gen double resp_tot_inc_2022 = resp_lab_inc_2022 ///
+capture drop resp_tot_inc_2020
+gen double resp_tot_inc_2020 = resp_lab_inc_2020 ///
     + cond(missing(h15icap), 0, h15icap) ///
     + cond(missing(h15iothr), 0, h15iothr)
 * If labor income is missing AND both additions are missing, set total to missing as well
-replace resp_tot_inc_2022 = . if missing(resp_lab_inc_2022) & missing(h15icap) & missing(h15iothr)
-label var resp_tot_inc_2022 "Respondent total income (labor + hwicap + hwiother; missing if all missing)"
+replace resp_tot_inc_2020 = . if missing(resp_lab_inc_2020) & missing(h15icap) & missing(h15iothr)
+label var resp_tot_inc_2020 "Respondent total income (labor + hwicap + hwiother; missing if all missing)"
 
-di as txt "resp_tot_inc_2022 summary:"
-summarize resp_tot_inc_2022, detail
+di as txt "resp_tot_inc_2020 summary:"
+summarize resp_tot_inc_2020, detail
 
 * ---------------------------------------------------------------------
 * Wealth percentile (0-100) and wealth deciles (1-10) using 2020 net worth (h15atotb)

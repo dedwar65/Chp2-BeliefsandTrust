@@ -10,7 +10,11 @@
     "../Tables/shares_interacted"
     "../Tables/fixed_effects"
     "../Tables/trust_rv557_returns_avg"
-    "../Tables/trust_pca_returns_avg")
+    "../Tables/trust_pca_returns_avg"
+    "../Tables/trust_correlation_2020"
+    "../Tables/trust_rv557_spec5"
+    "../Tables/trust_pca_spec5"
+    "../Tables/trust_pca2_spec5")
    (LaTeX-add-labels
     "sec:results"))
  :latex)
